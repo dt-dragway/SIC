@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SIC - Trading IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-theme.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Trading Automático con IA</h1>
+        <a href="/" class="boton">🏠 Inicio</a>
+
+        <div class="grafico-container">
+            <canvas id="precioChart"></canvas>
+        </div>
+
+        <div class="prediccion">
+            <h3>Próxima predicción (1h):</h3>
+            <p class="valor-prediccion">
+                {% if prediccion %}
+                    ${{ prediccion[0][0] | round(2) }}
+                {% else %}
+                    Modelo en entrenamiento...
+                {% endif %}
+            </p>
+        </div>
+
+        <script>
+            const ctx = document.getElementById('precioChart').getContext('2d');
+            const datos = {
+                labels: {{ datos['timestamp'].values() | list | tojson }},
+                datasets: [{
+                    label: 'Precio BTC/USDT',
+                    data: {{ datos['close'].values() | list | tojson }},
+                    borderColor: '#00ff9d',
+                    tension: 0.1
+                }]
+            };
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: datos,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#fff' } },
+                        y: { ticks: { color: '#fff' } }
+                    }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

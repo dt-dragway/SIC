@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Logs
+logs/
+*.log
+
+# Base de datos (Opcional: comenta esto si quieres subir la DB, pero no es recomendable por seguridad/tamaño)
+# database/*.db
+# Por ahora NO ignoramos la DB para que tengas tu backup de datos, dado que perdiste todo.
