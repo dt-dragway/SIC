@@ -1,7 +1,7 @@
 """
 SIC Ultra - Trading Endpoints
 
-Órdenes de trading y gráficos con datos REALES de Binance.
+Órdenes de trading con soporte para modo PRÁCTICA y REAL.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,6 +12,7 @@ from enum import Enum
 
 from app.api.v1.auth import oauth2_scheme, verify_token
 from app.infrastructure.binance.client import get_binance_client
+from app.infrastructure.binance.real_executor import get_real_executor, OrderSide
 
 
 router = APIRouter()
@@ -19,52 +20,35 @@ router = APIRouter()
 
 # === Enums ===
 
-class OrderSide(str, Enum):
-    BUY = "BUY"
-    SELL = "SELL"
-
-
 class OrderType(str, Enum):
     MARKET = "MARKET"
     LIMIT = "LIMIT"
-    STOP_LOSS = "STOP_LOSS"
 
 
-class OrderStatus(str, Enum):
-    PENDING = "PENDING"
-    FILLED = "FILLED"
-    CANCELLED = "CANCELLED"
+class OrderMode(str, Enum):
+    PRACTICE = "practice"
+    REAL = "real"
 
 
 # === Schemas ===
 
 class OrderCreate(BaseModel):
     symbol: str
-    side: OrderSide
-    type: OrderType
+    side: str  # BUY or SELL
+    type: OrderType = OrderType.MARKET
     quantity: float
     price: Optional[float] = None  # Solo para LIMIT
-    stop_price: Optional[float] = None  # Solo para STOP_LOSS
+    stop_loss: Optional[float] = None  # OBLIGATORIO para modo REAL
+    take_profit: Optional[float] = None
+    mode: OrderMode = OrderMode.PRACTICE  # Por defecto práctica
 
 
 class OrderResponse(BaseModel):
-    id: str
-    symbol: str
-    side: OrderSide
-    type: OrderType
-    quantity: float
-    price: float
-    status: OrderStatus
-    created_at: datetime
-
-
-class CandleResponse(BaseModel):
-    timestamp: datetime
-    open: float
-    high: float
-    low: float
-    close: float
-    volume: float
+    success: bool
+    message: str
+    order_id: Optional[str] = None
+    mode: str
+    checks: Optional[List] = None
 
 
 # === Endpoints ===
@@ -74,47 +58,144 @@ async def create_order(order: OrderCreate, token: str = Depends(oauth2_scheme)):
     """
     Crear orden de trading.
     
-    ⚠️ SOLO FUNCIONA EN MODO BATALLA REAL
-    En modo práctica usar /practice/order
+    - mode: "practice" (virtual) o "real" (dinero real)
+    - stop_loss: OBLIGATORIO para modo real
     
-    TODO: Implementar órdenes reales en Fase 7
+    ⚠️ MODO REAL: Ejecuta órdenes con dinero REAL en Binance
     """
     verify_token(token)
     
-    # TODO: Verificar modo (práctica vs real)
-    # TODO: Verificar protecciones de riesgo (7 capas)
-    # TODO: Enviar orden a Binance
+    symbol = order.symbol.upper()
+    side = order.side.upper()
     
-    raise HTTPException(
-        status_code=400, 
-        detail="Modo Batalla Real no habilitado aún. Usa /practice/order para practicar."
-    )
+    if order.mode == OrderMode.REAL:
+        # === MODO BATALLA REAL ===
+        
+        if not order.stop_loss:
+            raise HTTPException(
+                status_code=400,
+                detail="🛡️ Stop-loss es OBLIGATORIO en modo real"
+            )
+        
+        executor = get_real_executor()
+        
+        # Verificar estado de riesgo
+        risk_status = executor.get_risk_status()
+        if not risk_status["trading_enabled"]:
+            raise HTTPException(
+                status_code=429,
+                detail=f"❌ Límite diario alcanzado ({risk_status['daily_orders']}/{risk_status['max_daily_orders']} órdenes)"
+            )
+        
+        # Ejecutar orden real
+        result = executor.execute_market_order(
+            symbol=symbol,
+            side=OrderSide(side),
+            quantity=order.quantity,
+            stop_loss=order.stop_loss
+        )
+        
+        if not result["success"]:
+            return {
+                "success": False,
+                "message": result.get("error", "Error desconocido"),
+                "mode": "real",
+                "checks": result.get("all_checks") or result.get("failed_checks")
+            }
+        
+        return {
+            "success": True,
+            "message": f"✅ Orden REAL ejecutada: {side} {order.quantity} {symbol}",
+            "order_id": result.get("order", {}).get("orderId"),
+            "mode": "real",
+            "checks": result.get("checks")
+        }
+    
+    else:
+        # === MODO PRÁCTICA ===
+        # Redirigir a /practice/order
+        return {
+            "success": True,
+            "message": f"🎮 Usa /api/v1/practice/order para órdenes virtuales",
+            "mode": "practice",
+            "checks": None
+        }
 
 
-@router.get("/orders", response_model=List[OrderResponse])
+@router.get("/risk-status")
+async def get_risk_status(token: str = Depends(oauth2_scheme)):
+    """
+    Obtener estado actual de las protecciones de riesgo.
+    """
+    verify_token(token)
+    
+    executor = get_real_executor()
+    status = executor.get_risk_status()
+    
+    return {
+        **status,
+        "timestamp": datetime.utcnow()
+    }
+
+
+@router.get("/orders")
 async def get_orders(
     symbol: Optional[str] = None,
-    status: Optional[OrderStatus] = None,
+    limit: int = 50,
     token: str = Depends(oauth2_scheme)
 ):
     """
-    Obtener historial de órdenes.
+    Obtener historial de órdenes de Binance.
     """
     verify_token(token)
     
-    # TODO: Obtener de Binance
-    return []
+    client = get_binance_client()
+    
+    if not client.is_connected():
+        return {"orders": [], "message": "No conectado a Binance"}
+    
+    try:
+        if symbol:
+            orders = client.client.get_all_orders(symbol=symbol.upper(), limit=limit)
+        else:
+            # Obtener órdenes de símbolos principales
+            orders = []
+            for sym in ["BTCUSDT", "ETHUSDT", "BNBUSDT"]:
+                try:
+                    sym_orders = client.client.get_all_orders(symbol=sym, limit=10)
+                    orders.extend(sym_orders)
+                except:
+                    pass
+        
+        return {"orders": orders[:limit], "count": len(orders)}
+    except Exception as e:
+        return {"orders": [], "error": str(e)}
 
 
-@router.delete("/order/{order_id}")
-async def cancel_order(order_id: str, token: str = Depends(oauth2_scheme)):
+@router.delete("/order/{symbol}/{order_id}")
+async def cancel_order(
+    symbol: str,
+    order_id: str,
+    token: str = Depends(oauth2_scheme)
+):
     """
     Cancelar una orden pendiente.
     """
     verify_token(token)
     
-    # TODO: Cancelar en Binance
-    return {"message": f"Orden {order_id} cancelada"}
+    client = get_binance_client()
+    
+    if not client.is_connected():
+        raise HTTPException(status_code=503, detail="No conectado a Binance")
+    
+    try:
+        result = client.client.cancel_order(
+            symbol=symbol.upper(),
+            orderId=int(order_id)
+        )
+        return {"success": True, "message": f"Orden {order_id} cancelada", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/candles/{symbol}")
@@ -126,20 +207,16 @@ async def get_candles(
 ):
     """
     Obtener velas/candlesticks REALES para gráficos.
-    
-    Intervals: 1m, 5m, 15m, 1h, 4h, 1d
     """
     verify_token(token)
     
     client = get_binance_client()
     symbol = symbol.upper()
     
-    # Validar interval
     valid_intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w']
     if interval not in valid_intervals:
         raise HTTPException(status_code=400, detail=f"Interval inválido. Usa: {valid_intervals}")
     
-    # Obtener klines reales de Binance
     candles = client.get_klines(symbol, interval, limit)
     
     if not candles:
@@ -176,7 +253,6 @@ async def get_trading_symbols(token: str = Depends(oauth2_scheme)):
     """
     verify_token(token)
     
-    # Pares principales soportados
     symbols = [
         {"symbol": "BTCUSDT", "base": "BTC", "quote": "USDT", "name": "Bitcoin"},
         {"symbol": "ETHUSDT", "base": "ETH", "quote": "USDT", "name": "Ethereum"},
@@ -184,10 +260,6 @@ async def get_trading_symbols(token: str = Depends(oauth2_scheme)):
         {"symbol": "SOLUSDT", "base": "SOL", "quote": "USDT", "name": "Solana"},
         {"symbol": "XRPUSDT", "base": "XRP", "quote": "USDT", "name": "Ripple"},
         {"symbol": "ADAUSDT", "base": "ADA", "quote": "USDT", "name": "Cardano"},
-        {"symbol": "DOTUSDT", "base": "DOT", "quote": "USDT", "name": "Polkadot"},
-        {"symbol": "MATICUSDT", "base": "MATIC", "quote": "USDT", "name": "Polygon"},
-        {"symbol": "LINKUSDT", "base": "LINK", "quote": "USDT", "name": "Chainlink"},
-        {"symbol": "AVAXUSDT", "base": "AVAX", "quote": "USDT", "name": "Avalanche"},
     ]
     
     return {"symbols": symbols}
