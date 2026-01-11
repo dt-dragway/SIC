@@ -334,3 +334,37 @@ async def confirm_2fa(code: str, token: str = Depends(oauth2_scheme), db: Sessio
     
     return {"message": "✅ 2FA activado correctamente. Tu cuenta está protegida."}
 
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.post("/change-password")
+async def change_password(
+    password_data: PasswordChange,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    Cambiar contraseña del usuario logueado.
+    """
+    payload = verify_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+    user_id = payload.get("user_id")
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    # Verificar password actual
+    if not verify_password(password_data.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
+
+    # Actualizar password
+    user.password_hash = hash_password(password_data.new_password)
+    db.commit()
+
+    return {"message": "Contraseña actualizada correctamente"}

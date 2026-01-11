@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-
+import Header from '../components/layout/Header'
 import AIWidget from '../components/dashboard/AIWidget'
 
 interface Balance {
@@ -110,57 +110,45 @@ export default function Home() {
 
     return (
         <main className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
-            {/* Header Profesional */}
-            <header className="border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        {/* Logo Minimalista SVG */}
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
-                        </div>
-                        <h1 className="text-xl font-bold tracking-tight text-white">SIC <span className="text-cyan-400 font-light">Ultra</span></h1>
-                    </div>
+            {/* Header Profesional Reutilizable */}
+            <Header />
 
-                    {/* Mode Toggle Profesional */}
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/5 p-1 rounded-lg border border-white/5 flex relative">
-                            {/* Fondo animado para el toggle */}
-                            <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-gradient-to-r transition-all duration-300 rounded-md shadow-sm ${mode === 'practice'
-                                ? 'left-1 from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30'
-                                : 'left-[50%] from-rose-500/20 to-rose-600/20 border border-rose-500/30'
-                                }`}></div>
+            {/* Mode Toggle Floating */}
+            <div className="max-w-7xl mx-auto px-6 py-6 flex justify-end">
+                <div className="bg-white/5 p-1 rounded-lg border border-white/5 flex relative">
+                    {/* Fondo animado para el toggle */}
+                    <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-gradient-to-r transition-all duration-300 rounded-md shadow-sm ${mode === 'practice'
+                        ? 'left-1 from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30'
+                        : 'left-[50%] from-rose-500/20 to-rose-600/20 border border-rose-500/30'
+                        }`}></div>
 
-                            <button
-                                onClick={() => setMode('practice')}
-                                className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'practice' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'
-                                    }`}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-                                    <line x1="16" y1="8" x2="2" y2="22"></line>
-                                    <line x1="17.5" y1="15" x2="9" y2="15"></line>
-                                </svg>
-                                Laboratorio
-                            </button>
+                    <button
+                        onClick={() => setMode('practice')}
+                        className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'practice' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'
+                            }`}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                            <line x1="16" y1="8" x2="2" y2="22"></line>
+                            <line x1="17.5" y1="15" x2="9" y2="15"></line>
+                        </svg>
+                        Laboratorio
+                    </button>
 
-                            <button
-                                onClick={() => setMode('real')}
-                                className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'real' ? 'text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'text-slate-400 hover:text-slate-200'
-                                    }`}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                </svg>
-                                Mercado Real
-                            </button>
-                        </div>
-                    </div>
+                    <button
+                        onClick={() => setMode('real')}
+                        className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'real' ? 'text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'text-slate-400 hover:text-slate-200'
+                            }`}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Mercado Real
+                    </button>
                 </div>
-            </header>
+            </div>
 
-            <div className="max-w-7xl mx-auto p-6">
+            <div className="max-w-7xl mx-auto px-6 pb-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     {/* Balance Card */}
