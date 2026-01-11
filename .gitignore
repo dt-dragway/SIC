@@ -1,18 +1,53 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
 
-# Entornos virtuales
+# Virtual environments
 venv/
 env/
 .env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Logs
 logs/
 *.log
 
-# Base de datos (Opcional: comenta esto si quieres subir la DB, pero no es recomendable por seguridad/tamaño)
-# database/*.db
-# Por ahora NO ignoramos la DB para que tengas tu backup de datos, dado que perdiste todo.
+# Database
+*.db
+*.sqlite3
+
+# Models (large files)
+models/*.model
+models/*.pkl
+models/*.h5
+
+# Node
+node_modules/
+.next/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Docker
+.docker/
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+
+# MLflow
+mlruns/
