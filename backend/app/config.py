@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     # === 2FA ===
     totp_issuer: str = "SIC Ultra"
     
+    # === LLM (Inteligencia Artificial) ===
+    deepseek_api_key: str = ""  # https://platform.deepseek.com
+    openai_api_key: str = ""    # https://platform.openai.com
+    ollama_model: str = "llama3"  # Modelo local (gratis)
+    
     class Config:
         env_file = "../.env"
         env_file_encoding = "utf-8"
