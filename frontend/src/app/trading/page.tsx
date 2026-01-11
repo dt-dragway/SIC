@@ -16,6 +16,7 @@ import {
     Gamepad2,
     Swords
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 const SYMBOLS = [
     { symbol: 'BTCUSDT', name: 'Bitcoin', icon: 'BTC' },
@@ -54,7 +55,7 @@ export default function TradingPage() {
 
     const handleOrder = () => {
         if (!order.quantity) {
-            alert('Ingresa una cantidad')
+            toast.error('Por favor ingresa una cantidad válida')
             return
         }
 
@@ -62,11 +63,17 @@ export default function TradingPage() {
         const total = qty * currentPrice
 
         if (order.side === 'BUY' && total > balance.USDT) {
-            alert('Saldo USDT insuficiente')
+            toast.error('Saldo USDT insuficiente para esta operación')
             return
         }
 
-        alert(`${mode === 'practice' ? 'PRÁCTICA: ' : 'REAL: '}${order.side} ${qty} @ $${currentPrice}`)
+        const message = `${order.side === 'BUY' ? 'Compra' : 'Venta'} de ${qty} ${selectedSymbol.symbol.replace('USDT', '')} ejecutada correctamente`
+
+        if (mode === 'practice') {
+            toast.success('Orden de Práctica Exitosa', { description: message })
+        } else {
+            toast.success('Orden Real Enviada', { description: 'Tu orden ha sido enviada al mercado' })
+        }
     }
 
     return (

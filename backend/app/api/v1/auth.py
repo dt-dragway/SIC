@@ -225,13 +225,23 @@ async def login(
     access_token = create_access_token(user_data)
     refresh_token = create_refresh_token(user_data, remember_me=True) 
     
+    # Establecer cookie de acceso (HttpOnly)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False, # True en producción con HTTPS
+        samesite="lax",
+        max_age=settings.access_token_expire_minutes * 60
+    )
+
     # Establecer cookie de dispositivo confiable (30 días)
     trusted_token = create_trusted_device_token(user_id=user.id)
     response.set_cookie(
         key="trusted_device",
         value=trusted_token,
         httponly=True,
-        secure=True,
+        secure=False, # True en producción
         samesite="lax",
         max_age=60 * 60 * 24 * settings.trusted_device_expire_days
     )
@@ -243,10 +253,31 @@ async def login(
         "expires_in": settings.access_token_expire_minutes * 60
     }
 
+
+@router.post("/logout")
+async def logout(response: Response):
+    """Cerrar sesión y limpiar cookies"""
+    response.delete_cookie("access_token")
+    response.delete_cookie("trusted_device")
+    return {"message": "Sesión cerrada correctamente"}
+
+
+def get_token(request: Request):
+    """Obtener token desde cookie o header"""
+    token = request.cookies.get("access_token")
+    if token:
+        return token
+    
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        return auth_header.split(" ")[1]
+        
+    raise HTTPException(status_code=401, detail="No autenticado")
+
 # ... (Refresh, Logout, Me endpoints updated similarly)
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def get_current_user(token: str = Depends(get_token), db: Session = Depends(get_db)):
     """
     Obtener usuario actual desde BD.
     """
@@ -274,7 +305,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 
 @router.post("/2fa/enable")
-async def enable_2fa(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def enable_2fa(token: str = Depends(get_token), db: Session = Depends(get_db)):
     """
     Habilitar autenticación de dos factores.
     Retorna el secreto y QR para Google Authenticator.
@@ -310,7 +341,7 @@ async def enable_2fa(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
 @router.post("/2fa/confirm")
-async def confirm_2fa(code: str, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def confirm_2fa(code: str, token: str = Depends(get_token), db: Session = Depends(get_db)):
     """
     Confirmar y activar 2FA con el código de verificación.
     """
@@ -343,7 +374,7 @@ class PasswordChange(BaseModel):
 @router.post("/change-password")
 async def change_password(
     password_data: PasswordChange,
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(get_token),
     db: Session = Depends(get_db)
 ):
     """

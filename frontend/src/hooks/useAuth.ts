@@ -10,7 +10,6 @@ interface User {
 
 interface AuthState {
     user: User | null;
-    token: string | null;
     loading: boolean;
     isAuthenticated: boolean;
 }
@@ -19,40 +18,33 @@ export function useAuth() {
     const router = useRouter();
     const [state, setState] = useState<AuthState>({
         user: null,
-        token: null,
         loading: true,
         isAuthenticated: false
     });
 
     useEffect(() => {
-        // Cargar token al iniciar
-        const token = localStorage.getItem('token');
-        if (token) {
-            fetchUser(token);
-        } else {
-            setState(s => ({ ...s, loading: false }));
-        }
+        // Al iniciar, intentar obtener el usuario usando la cookie de sesión
+        checkSession();
     }, []);
 
-    const fetchUser = async (token: string) => {
+    const checkSession = async () => {
         try {
-            const res = await fetch('/api/v1/auth/me', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            // Ya no necesitamos enviar el header Authorization
+            // El navegador envía la cookie automáticamente
+            const res = await fetch('/api/v1/auth/me');
 
             if (res.ok) {
                 const user = await res.json();
                 setState({
                     user,
-                    token,
                     loading: false,
                     isAuthenticated: true
                 });
             } else {
-                logout();
+                setState(prev => ({ ...prev, loading: false, isAuthenticated: false, user: null }));
             }
         } catch (error) {
-            logout();
+            setState(prev => ({ ...prev, loading: false, isAuthenticated: false, user: null }));
         }
     };
 
@@ -70,8 +62,9 @@ export function useAuth() {
         const data = await res.json();
 
         if (res.ok) {
-            localStorage.setItem('token', data.access_token);
-            await fetchUser(data.access_token);
+            // El backend ya estableció la cookie HttpOnly
+            // Solo necesitamos recargar el estado del usuario
+            await checkSession();
             return { success: true };
         } else {
             return { success: false, error: data.detail || 'Error al iniciar sesión' };
@@ -94,11 +87,17 @@ export function useAuth() {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
+    const logout = async () => {
+        try {
+            // Llamar al endpoint de logout para borrar cookies
+            await fetch('/api/v1/auth/logout', { method: 'POST' });
+        } catch (error) {
+            console.error('Error durante logout', error);
+        }
+
+        // Limpiar estado local
         setState({
             user: null,
-            token: null,
             loading: false,
             isAuthenticated: false
         });
@@ -109,6 +108,7 @@ export function useAuth() {
         ...state,
         login,
         register,
-        logout
+        logout,
+        checkSession // Exportamos por si necesitamos revalidar manualmente
     };
 }
