@@ -1,7 +1,7 @@
 """
 SIC Ultra - Mercado P2P VES
 
-Arbitraje USDT/VES en el mercado P2P de Binance.
+Arbitraje USDT/VES con datos REALES del mercado P2P de Binance.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -10,6 +10,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.api.v1.auth import oauth2_scheme, verify_token
+from app.infrastructure.binance.p2p import get_p2p_client
 
 
 router = APIRouter()
@@ -19,168 +20,239 @@ router = APIRouter()
 
 class P2POffer(BaseModel):
     advertiser: str
-    price: float  # VES por USDT
-    available: float  # USDT disponible
+    price: float
+    available: float
     min_amount: float
     max_amount: float
     payment_methods: List[str]
-    completion_rate: float  # %
+    completion_rate: float
+    orders_count: Optional[int] = None
 
 
 class P2PMarket(BaseModel):
-    buy_offers: List[P2POffer]  # Comprar USDT (pagar VES)
-    sell_offers: List[P2POffer]  # Vender USDT (recibir VES)
-    best_buy_price: float  # Precio más bajo para comprar
-    best_sell_price: float  # Precio más alto para vender
-    spread: float  # Diferencia porcentual
-    last_update: datetime
+    fiat: str
+    asset: str
+    buy_offers: List[P2POffer]
+    sell_offers: List[P2POffer]
+    best_buy_price: float
+    best_sell_price: float
+    spread_percent: float
+    timestamp: datetime
 
 
 class P2PStats(BaseModel):
+    fiat: str
+    asset: str
     avg_buy_price: float
     avg_sell_price: float
     spread_percent: float
-    volume_24h: float
-    offers_count: int
+    buy_offers_count: int
+    sell_offers_count: int
+    timestamp: datetime
 
 
 # === Endpoints ===
 
 @router.get("/market", response_model=P2PMarket)
-async def get_p2p_market(token: str = Depends(oauth2_scheme)):
+async def get_p2p_market(
+    fiat: str = "VES",
+    asset: str = "USDT",
+    token: str = Depends(oauth2_scheme)
+):
     """
-    Obtener ofertas del mercado P2P USDT/VES.
+    Obtener ofertas REALES del mercado P2P de Binance.
     
     Muestra las mejores ofertas para comprar y vender USDT con Bolívares.
+    
+    - **fiat**: Moneda fiat (VES, USD, COP, etc)
+    - **asset**: Criptomoneda (USDT, BTC, etc)
     """
     verify_token(token)
     
-    # TODO: Scraper real de Binance P2P
-    # Por ahora datos de ejemplo
+    client = get_p2p_client()
     
-    buy_offers = [
-        {
-            "advertiser": "CryptoVzla",
-            "price": 36.50,
-            "available": 1500.0,
-            "min_amount": 10,
-            "max_amount": 500,
-            "payment_methods": ["Banesco", "Mercantil"],
-            "completion_rate": 98.5
-        },
-        {
-            "advertiser": "BolívarExchange",
-            "price": 36.45,
-            "available": 2000.0,
-            "min_amount": 50,
-            "max_amount": 1000,
-            "payment_methods": ["Provincial", "Banesco"],
-            "completion_rate": 99.1
-        }
-    ]
+    # Obtener ofertas reales
+    buy_offers = await client.get_buy_offers(fiat, asset, rows=10)
+    sell_offers = await client.get_sell_offers(fiat, asset, rows=10)
     
-    sell_offers = [
-        {
-            "advertiser": "VESTrader",
-            "price": 37.20,
-            "available": 800.0,
-            "min_amount": 10,
-            "max_amount": 300,
-            "payment_methods": ["Pago Móvil"],
-            "completion_rate": 97.8
-        },
-        {
-            "advertiser": "CryptoVzla",
-            "price": 37.15,
-            "available": 1200.0,
-            "min_amount": 20,
-            "max_amount": 600,
-            "payment_methods": ["Banesco", "Mercantil"],
-            "completion_rate": 98.5
-        }
-    ]
+    if not buy_offers and not sell_offers:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"No hay ofertas P2P disponibles para {asset}/{fiat}"
+        )
     
-    best_buy = min(o["price"] for o in buy_offers)
-    best_sell = max(o["price"] for o in sell_offers)
-    spread = ((best_sell - best_buy) / best_buy) * 100
+    # Calcular mejores precios
+    best_buy = min(o["price"] for o in buy_offers) if buy_offers else 0
+    best_sell = max(o["price"] for o in sell_offers) if sell_offers else 0
+    spread = ((best_sell - best_buy) / best_buy * 100) if best_buy > 0 else 0
     
     return {
+        "fiat": fiat.upper(),
+        "asset": asset.upper(),
         "buy_offers": buy_offers,
         "sell_offers": sell_offers,
         "best_buy_price": best_buy,
         "best_sell_price": best_sell,
-        "spread": spread,
-        "last_update": datetime.utcnow()
+        "spread_percent": round(spread, 2),
+        "timestamp": datetime.utcnow()
     }
 
 
 @router.get("/stats", response_model=P2PStats)
-async def get_p2p_stats(token: str = Depends(oauth2_scheme)):
+async def get_p2p_stats(
+    fiat: str = "VES",
+    asset: str = "USDT",
+    token: str = Depends(oauth2_scheme)
+):
     """
-    Estadísticas del mercado P2P VES.
+    Estadísticas del mercado P2P.
     """
     verify_token(token)
     
-    # TODO: Calcular de datos reales
+    client = get_p2p_client()
+    summary = await client.get_market_summary(fiat, asset)
+    
+    if "error" in summary:
+        raise HTTPException(status_code=404, detail=summary["error"])
+    
+    return summary
+
+
+@router.get("/buy")
+async def get_buy_offers(
+    fiat: str = "VES",
+    asset: str = "USDT",
+    limit: int = 10,
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Obtener solo ofertas para COMPRAR cripto (pagas VES).
+    
+    Ordenadas por precio (más bajo primero).
+    """
+    verify_token(token)
+    
+    client = get_p2p_client()
+    offers = await client.get_buy_offers(fiat, asset, rows=limit)
+    
+    # Ordenar por precio
+    offers.sort(key=lambda x: x["price"])
+    
     return {
-        "avg_buy_price": 36.48,
-        "avg_sell_price": 37.18,
-        "spread_percent": 1.92,
-        "volume_24h": 125000,
-        "offers_count": 45
+        "type": "BUY",
+        "fiat": fiat.upper(),
+        "asset": asset.upper(),
+        "count": len(offers),
+        "offers": offers,
+        "timestamp": datetime.utcnow()
     }
 
 
-@router.get("/history")
-async def get_p2p_history(
-    days: int = 7,
+@router.get("/sell")
+async def get_sell_offers(
+    fiat: str = "VES",
+    asset: str = "USDT",
+    limit: int = 10,
     token: str = Depends(oauth2_scheme)
 ):
     """
-    Historial de precios P2P VES de los últimos días.
+    Obtener solo ofertas para VENDER cripto (recibes VES).
     
-    Útil para ver tendencia de la tasa.
+    Ordenadas por precio (más alto primero).
     """
     verify_token(token)
     
-    # TODO: Datos históricos reales
-    from datetime import timedelta
-    import random
+    client = get_p2p_client()
+    offers = await client.get_sell_offers(fiat, asset, rows=limit)
     
-    history = []
-    base_price = 36.50
-    now = datetime.utcnow()
-    
-    for i in range(days):
-        date = now - timedelta(days=days-i-1)
-        variation = random.uniform(-0.5, 0.5)
-        history.append({
-            "date": date.strftime("%Y-%m-%d"),
-            "avg_buy": base_price + variation,
-            "avg_sell": base_price + variation + 0.7,
-            "volume": random.randint(80000, 150000)
-        })
-    
-    return {"history": history}
-
-
-@router.post("/alert")
-async def create_p2p_alert(
-    target_price: float,
-    side: str,  # "buy" o "sell"
-    token: str = Depends(oauth2_scheme)
-):
-    """
-    Crear alerta de precio P2P.
-    
-    Te notifica cuando el precio llegue al objetivo.
-    """
-    verify_token(token)
-    
-    # TODO: Guardar alerta en DB
-    # TODO: Sistema de notificaciones
+    # Ordenar por precio (más alto primero)
+    offers.sort(key=lambda x: x["price"], reverse=True)
     
     return {
-        "message": f"Alerta creada: notificar cuando {side} llegue a {target_price} VES",
-        "active": True
+        "type": "SELL",
+        "fiat": fiat.upper(),
+        "asset": asset.upper(),
+        "count": len(offers),
+        "offers": offers,
+        "timestamp": datetime.utcnow()
+    }
+
+
+@router.get("/spread")
+async def get_spread(
+    fiat: str = "VES",
+    asset: str = "USDT",
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Calcular spread actual del mercado P2P.
+    
+    El spread es la diferencia entre el mejor precio de compra y venta.
+    Un spread alto indica oportunidad de arbitraje.
+    """
+    verify_token(token)
+    
+    client = get_p2p_client()
+    summary = await client.get_market_summary(fiat, asset)
+    
+    if "error" in summary:
+        raise HTTPException(status_code=404, detail=summary["error"])
+    
+    arbitrage_opportunity = summary["spread_percent"] > 1.5
+    
+    return {
+        "fiat": fiat.upper(),
+        "asset": asset.upper(),
+        "best_buy_price": summary["best_buy_price"],
+        "best_sell_price": summary["best_sell_price"],
+        "spread_percent": summary["spread_percent"],
+        "arbitrage_opportunity": arbitrage_opportunity,
+        "message": "🔥 Oportunidad de arbitraje!" if arbitrage_opportunity else "Spread normal",
+        "timestamp": datetime.utcnow()
+    }
+
+
+@router.get("/calculator")
+async def calculate_arbitrage(
+    amount_usdt: float = 100,
+    fiat: str = "VES",
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Calculadora de arbitraje P2P.
+    
+    Calcula la ganancia potencial si compras y vendes USDT.
+    """
+    verify_token(token)
+    
+    client = get_p2p_client()
+    summary = await client.get_market_summary(fiat, "USDT")
+    
+    if "error" in summary:
+        raise HTTPException(status_code=404, detail=summary["error"])
+    
+    buy_price = summary["best_buy_price"]
+    sell_price = summary["best_sell_price"]
+    
+    # Costo de comprar USDT
+    cost_fiat = amount_usdt * buy_price
+    
+    # Ganancia al vender USDT
+    revenue_fiat = amount_usdt * sell_price
+    
+    # Ganancia neta
+    profit_fiat = revenue_fiat - cost_fiat
+    profit_percent = (profit_fiat / cost_fiat) * 100 if cost_fiat > 0 else 0
+    
+    return {
+        "amount_usdt": amount_usdt,
+        "fiat": fiat.upper(),
+        "buy_price": buy_price,
+        "sell_price": sell_price,
+        "cost_fiat": round(cost_fiat, 2),
+        "revenue_fiat": round(revenue_fiat, 2),
+        "profit_fiat": round(profit_fiat, 2),
+        "profit_percent": round(profit_percent, 2),
+        "profitable": profit_fiat > 0,
+        "timestamp": datetime.utcnow()
     }
