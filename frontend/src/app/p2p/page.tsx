@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import P2POpportunities from '../../components/dashboard/P2POpportunities'
 
 interface P2POffer {
     advertiser: string
@@ -47,6 +48,11 @@ export default function P2PPage() {
             </header>
 
             <div className="max-w-7xl mx-auto p-6">
+                {/* AI Opportunities Panel */}
+                <div className="mb-8">
+                    <P2POpportunities />
+                </div>
+
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div className="glass-card p-4">
@@ -105,8 +111,8 @@ export default function P2PPage() {
                     <button
                         onClick={() => setActiveTab('buy')}
                         className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'buy'
-                                ? 'bg-sic-green text-black'
-                                : 'bg-sic-card text-gray-400'
+                            ? 'bg-sic-green text-black'
+                            : 'bg-sic-card text-gray-400'
                             }`}
                     >
                         Comprar USDT
@@ -114,8 +120,8 @@ export default function P2PPage() {
                     <button
                         onClick={() => setActiveTab('sell')}
                         className={`px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'sell'
-                                ? 'bg-sic-red text-white'
-                                : 'bg-sic-card text-gray-400'
+                            ? 'bg-sic-red text-white'
+                            : 'bg-sic-card text-gray-400'
                             }`}
                     >
                         Vender USDT
@@ -162,8 +168,8 @@ export default function P2PPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <button className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'buy'
-                                                ? 'bg-sic-green text-black'
-                                                : 'bg-sic-red text-white'
+                                            ? 'bg-sic-green text-black'
+                                            : 'bg-sic-red text-white'
                                             }`}>
                                             {activeTab === 'buy' ? 'Comprar' : 'Vender'}
                                         </button>
