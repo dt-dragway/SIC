@@ -1,8 +1,7 @@
 """
 SIC Ultra - Señales de Trading
 
-Señales generadas por el agente de IA.
-Monitoreo en tiempo real.
+Señales generadas por el agente de IA con análisis técnico real.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
@@ -11,15 +10,15 @@ from typing import List, Optional
 from datetime import datetime
 from enum import Enum
 import asyncio
-import json
 
 from app.api.v1.auth import oauth2_scheme, verify_token
+from app.ml.signal_generator import get_signal_generator
 
 
 router = APIRouter()
 
 
-# === Enums ===
+# === Schemas ===
 
 class SignalType(str, Enum):
     LONG = "LONG"
@@ -33,28 +32,27 @@ class SignalStrength(str, Enum):
     WEAK = "WEAK"
 
 
-# === Schemas ===
-
 class TradingSignal(BaseModel):
-    id: int
     symbol: str
+    interval: str
     type: SignalType
     strength: SignalStrength
-    confidence: float  # 0-100%
+    confidence: float
+    current_price: float
     entry_price: float
-    take_profit: float
     stop_loss: float
+    take_profit: float
     risk_reward: float
-    reasoning: str
+    reasoning: List[str]
     timestamp: datetime
     expires_at: datetime
 
 
-class SignalStats(BaseModel):
-    total_signals: int
-    win_rate: float
-    avg_profit: float
-    best_signal: Optional[TradingSignal]
+class SignalIndicators(BaseModel):
+    rsi: Optional[float]
+    macd_histogram: Optional[float]
+    trend: str
+    atr: float
 
 
 # === WebSocket Manager ===
@@ -70,10 +68,10 @@ class ConnectionManager:
         self.active_connections.append(websocket)
     
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
     
     async def broadcast(self, message: dict):
-        """Enviar mensaje a todos los clientes conectados"""
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
@@ -84,72 +82,109 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-# === Endpoints REST ===
+# === Endpoints ===
 
-@router.get("/", response_model=List[TradingSignal])
-async def get_signals(
-    symbol: Optional[str] = None,
-    active_only: bool = True,
+@router.get("/analyze/{symbol}")
+async def analyze_symbol(
+    symbol: str,
+    interval: str = "1h",
     token: str = Depends(oauth2_scheme)
 ):
     """
-    Obtener señales de trading actuales.
+    Analizar un símbolo y generar señal de trading.
     
-    Las señales son generadas por el agente de IA.
+    Usa análisis técnico con múltiples indicadores:
+    - RSI (sobreventa/sobrecompra)
+    - MACD (momentum)
+    - Bollinger Bands (volatilidad)
+    - Trend (tendencia)
+    
+    Intervals: 1m, 5m, 15m, 1h, 4h, 1d
     """
     verify_token(token)
     
-    # TODO: Obtener señales reales del agente
-    signals = [
-        {
-            "id": 1,
-            "symbol": "BTCUSDT",
-            "type": SignalType.LONG,
-            "strength": SignalStrength.STRONG,
-            "confidence": 87.5,
-            "entry_price": 45000.0,
-            "take_profit": 47500.0,
-            "stop_loss": 44200.0,
-            "risk_reward": 3.12,
-            "reasoning": "Confluencia: Top 3 traders en LONG, RSI saliendo de sobreventa, volumen creciente",
-            "timestamp": datetime.utcnow(),
-            "expires_at": datetime.utcnow()
-        }
-    ]
+    generator = get_signal_generator()
+    signal = generator.analyze(symbol.upper(), interval)
     
-    if symbol:
-        signals = [s for s in signals if s["symbol"] == symbol.upper()]
+    if not signal:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se pudo analizar {symbol}. Verifica que el par sea válido."
+        )
     
-    return signals
+    return signal
 
 
-@router.get("/stats", response_model=SignalStats)
-async def get_signal_stats(token: str = Depends(oauth2_scheme)):
+@router.get("/scan")
+async def scan_market(token: str = Depends(oauth2_scheme)):
     """
-    Estadísticas de rendimiento de las señales.
+    Escanear el mercado y retornar todas las señales activas.
+    
+    Analiza los principales pares y muestra solo señales de compra/venta.
     """
     verify_token(token)
+    
+    generator = get_signal_generator()
+    signals = generator.scan_market()
     
     return {
-        "total_signals": 156,
-        "win_rate": 67.3,
-        "avg_profit": 2.4,
-        "best_signal": None
+        "count": len(signals),
+        "signals": signals,
+        "timestamp": datetime.utcnow()
     }
 
 
-@router.get("/history")
-async def get_signal_history(
-    limit: int = 50,
+@router.get("/top")
+async def get_top_signals(
+    limit: int = 5,
     token: str = Depends(oauth2_scheme)
 ):
     """
-    Historial de señales pasadas con resultados.
+    Obtener las mejores señales del momento.
+    
+    Ordenadas por confianza (más alta primero).
     """
     verify_token(token)
     
-    # TODO: Obtener de DB
-    return {"signals": [], "total": 0}
+    generator = get_signal_generator()
+    signals = generator.scan_market()
+    
+    # Filtrar solo señales fuertes/moderadas
+    strong_signals = [s for s in signals if s["strength"] in ["STRONG", "MODERATE"]]
+    
+    return {
+        "count": min(len(strong_signals), limit),
+        "signals": strong_signals[:limit],
+        "timestamp": datetime.utcnow()
+    }
+
+
+@router.get("/indicators/{symbol}")
+async def get_indicators(
+    symbol: str,
+    interval: str = "1h",
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Obtener solo los indicadores técnicos de un símbolo.
+    """
+    verify_token(token)
+    
+    generator = get_signal_generator()
+    signal = generator.analyze(symbol.upper(), interval)
+    
+    if not signal:
+        raise HTTPException(status_code=404, detail=f"No se pudo analizar {symbol}")
+    
+    return {
+        "symbol": symbol.upper(),
+        "interval": interval,
+        "indicators": signal.get("indicators", {}),
+        "support": signal.get("support"),
+        "resistance": signal.get("resistance"),
+        "current_price": signal.get("current_price"),
+        "timestamp": datetime.utcnow()
+    }
 
 
 # === WebSocket para Tiempo Real ===
@@ -159,54 +194,52 @@ async def websocket_signals(websocket: WebSocket):
     """
     WebSocket para recibir señales en tiempo real.
     
-    Conectar desde frontend:
-    ```javascript
-    const ws = new WebSocket('ws://localhost:8000/api/v1/signals/ws');
-    ws.onmessage = (event) => {
-        const signal = JSON.parse(event.data);
-        console.log('Nueva señal:', signal);
-    };
-    ```
+    El servidor envía nuevas señales automáticamente cada minuto.
     """
     await manager.connect(websocket)
     
     try:
-        # Enviar mensaje de bienvenida
         await websocket.send_json({
             "type": "connected",
             "message": "Conectado a señales en tiempo real",
             "timestamp": datetime.utcnow().isoformat()
         })
         
-        # Mantener conexión abierta
         while True:
-            # Esperar mensajes del cliente (ping/pong, etc)
             try:
+                # Esperar mensajes del cliente
                 data = await asyncio.wait_for(
                     websocket.receive_text(),
-                    timeout=30.0
+                    timeout=60.0  # Cada minuto
                 )
                 
-                # Responder a ping
                 if data == "ping":
                     await websocket.send_text("pong")
+                elif data == "scan":
+                    # Escaneo bajo demanda
+                    generator = get_signal_generator()
+                    signals = generator.scan_market()
+                    await websocket.send_json({
+                        "type": "scan_result",
+                        "count": len(signals),
+                        "signals": signals,
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
                     
             except asyncio.TimeoutError:
-                # Enviar heartbeat
-                await websocket.send_json({"type": "heartbeat"})
+                # Enviar escaneo automático cada minuto
+                generator = get_signal_generator()
+                signals = generator.scan_market()
                 
+                if signals:
+                    await websocket.send_json({
+                        "type": "auto_scan",
+                        "count": len(signals),
+                        "signals": signals[:3],  # Top 3
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+                else:
+                    await websocket.send_json({"type": "heartbeat"})
+                    
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
-
-# === Función para emitir señales (llamada por el agente) ===
-
-async def emit_signal(signal: dict):
-    """
-    Emitir nueva señal a todos los clientes WebSocket.
-    
-    Llamada por el agente de IA cuando genera una señal.
-    """
-    signal["type"] = "new_signal"
-    signal["timestamp"] = datetime.utcnow().isoformat()
-    await manager.broadcast(signal)
