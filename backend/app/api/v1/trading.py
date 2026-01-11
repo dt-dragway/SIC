@@ -1,16 +1,17 @@
 """
 SIC Ultra - Trading Endpoints
 
-Órdenes de trading en Binance.
+Órdenes de trading y gráficos con datos REALES de Binance.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional, Literal
+from typing import List, Optional
 from datetime import datetime
 from enum import Enum
 
 from app.api.v1.auth import oauth2_scheme, verify_token
+from app.infrastructure.binance.client import get_binance_client
 
 
 router = APIRouter()
@@ -75,23 +76,19 @@ async def create_order(order: OrderCreate, token: str = Depends(oauth2_scheme)):
     
     ⚠️ SOLO FUNCIONA EN MODO BATALLA REAL
     En modo práctica usar /practice/order
+    
+    TODO: Implementar órdenes reales en Fase 7
     """
     verify_token(token)
     
     # TODO: Verificar modo (práctica vs real)
-    # TODO: Verificar protecciones de riesgo
+    # TODO: Verificar protecciones de riesgo (7 capas)
     # TODO: Enviar orden a Binance
     
-    return {
-        "id": "12345",
-        "symbol": order.symbol.upper(),
-        "side": order.side,
-        "type": order.type,
-        "quantity": order.quantity,
-        "price": order.price or 45000.0,
-        "status": OrderStatus.PENDING,
-        "created_at": datetime.utcnow()
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="Modo Batalla Real no habilitado aún. Usa /practice/order para practicar."
+    )
 
 
 @router.get("/orders", response_model=List[OrderResponse])
@@ -128,35 +125,69 @@ async def get_candles(
     token: str = Depends(oauth2_scheme)
 ):
     """
-    Obtener velas/candlesticks para gráficos.
+    Obtener velas/candlesticks REALES para gráficos.
     
     Intervals: 1m, 5m, 15m, 1h, 4h, 1d
     """
     verify_token(token)
     
+    client = get_binance_client()
     symbol = symbol.upper()
     
-    # TODO: Obtener de Binance
-    # Datos de ejemplo
-    from datetime import timedelta
-    import random
+    # Validar interval
+    valid_intervals = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w']
+    if interval not in valid_intervals:
+        raise HTTPException(status_code=400, detail=f"Interval inválido. Usa: {valid_intervals}")
     
-    candles = []
-    base_price = 45000
-    now = datetime.utcnow()
+    # Obtener klines reales de Binance
+    candles = client.get_klines(symbol, interval, limit)
     
-    for i in range(limit):
-        variance = random.uniform(-500, 500)
-        open_price = base_price + variance
-        close_price = open_price + random.uniform(-200, 200)
-        
-        candles.append({
-            "timestamp": now - timedelta(hours=limit-i),
-            "open": open_price,
-            "high": max(open_price, close_price) + random.uniform(0, 100),
-            "low": min(open_price, close_price) - random.uniform(0, 100),
-            "close": close_price,
-            "volume": random.uniform(100, 1000)
-        })
+    if not candles:
+        raise HTTPException(status_code=404, detail=f"No se encontraron datos para {symbol}")
     
-    return {"symbol": symbol, "interval": interval, "candles": candles}
+    return {
+        "symbol": symbol,
+        "interval": interval,
+        "candles": candles,
+        "count": len(candles)
+    }
+
+
+@router.get("/ticker/{symbol}")
+async def get_ticker(symbol: str, token: str = Depends(oauth2_scheme)):
+    """
+    Obtener información completa de un par de trading.
+    """
+    verify_token(token)
+    
+    client = get_binance_client()
+    ticker = client.get_24h_ticker(symbol.upper())
+    
+    if not ticker:
+        raise HTTPException(status_code=404, detail=f"Par {symbol} no encontrado")
+    
+    return ticker
+
+
+@router.get("/symbols")
+async def get_trading_symbols(token: str = Depends(oauth2_scheme)):
+    """
+    Obtener lista de pares de trading disponibles.
+    """
+    verify_token(token)
+    
+    # Pares principales soportados
+    symbols = [
+        {"symbol": "BTCUSDT", "base": "BTC", "quote": "USDT", "name": "Bitcoin"},
+        {"symbol": "ETHUSDT", "base": "ETH", "quote": "USDT", "name": "Ethereum"},
+        {"symbol": "BNBUSDT", "base": "BNB", "quote": "USDT", "name": "Binance Coin"},
+        {"symbol": "SOLUSDT", "base": "SOL", "quote": "USDT", "name": "Solana"},
+        {"symbol": "XRPUSDT", "base": "XRP", "quote": "USDT", "name": "Ripple"},
+        {"symbol": "ADAUSDT", "base": "ADA", "quote": "USDT", "name": "Cardano"},
+        {"symbol": "DOTUSDT", "base": "DOT", "quote": "USDT", "name": "Polkadot"},
+        {"symbol": "MATICUSDT", "base": "MATIC", "quote": "USDT", "name": "Polygon"},
+        {"symbol": "LINKUSDT", "base": "LINK", "quote": "USDT", "name": "Chainlink"},
+        {"symbol": "AVAXUSDT", "base": "AVAX", "quote": "USDT", "name": "Avalanche"},
+    ]
+    
+    return {"symbols": symbols}
