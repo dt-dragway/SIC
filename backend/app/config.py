@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     totp_issuer: str = "SIC Ultra"
     
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
         env_file_encoding = "utf-8"
         case_sensitive = False
 

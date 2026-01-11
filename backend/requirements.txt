@@ -24,7 +24,7 @@ qrcode[pil]==8.0
 
 # === Binance ===
 python-binance==1.0.19
-ccxt==4.4.0
+ccxt
 
 # === ML/Data ===
 pandas==2.2.0
