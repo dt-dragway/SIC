@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+import AIWidget from '../components/dashboard/AIWidget'
+
 interface Balance {
     asset: string
     total: number
@@ -66,8 +68,8 @@ export default function Home() {
                             <button
                                 onClick={() => setMode('practice')}
                                 className={`px-4 py-2 rounded-lg transition-all ${mode === 'practice'
-                                        ? 'bg-sic-green text-black font-semibold'
-                                        : 'text-gray-400 hover:text-white'
+                                    ? 'bg-sic-green text-black font-semibold'
+                                    : 'text-gray-400 hover:text-white'
                                     }`}
                             >
                                 🎮 Práctica
@@ -75,8 +77,8 @@ export default function Home() {
                             <button
                                 onClick={() => setMode('real')}
                                 className={`px-4 py-2 rounded-lg transition-all ${mode === 'real'
-                                        ? 'bg-sic-red text-white font-semibold'
-                                        : 'text-gray-400 hover:text-white'
+                                    ? 'bg-sic-red text-white font-semibold'
+                                    : 'text-gray-400 hover:text-white'
                                     }`}
                             >
                                 ⚔️ Real
@@ -128,6 +130,11 @@ export default function Home() {
                     </div>
                 </div>
 
+                {/* AI Neural Engine Widget */}
+                <div className="mb-8">
+                    <AIWidget symbol="BTCUSDT" />
+                </div>
+
                 {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Chart Section */}
@@ -160,15 +167,15 @@ export default function Home() {
                                     <div
                                         key={i}
                                         className={`p-4 rounded-lg border ${signal.type === 'LONG'
-                                                ? 'border-sic-green bg-sic-green/10'
-                                                : 'border-sic-red bg-sic-red/10'
+                                            ? 'border-sic-green bg-sic-green/10'
+                                            : 'border-sic-red bg-sic-red/10'
                                             } ${signal.strength === 'STRONG' ? 'signal-strong' : ''}`}
                                     >
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="font-bold">{signal.symbol}</span>
                                             <span className={`px-2 py-1 rounded text-xs font-bold ${signal.type === 'LONG'
-                                                    ? 'bg-sic-green text-black'
-                                                    : 'bg-sic-red text-white'
+                                                ? 'bg-sic-green text-black'
+                                                : 'bg-sic-red text-white'
                                                 }`}>
                                                 {signal.type}
                                             </span>
