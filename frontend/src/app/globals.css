@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sic-dark: #0a0a0f;
+  --sic-card: #12121a;
+  --sic-border: #1e1e2e;
+  --sic-green: #00ff9d;
+  --sic-red: #ff4757;
+  --sic-blue: #4da6ff;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--sic-dark);
+  color: white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sic-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sic-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2d2d4a;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  background: rgba(18, 18, 26, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--sic-border);
+  border-radius: 16px;
+}
+
+/* Price Colors */
+.text-green { color: var(--sic-green); }
+.text-red { color: var(--sic-red); }
+.bg-green { background-color: var(--sic-green); }
+.bg-red { background-color: var(--sic-red); }
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 157, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.6); }
+}
+
+.signal-strong {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--sic-green), #00cc7a);
+  color: #0a0a0f;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 255, 157, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--sic-border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--sic-green);
+  color: var(--sic-green);
+}
