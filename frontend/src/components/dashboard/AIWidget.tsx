@@ -41,7 +41,7 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                     </h3>
                 </div>
                 <div className="text-xs text-slate-400 font-mono">
-                    {status?.model || 'Ollama Offline'}
+                    {status?.model || 'IA Desconectada'}
                 </div>
             </div>
 

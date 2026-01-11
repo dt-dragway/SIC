@@ -42,8 +42,8 @@ function OpportunityCard({ opportunity }: { opportunity: GoldenOpportunity }) {
 
     return (
         <div className={`relative overflow-hidden rounded-xl border p-5 backdrop-blur-md transition-all hover:scale-[1.02] ${isArbitrage
-                ? 'bg-amber-500/10 border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]'
-                : 'bg-sic-card border-sic-border hover:border-sic-blue'
+            ? 'bg-amber-500/10 border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]'
+            : 'bg-sic-card border-sic-border hover:border-sic-blue'
             }`}>
             {/* Background glow effect */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-gradient-to-br from-white/10 to-transparent blur-3xl"></div>
@@ -62,15 +62,16 @@ function OpportunityCard({ opportunity }: { opportunity: GoldenOpportunity }) {
                                 opportunity.type === 'TIMING' ? 'Mejor Horario' :
                                     opportunity.type === 'TRADER' ? 'Copiar Trader Top' : 'Oportunidad'}
                         </h3>
-                        <span className="text-xs text-slate-400">Score: <b className="text-white">{opportunity.score}/100</b></span>
+                        <span className="text-xs text-slate-400">Puntaje: <b className="text-white">{opportunity.score}/100</b></span>
                     </div>
                 </div>
 
                 <span className={`px-2 py-1 rounded text-[10px] font-bold tracking-wider ${opportunity.risk_level === 'LOW' ? 'bg-emerald-500/20 text-emerald-400' :
-                        opportunity.risk_level === 'MEDIUM' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-rose-500/20 text-rose-400'
+                    opportunity.risk_level === 'MEDIUM' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-rose-500/20 text-rose-400'
                     }`}>
-                    {opportunity.risk_level} RISK
+                    {opportunity.risk_level === 'LOW' ? 'RIESGO BAJO' :
+                        opportunity.risk_level === 'MEDIUM' ? 'RIESGO MEDIO' : 'RIESGO ALTO'}
                 </span>
             </div>
 
@@ -105,8 +106,8 @@ function OpportunityCard({ opportunity }: { opportunity: GoldenOpportunity }) {
             </div>
 
             <button className={`w-full py-2 rounded-lg text-sm font-bold transition-all ${isArbitrage
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:shadow-lg'
-                    : 'bg-white/10 hover:bg-white/20 text-white'
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:shadow-lg'
+                : 'bg-white/10 hover:bg-white/20 text-white'
                 }`}>
                 {isArbitrage ? '⚡ Ejecutar Arbitraje' : 'Ver Detalles'}
             </button>
