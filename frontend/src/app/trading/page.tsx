@@ -17,6 +17,7 @@ import {
     Swords
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { CandlestickChart } from '../../components/charts/CandlestickChart'
 
 const SYMBOLS = [
     { symbol: 'BTCUSDT', name: 'Bitcoin', icon: 'BTC' },
@@ -162,15 +163,8 @@ export default function TradingPage() {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex-1 bg-black/40 rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden group">
-                            {/* Grid decorative background */}
-                            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-                            <div className="relative z-10 text-center flex flex-col items-center gap-3">
-                                <div className="p-4 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors">
-                                    <BarChart2 className="h-12 w-12 text-slate-600 group-hover:text-cyan-400 transition-colors" />
-                                </div>
-                                <p className="text-slate-500 font-medium">Vista de TradingView Profesional</p>
-                            </div>
+                        <div className="flex-1 bg-black/40 rounded-xl border border-white/5 overflow-hidden relative min-h-[500px]">
+                            <CandlestickChart symbol={selectedSymbol.symbol} />
                         </div>
                     </div>
 

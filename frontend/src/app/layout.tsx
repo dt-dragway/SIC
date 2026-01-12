@@ -20,7 +20,22 @@ export default function RootLayout({
         <html lang="es">
             <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
                 {children}
-                <Toaster richColors position="top-center" theme="dark" />
+                <Toaster
+                    richColors
+                    position="top-right"
+                    theme="dark"
+                    closeButton
+                    toastOptions={{
+                        style: {
+                            background: 'rgba(11, 14, 20, 0.85)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            color: '#e2e8f0',
+                            borderRadius: '12px'
+                        },
+                        className: 'font-sans'
+                    }}
+                />
             </body>
         </html>
     )

@@ -2,8 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import Header from '../components/layout/Header'
 import AIWidget from '../components/dashboard/AIWidget'
+
+const CandlestickChart = dynamic(
+    () => import('../components/charts/CandlestickChart').then(mod => mod.CandlestickChart),
+    { ssr: false }
+)
 
 interface Balance {
     asset: string
@@ -237,8 +243,8 @@ export default function Home() {
                                 ))}
                             </div>
                         </div>
-                        <div className="bg-black/30 rounded-lg h-[400px] flex items-center justify-center border border-white/5">
-                            <p className="text-gray-500">📊 Gráfico Profesional TradingView</p>
+                        <div className="bg-black/40 rounded-lg min-h-[400px] h-[400px] border border-white/5 overflow-hidden">
+                            <CandlestickChart symbol="BTCUSDT" />
                         </div>
                     </div>
 
