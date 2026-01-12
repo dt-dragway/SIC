@@ -49,25 +49,35 @@ export function useAuth() {
     };
 
     const login = async (email: string, password: string) => {
-        const formData = new URLSearchParams();
-        formData.append('username', email);
-        formData.append('password', password);
+        try {
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
 
-        const res = await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
-        });
+            const res = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
 
-        const data = await res.json();
+            // Si falla la red o el backend devuelve 500 sin JSON válido
+            let data;
+            try {
+                data = await res.json();
+            } catch (e) {
+                return { success: false, error: 'Error de comunicación con el servidor' };
+            }
 
-        if (res.ok) {
-            // El backend ya estableció la cookie HttpOnly
-            // Solo necesitamos recargar el estado del usuario
-            await checkSession();
-            return { success: true };
-        } else {
-            return { success: false, error: data.detail || 'Error al iniciar sesión' };
+            if (res.ok) {
+                // El backend ya estableció la cookie HttpOnly
+                await checkSession();
+                return { success: true };
+            } else {
+                return { success: false, error: data.detail || 'Error al iniciar sesión' };
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            return { success: false, error: 'No se pudo conectar con el servidor' };
         }
     };
 
