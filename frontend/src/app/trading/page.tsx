@@ -34,25 +34,63 @@ interface OrderForm {
     price: string
 }
 
+import { useRouter } from 'next/navigation'
+import { useAuth } from '../../hooks/useAuth'
+import LoadingSpinner from '../../components/ui/LoadingSpinner' // Corregir path si es necesario, parece ok
+import { useWallet } from '../../context/WalletContext'
+
 export default function TradingPage() {
+    const router = useRouter()
+    const { isAuthenticated, loading: authLoading } = useAuth()
+    const { mode, setMode, balances } = useWallet() // Global Context
+
     const [selectedSymbol, setSelectedSymbol] = useState(SYMBOLS[0])
-    const [mode, setMode] = useState<'practice' | 'real'>('practice')
     const [currentPrice, setCurrentPrice] = useState(45000)
     const [change24h, setChange24h] = useState(2.5)
     const [order, setOrder] = useState<OrderForm>({ side: 'BUY', quantity: '', price: '' })
-    const [balance, setBalance] = useState({ USDT: 100, BTC: 0 })
+
+    // Derived state from global balances
+    const usdtBalance = balances.find(b => b.asset === 'USDT')?.total || 0;
+
+    // Auth Guard
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login')
+        }
+    }, [authLoading, isAuthenticated, router])
+
+    if (authLoading) return <LoadingSpinner />
+    if (!isAuthenticated) return null
+
+    // ... (rest of the fetching logic for price stays same)
 
     useEffect(() => {
-        const prices: Record<string, number> = {
-            BTCUSDT: 45000,
-            ETHUSDT: 2500,
-            BNBUSDT: 320,
-            SOLUSDT: 95,
-            XRPUSDT: 0.55,
-            ADAUSDT: 0.45,
-        }
-        setCurrentPrice(prices[selectedSymbol.symbol] || 0)
-    }, [selectedSymbol])
+        const fetchMarketData = async () => {
+            // ... existing code ...
+            try {
+                // 1. Precio Actual
+                const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${selectedSymbol.symbol}`);
+                const priceData = await priceRes.json();
+                if (priceData.price) {
+                    setCurrentPrice(parseFloat(priceData.price));
+                }
+
+                // 2. Cambodia 24h
+                const statsRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${selectedSymbol.symbol}`);
+                const statsData = await statsRes.json();
+                if (statsData.priceChangePercent) {
+                    setChange24h(parseFloat(statsData.priceChangePercent));
+                }
+            } catch (error) {
+                console.error("Error fetching Binance data", error);
+            }
+        };
+
+        fetchMarketData();
+        const interval = setInterval(fetchMarketData, 5000);
+
+        return () => clearInterval(interval);
+    }, [selectedSymbol]);
 
     const handleOrder = () => {
         if (!order.quantity) {
@@ -63,7 +101,7 @@ export default function TradingPage() {
         const qty = parseFloat(order.quantity)
         const total = qty * currentPrice
 
-        if (order.side === 'BUY' && total > balance.USDT) {
+        if (order.side === 'BUY' && total > usdtBalance) {
             toast.error('Saldo USDT insuficiente para esta operación')
             return
         }
@@ -87,6 +125,7 @@ export default function TradingPage() {
                     <div className="flex items-center gap-6">
                         {/* Symbol Selector */}
                         <div className="relative group">
+                            {/* ... selector code ... */}
                             <select
                                 value={selectedSymbol.symbol}
                                 onChange={(e) => setSelectedSymbol(SYMBOLS.find(s => s.symbol === e.target.value) || SYMBOLS[0])}
@@ -179,7 +218,7 @@ export default function TradingPage() {
                         <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/5 flex items-center justify-between">
                             <div>
                                 <p className="text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Balance Disponible</p>
-                                <p className="text-xl font-bold text-emerald-400 tracking-tight">${balance.USDT.toFixed(2)}</p>
+                                <p className="text-xl font-bold text-emerald-400 tracking-tight">${usdtBalance.toFixed(2)}</p>
                             </div>
                             <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                 <Wallet className="h-5 w-5 text-emerald-400" />

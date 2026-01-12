@@ -1,10 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import Header from '../components/layout/Header'
 import AIWidget from '../components/dashboard/AIWidget'
+import { useAuth } from '../hooks/useAuth'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
+import { useWallet } from '../context/WalletContext' // Import Context
 
 const CandlestickChart = dynamic(
     () => import('../components/charts/CandlestickChart').then(mod => mod.CandlestickChart),
@@ -28,91 +32,50 @@ interface Signal {
 }
 
 export default function Home() {
-    const [mode, setMode] = useState<'practice' | 'real'>('practice')
-    const [wallet, setWallet] = useState<{ total_usd: number; balances: Balance[] } | null>(null)
+    const router = useRouter()
+    const { isAuthenticated, loading: authLoading } = useAuth()
+    const { mode, setMode, totalUsd, balances, isLoading: walletLoading } = useWallet() // Use Global Wallet
+
     const [signals, setSignals] = useState<Signal[]>([])
-    const [loading, setLoading] = useState(true)
+    const [dataLoading, setDataLoading] = useState(true)
 
-    // Fetch Real Data (or Mock for Practice)
+    // Auth Guard
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-
-            if (mode === 'practice') {
-                // Datos simulados para Laboratorio (Sandbox)
-                setWallet({
-                    total_usd: 100.00,
-                    balances: [
-                        { asset: 'USDT', total: 100.00, usd_value: 100.00 }
-                    ]
-                });
-
-                // Señales simuladas para práctica
-                setSignals([
-                    {
-                        symbol: 'BTCUSDT',
-                        type: 'LONG',
-                        confidence: 87.5,
-                        entry_price: 45000,
-                        stop_loss: 44200,
-                        take_profit: 47500,
-                        strength: 'STRONG'
-                    }
-                ]);
-                setLoading(false);
-            } else {
-                // MODO REAL: Conectar al Backend
-                try {
-                    const token = localStorage.getItem('token');
-
-                    if (!token) {
-                        console.warn("No token found for Real Mode");
-                        // Redirigir al login si no hay token en modo real
-                        setLoading(false);
-                        window.location.href = '/login';
-                        return;
-                    }
-
-                    const headers = { 'Authorization': `Bearer ${token}` };
-
-                    // 1. Fetch Wallet
-                    const walletRes = await fetch('/api/v1/wallet/', { headers });
-                    if (walletRes.ok) {
-                        const walletData = await walletRes.json();
-                        setWallet(walletData);
-                    } else {
-                        console.error("Error fetching wallet:", walletRes.status);
-                    }
-
-                    // 2. Fetch Signals
-                    const signalsRes = await fetch('/api/v1/signals/scan', { headers });
-                    if (signalsRes.ok) {
-                        const signalsData = await signalsRes.json();
-                        setSignals(signalsData.signals || []);
-                    } else {
-                        console.error("Error fetching signals:", signalsRes.status);
-                    }
-
-                } catch (error) {
-                    console.error("Error connecting to backend:", error);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        };
-
-        fetchData();
-
-        // Polling cada 30s en modo real
-        let interval: NodeJS.Timeout;
-        if (mode === 'real') {
-            interval = setInterval(fetchData, 30000);
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login')
         }
+    }, [authLoading, isAuthenticated, router])
 
-        return () => {
-            if (interval) clearInterval(interval);
+    // Fetch Signals Only (Wallet is in Context)
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const fetchSignals = async () => {
+            setDataLoading(true);
+            try {
+                const signalsRes = await fetch('/api/v1/signals/scan');
+                if (signalsRes.ok) {
+                    const signalsData = await signalsRes.json();
+                    setSignals(signalsData.signals || []);
+                }
+            } catch (error) {
+                console.error("Error fetching signals:", error);
+            }
+            setDataLoading(false);
         };
-    }, [mode]);
+
+        fetchSignals();
+        const interval = setInterval(fetchSignals, 30000);
+        return () => clearInterval(interval);
+    }, [isAuthenticated]);
+
+    if (authLoading || (walletLoading && isAuthenticated)) {
+        return <LoadingSpinner />
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
 
     return (
         <main className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
@@ -166,7 +129,7 @@ export default function Home() {
                             <p className="text-slate-400 text-sm font-medium">Balance Total</p>
                         </div>
                         <p className="text-3xl font-bold text-white tracking-tight">
-                            ${wallet?.total_usd.toFixed(2) || '0.00'}
+                            ${totalUsd.toFixed(2)}
                         </p>
                         <div className="mt-3 flex items-center gap-2">
                             <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${mode === 'practice' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-cyan-500/10 text-cyan-400'
