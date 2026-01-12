@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import Header from '@/components/layout/Header';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function ProfilePage() {
     const { user, loading } = useAuth();
@@ -49,8 +49,7 @@ export default function ProfilePage() {
     if (loading) return <div className="min-h-screen bg-[#0B0E14] text-white flex items-center justify-center">Cargando...</div>;
 
     return (
-        <div className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
-            <Header />
+        <DashboardLayout>
 
             <main className="max-w-4xl mx-auto p-6 py-12">
                 <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
@@ -133,6 +132,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </main>
-        </div>
+        </DashboardLayout>
     );
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '../../components/layout/Header'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import {
     Target,
     Activity,
@@ -64,8 +64,7 @@ export default function SignalsPage() {
     ]
 
     return (
-        <main className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
-            <Header />
+        <DashboardLayout>
 
             <div className="max-w-7xl mx-auto p-6">
                 <div className="flex justify-between items-center mb-8">
@@ -207,6 +206,6 @@ export default function SignalsPage() {
                     ))}
                 </div>
             </div>
-        </main>
+        </DashboardLayout>
     )
 }

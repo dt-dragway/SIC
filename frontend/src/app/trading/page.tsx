@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Header from '../../components/layout/Header'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import {
     TrendingUp,
     TrendingDown,
@@ -52,19 +52,10 @@ export default function TradingPage() {
     // Derived state from global balances
     const usdtBalance = balances.find(b => b.asset === 'USDT')?.total || 0;
 
-    // Auth Guard
+    // Market Data Fetching
     useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push('/login')
-        }
-    }, [authLoading, isAuthenticated, router])
+        if (authLoading || !isAuthenticated) return;
 
-    if (authLoading) return <LoadingSpinner />
-    if (!isAuthenticated) return null
-
-    // ... (rest of the fetching logic for price stays same)
-
-    useEffect(() => {
         const fetchMarketData = async () => {
             // ... existing code ...
             try {
@@ -90,7 +81,17 @@ export default function TradingPage() {
         const interval = setInterval(fetchMarketData, 5000);
 
         return () => clearInterval(interval);
-    }, [selectedSymbol]);
+    }, [selectedSymbol, authLoading, isAuthenticated]);
+
+    // Auth Guard
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            router.push('/login')
+        }
+    }, [authLoading, isAuthenticated, router])
+
+    if (authLoading) return <LoadingSpinner />
+    if (!isAuthenticated) return null
 
     const handleOrder = () => {
         if (!order.quantity) {
@@ -116,10 +117,9 @@ export default function TradingPage() {
     }
 
     return (
-        <main className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
-            <Header />
 
-            <div className="max-w-7xl mx-auto p-6">
+        <DashboardLayout>
+            <div className="max-w-7xl mx-auto space-y-6">
                 {/* Top Bar: Price & Selector */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
                     <div className="flex items-center gap-6">
@@ -304,6 +304,6 @@ export default function TradingPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </DashboardLayout>
     )
 }

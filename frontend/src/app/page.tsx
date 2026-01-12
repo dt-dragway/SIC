@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import Header from '../components/layout/Header'
+import DashboardLayout from '../components/layout/DashboardLayout'
 import AIWidget from '../components/dashboard/AIWidget'
 import { useAuth } from '../hooks/useAuth'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -78,9 +78,8 @@ export default function Home() {
     }
 
     return (
-        <main className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
-            {/* Header Profesional Reutilizable */}
-            <Header />
+        <DashboardLayout>
+            {/* Header Profesional Reutilizable eliminado por DashboardLayout */}
 
             {/* Mode Toggle Floating */}
             <div className="max-w-7xl mx-auto px-6 py-6 flex justify-end">
@@ -290,6 +289,6 @@ export default function Home() {
                     </Link>
                 </div>
             </div>
-        </main>
+        </DashboardLayout>
     )
 }

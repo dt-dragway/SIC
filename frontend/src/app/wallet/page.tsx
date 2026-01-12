@@ -1,158 +1,208 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import { useAuth } from '@/hooks/useAuth';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { RefreshCw, Eye, EyeOff, Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, CreditCard } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Balance {
-    asset: string
-    free: number
-    locked: number
-    total: number
-    usd_value: number
+    asset: string;
+    free: number;
+    locked: number;
+    total: number;
+    usd_value: number;
+}
+
+interface WalletData {
+    total_usd: number;
+    balances: Balance[];
+    connected: boolean;
 }
 
 export default function WalletPage() {
-    const [mode, setMode] = useState<'practice' | 'real'>('practice')
+    const { isAuthenticated, loading: authLoading } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<WalletData | null>(null);
+    const [hideBalance, setHideBalance] = useState(false);
+    const [mode, setMode] = useState<'real' | 'practice'>('real'); // Default to real per user request
 
-    // Demo balances
-    const practiceBalances: Balance[] = [
-        { asset: 'USDT', free: 85.50, locked: 0, total: 85.50, usd_value: 85.50 },
-        { asset: 'BTC', free: 0.00032, locked: 0, total: 0.00032, usd_value: 14.50 },
-    ]
+    const fetchWallet = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/v1/wallet/');
+            if (res.ok) {
+                const walletData = await res.json();
+                setData(walletData);
+            } else {
+                toast.error('Error al cargar la billetera');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Error de conexión');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const realBalances: Balance[] = [
-        { asset: 'USDT', free: 500.00, locked: 0, total: 500.00, usd_value: 500.00 },
-        { asset: 'BTC', free: 0.015, locked: 0, total: 0.015, usd_value: 675.00 },
-        { asset: 'ETH', free: 0.25, locked: 0, total: 0.25, usd_value: 625.00 },
-        { asset: 'BNB', free: 2.5, locked: 0, total: 2.5, usd_value: 800.00 },
-    ]
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchWallet();
+        }
+    }, [isAuthenticated]);
 
-    const balances = mode === 'practice' ? practiceBalances : realBalances
-    const totalUsd = balances.reduce((sum, b) => sum + b.usd_value, 0)
+    if (authLoading || (!data && loading)) return <LoadingSpinner />;
 
     return (
-        <main className="min-h-screen bg-sic-dark">
-            {/* Header */}
-            <header className="border-b border-sic-border px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <Link href="/" className="text-2xl">🪙</Link>
-                        <h1 className="text-xl font-bold">💰 Wallet</h1>
+        <DashboardLayout>
+            <div className="max-w-7xl mx-auto space-y-8">
+
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                            Billetera
+                        </h1>
+                        <p className="text-slate-400 text-sm mt-1">Gestión de activos y balances en tiempo real</p>
                     </div>
 
-                    {/* Mode Toggle */}
-                    <div className="glass-card flex p-1">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
                         <button
                             onClick={() => setMode('practice')}
-                            className={`px-4 py-2 rounded-lg transition-all ${mode === 'practice'
-                                    ? 'bg-sic-green text-black font-semibold'
-                                    : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'practice'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : 'text-slate-400 hover:text-white'}`}
                         >
-                            🎮 Práctica
+                            Simulado
                         </button>
                         <button
                             onClick={() => setMode('real')}
-                            className={`px-4 py-2 rounded-lg transition-all ${mode === 'real'
-                                    ? 'bg-sic-red text-white font-semibold'
-                                    : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'real'
+                                ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                                : 'text-slate-400 hover:text-white'}`}
                         >
-                            ⚔️ Real
+                            Real (Binance)
                         </button>
                     </div>
                 </div>
-            </header>
 
-            <div className="max-w-7xl mx-auto p-6">
-                {/* Total Balance */}
-                <div className="glass-card p-8 mb-6 text-center">
-                    <p className="text-gray-400 mb-2">
-                        {mode === 'practice' ? '🎮 Balance Virtual' : '💰 Balance Real (Binance)'}
-                    </p>
-                    <p className="text-5xl font-bold text-white mb-2">
-                        ${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </p>
-                    {mode === 'practice' && (
-                        <p className="text-sm text-gray-500">Iniciaste con $100.00</p>
-                    )}
-
-                    {mode === 'practice' && (
-                        <div className="mt-4">
-                            <button className="btn-secondary">
-                                🔄 Resetear a $100
-                            </button>
+                {/* Total Balance Card */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="md:col-span-2 glass-card p-8 rounded-3xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Wallet size={120} />
                         </div>
-                    )}
-                </div>
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-2 text-slate-400">
+                                <span className="text-sm font-medium uppercase tracking-wider">Balance Total Estimado</span>
+                                <button onClick={() => setHideBalance(!hideBalance)} className="hover:text-white transition-colors">
+                                    {hideBalance ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                            </div>
 
-                {/* Balances Table */}
-                <div className="glass-card overflow-hidden">
-                    <div className="p-4 border-b border-sic-border">
-                        <h2 className="text-lg font-semibold">Activos</h2>
+                            <div className="text-5xl font-bold text-white font-mono tracking-tight mb-6">
+                                {hideBalance ? '••••••' : `$${(data?.total_usd ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                                <span className="text-lg text-slate-500 ml-2 font-sans font-normal">USD</span>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button className="btn-primary flex items-center gap-2">
+                                    <CreditCard size={18} />
+                                    Depositar
+                                </button>
+                                <button className="btn-secondary flex items-center gap-2">
+                                    <ArrowUpRight size={18} />
+                                    Retirar
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <table className="w-full">
-                        <thead className="bg-sic-dark">
-                            <tr>
-                                <th className="text-left px-6 py-4 text-gray-400 font-medium">Activo</th>
-                                <th className="text-right px-6 py-4 text-gray-400 font-medium">Disponible</th>
-                                <th className="text-right px-6 py-4 text-gray-400 font-medium">En Órdenes</th>
-                                <th className="text-right px-6 py-4 text-gray-400 font-medium">Total</th>
-                                <th className="text-right px-6 py-4 text-gray-400 font-medium">Valor USD</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {balances.map((balance, i) => (
-                                <tr key={i} className="border-t border-sic-border hover:bg-sic-dark/50">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">
-                                                {balance.asset === 'BTC' ? '₿' :
-                                                    balance.asset === 'ETH' ? 'Ξ' :
-                                                        balance.asset === 'BNB' ? '⬡' :
-                                                            balance.asset === 'USDT' ? '💵' : '🪙'}
-                                            </span>
-                                            <span className="font-medium">{balance.asset}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono">
-                                        {balance.free.toFixed(balance.asset === 'USDT' ? 2 : 8)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono text-gray-400">
-                                        {balance.locked.toFixed(balance.asset === 'USDT' ? 2 : 8)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono font-medium">
-                                        {balance.total.toFixed(balance.asset === 'USDT' ? 2 : 8)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-mono text-sic-green font-medium">
-                                        ${balance.usd_value.toFixed(2)}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+
+                    {/* Stats Card */}
+                    <div className="glass-card p-8 rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-4">Rendimiento (24h)</h3>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-3xl font-bold text-emerald-400">+2.45%</span>
+                                <ArrowUpRight className="text-emerald-400" size={20} />
+                            </div>
+                            <p className="text-slate-500 text-sm mt-1">+$124.50 USD</p>
+                        </div>
+
+                        <div className="mt-6 pt-6 border-t border-white/5">
+                            <div className="flex justify-between items-center text-sm text-slate-400 mb-2">
+                                <span>Activos Totales</span>
+                                <span className="text-white font-medium">{data?.balances.length || 0}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm text-slate-400">
+                                <span>Estado API</span>
+                                <span className={`flex items-center gap-2 font-medium ${data?.connected ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    <span className={`w-2 h-2 rounded-full ${data?.connected ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
+                                    {data?.connected ? 'Conectado' : 'Desconectado'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                    <Link href="/trading" className="glass-card p-4 text-center hover:border-sic-green transition-all">
-                        <span className="text-2xl">📈</span>
-                        <p className="mt-2 font-medium">Trading</p>
-                    </Link>
-                    <Link href="/p2p" className="glass-card p-4 text-center hover:border-sic-green transition-all">
-                        <span className="text-2xl">💱</span>
-                        <p className="mt-2 font-medium">P2P VES</p>
-                    </Link>
-                    <Link href="/signals" className="glass-card p-4 text-center hover:border-sic-green transition-all">
-                        <span className="text-2xl">🎯</span>
-                        <p className="mt-2 font-medium">Señales</p>
-                    </Link>
-                    <button className="glass-card p-4 text-center hover:border-sic-green transition-all">
-                        <span className="text-2xl">📊</span>
-                        <p className="mt-2 font-medium">Historial</p>
-                    </button>
+                {/* Assets Table */}
+                <div className="glass-card overflow-hidden rounded-3xl border border-white/5">
+                    <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                        <h2 className="font-bold text-lg text-white">Mis Activos</h2>
+                        <button onClick={fetchWallet} disabled={loading} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
+                            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                        </button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-[#0f1219]">
+                                <tr>
+                                    <th className="text-left py-4 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Activo</th>
+                                    <th className="text-right py-4 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Balance Total</th>
+                                    <th className="text-right py-4 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Disponible</th>
+                                    <th className="text-right py-4 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">En Órdenes</th>
+                                    <th className="text-right py-4 px-6 text-xs font-medium text-slate-500 uppercase tracking-wider">Valor (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {data?.balances.map((asset) => (
+                                    <tr key={asset.asset} className="hover:bg-white/[0.02] transition-colors group">
+                                        <td className="py-4 px-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs ring-1 ring-indigo-500/30">
+                                                    {asset.asset[0]}
+                                                </div>
+                                                <span className="font-bold text-white">{asset.asset}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-6 text-right font-mono text-slate-300">
+                                            {hideBalance ? '••••' : asset.total.toLocaleString()}
+                                        </td>
+                                        <td className="py-4 px-6 text-right font-mono text-slate-400">
+                                            {hideBalance ? '••••' : asset.free.toLocaleString()}
+                                        </td>
+                                        <td className="py-4 px-6 text-right font-mono text-slate-500">
+                                            {hideBalance ? '••••' : asset.locked.toLocaleString()}
+                                        </td>
+                                        <td className="py-4 px-6 text-right font-mono font-medium text-emerald-400">
+                                            {hideBalance ? '••••' : `$${asset.usd_value?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {data?.balances.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="py-12 text-center text-slate-500">
+                                            No tienes activos con balance positivo.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </main>
-    )
+        </DashboardLayout>
+    );
 }

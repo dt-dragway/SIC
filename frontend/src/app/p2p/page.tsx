@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '../../components/layout/Header'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import P2POpportunities from '../../components/dashboard/P2POpportunities'
 import {
     Calculator,
@@ -49,8 +49,7 @@ export default function P2PPage() {
     const spread = ((bestSell - bestBuy) / bestBuy * 100).toFixed(2)
 
     return (
-        <main className="min-h-screen bg-[#0B0E14] text-slate-100 font-sans selection:bg-cyan-500/30">
-            <Header />
+        <DashboardLayout>
 
             <div className="max-w-7xl mx-auto p-6">
                 <div className="flex items-center gap-3 mb-8">
@@ -228,6 +227,6 @@ export default function P2PPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </DashboardLayout>
     )
 }
