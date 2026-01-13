@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.auth import oauth2_scheme, verify_token
 from app.infrastructure.database.session import get_db
-from app.infrastructure.database.models import WhaleAlert
+from app.infrastructure.database.institutional_models import WhaleAlert
 
 
 router = APIRouter()

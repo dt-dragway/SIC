@@ -15,7 +15,11 @@ import {
     Brain,
     BookOpen,
     User,
-    Monitor
+    Monitor,
+    BarChart3,
+    Droplet,
+    Bot,
+    Scale
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +35,10 @@ export default function Sidebar() {
         { href: '/', label: 'Inicio', icon: LayoutDashboard },
         { href: '/wallet', label: 'Billetera', icon: Wallet },
         { href: '/terminal', label: 'Terminal Pro', icon: Monitor },
+        { href: '/derivatives', label: 'Derivatives', icon: BarChart3 },
+        { href: '/defi', label: 'DeFi Tools', icon: Droplet },
+        { href: '/automation', label: 'Backtesting', icon: Bot },
+        { href: '/risk', label: 'Risk Mgmt', icon: Scale },
         { href: '/trading', label: 'Trading', icon: TrendingUp },
         { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },
         { href: '/signals', label: 'Señales IA', icon: Target },

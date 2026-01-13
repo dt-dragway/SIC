@@ -15,6 +15,10 @@ from app.api.v1.signals import router as signals_router
 from app.api.v1.ml import router as ml_router
 from app.api.v1.knowledge import router as knowledge_router
 from app.api.v1.onchain import router as onchain_router
+from app.api.v1.derivatives import router as derivatives_router
+from app.api.v1.defi import router as defi_router
+from app.api.v1.automation import router as automation_router
+from app.api.v1.risk import router as risk_router
 
 router = APIRouter()
 
@@ -28,5 +32,9 @@ router.include_router(signals_router, prefix="/signals", tags=["🎯 Señales IA
 router.include_router(ml_router, prefix="/ml", tags=["🧠 Machine Learning"])
 router.include_router(knowledge_router, prefix="/knowledge", tags=["📚 Base Conocimientos"])
 router.include_router(onchain_router, prefix="/onchain", tags=["🐋 On-Chain Analysis"])
+router.include_router(derivatives_router, prefix="/derivatives", tags=["📊 Derivatives & Delta Neutral"])
+router.include_router(defi_router, prefix="/defi", tags=["🔷 DeFi Advanced"])
+router.include_router(automation_router, prefix="/automation", tags=["🤖 Automation & Backtesting"])
+router.include_router(risk_router, prefix="/risk", tags=["⚖️ Risk Management"])
 
 
