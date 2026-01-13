@@ -241,6 +241,36 @@ class BinanceClient:
         
         return total_usd
 
+    def get_top_long_short_ratio(self, symbol: str, period: str = "5m") -> Optional[Dict]:
+        """
+        Obtener Ratio Long/Short de Top Traders (Binance Futures).
+        
+        Args:
+            symbol: Par (ej: BTCUSDT)
+            period: "5m", "15m", "1h", "4h", "1d"
+            
+        Returns:
+            Dict con longAccount, shortAccount, longShortRatio
+        """
+        if not self.client:
+            return None
+            
+        try:
+            # Nota: Esto usa endpoint público de Futures
+            data = self.client.futures_top_longshort_ratio(symbol=symbol.upper(), period=period, limit=1)
+            if data and len(data) > 0:
+                latest = data[0]
+                return {
+                    "long_ratio": float(latest["longAccount"]),
+                    "short_ratio": float(latest["shortAccount"]),
+                    "ratio": float(latest["longShortRatio"]),
+                    "timestamp": datetime.fromtimestamp(latest["timestamp"] / 1000)
+                }
+            return None
+        except Exception as e:
+            logger.warning(f"No se pudo obtener Long/Short ratio para {symbol}: {e}")
+            return None
+
 
 # Singleton para reusar la conexión
 _binance_client: Optional[BinanceClient] = None

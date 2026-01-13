@@ -31,19 +31,29 @@ export default function WalletPage() {
                     {/* Mode Switcher */}
                     <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
                         <button
-                            onClick={() => refreshWallet() && (mode !== 'practice' && (document.querySelector('header button:first-child') as HTMLButtonElement)?.click())}
+                            onClick={() => {
+                                refreshWallet();
+                                if (mode !== 'practice') {
+                                    (document.querySelector('header button:first-child') as HTMLButtonElement)?.click();
+                                }
+                            }}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'practice'
-                                    ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             Modo Práctica
                         </button>
                         <button
-                            onClick={() => refreshWallet() && (mode !== 'real' && (document.querySelector('header button:last-child') as HTMLButtonElement)?.click())}
+                            onClick={() => {
+                                refreshWallet();
+                                if (mode !== 'real') {
+                                    (document.querySelector('header button:last-child') as HTMLButtonElement)?.click();
+                                }
+                            }}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'real'
-                                    ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             Modo Real

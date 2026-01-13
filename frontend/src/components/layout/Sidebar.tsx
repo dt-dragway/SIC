@@ -2,23 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-    LayoutDashboard, 
-    Wallet, 
-    TrendingUp, 
-    ArrowRightLeft, 
-    Target, 
-    History, 
+import {
+    LayoutDashboard,
+    Wallet,
+    TrendingUp,
+    ArrowRightLeft,
+    Target,
+    History,
     LogOut,
     Menu,
-    X
+    X,
+    Brain,
+    BookOpen,
+    User
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useAIContext } from '@/context/AIContext';
 
 export default function Sidebar() {
     const pathname = usePathname();
     const { logout } = useAuth();
+    const { status, toggleBrain } = useAIContext();
     const [isOpen, setIsOpen] = useState(false);
 
     const links = [
@@ -27,6 +32,8 @@ export default function Sidebar() {
         { href: '/trading', label: 'Trading', icon: TrendingUp },
         { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },
         { href: '/signals', label: 'Señales IA', icon: Target },
+        { href: '/knowledge', label: 'Biblioteca', icon: BookOpen },
+        { href: '/profile', label: 'Mi Perfil', icon: User },
         { href: '/history', label: 'Historial', icon: History },
     ];
 
@@ -35,7 +42,7 @@ export default function Sidebar() {
     return (
         <>
             {/* Mobile Toggle */}
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-sic-card rounded-lg border border-white/10 text-white"
             >
@@ -50,7 +57,7 @@ export default function Sidebar() {
             `}>
                 <div className="flex flex-col h-full p-6">
                     {/* Brand */}
-                    <div className="flex items-center gap-3 mb-10 px-2">
+                    <div className="flex items-center gap-3 mb-6 px-2">
                         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
                             <span className="text-white font-bold text-xl">S</span>
                         </div>
@@ -60,21 +67,39 @@ export default function Sidebar() {
                         </div>
                     </div>
 
+                    {/* Neural Engine Global Status */}
+                    <div
+                        onClick={toggleBrain}
+                        className="mx-2 mb-6 px-3 py-2 rounded-lg bg-gradient-to-r from-violet-500/10 to-indigo-500/10 border border-violet-500/20 flex items-center gap-3 cursor-pointer hover:bg-violet-500/20 transition-all group"
+                    >
+                        <div className="relative">
+                            <Brain size={16} className="text-violet-400" />
+                            <span className="absolute -top-0.5 -right-0.5 flex h-1.5 w-1.5">
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status?.available ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
+                                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${status?.available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                            </span>
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-[10px] text-violet-300 font-bold uppercase tracking-wider">Neural Engine</p>
+                            <p className="text-[10px] text-slate-400 font-mono truncate">{status?.model || 'Desconectado'}</p>
+                        </div>
+                    </div>
+
                     {/* Navigation */}
                     <nav className="flex-1 space-y-2">
                         {links.map((link) => {
                             const Icon = link.icon;
                             const active = isActive(link.href);
-                            
+
                             return (
-                                <Link 
-                                    key={link.href} 
+                                <Link
+                                    key={link.href}
                                     href={link.href}
                                     onClick={() => setIsOpen(false)}
                                     className={`
                                         flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                                        ${active 
-                                            ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/20' 
+                                        ${active
+                                            ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/20'
                                             : 'text-slate-400 hover:text-white hover:bg-white/5'}
                                     `}
                                 >
@@ -86,7 +111,7 @@ export default function Sidebar() {
                     </nav>
 
                     {/* Logout */}
-                    <button 
+                    <button
                         onClick={() => logout()}
                         className="flex items-center gap-3 px-4 py-3 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-colors mt-auto"
                     >
@@ -98,7 +123,7 @@ export default function Sidebar() {
 
             {/* Overlay for mobile */}
             {isOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
                     onClick={() => setIsOpen(false)}
                 />

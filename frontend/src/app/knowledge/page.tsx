@@ -103,19 +103,19 @@ export default function KnowledgePage() {
                             <span>📥</span> Alimentar al Agente
                         </h2>
                         <p className="text-gray-400 text-sm mb-6">
-                            Sube libros en PDF, DOCX o TXT. El agente leerá, procesará y aprenderá todo el contenido para usarlo en sus análisis.
+                            Sube libros (PDF), documentos o imágenes de tus bitácoras de trading. El agente procesará todo para usarlo en sus análisis.
                         </p>
 
                         <div className="mb-4">
                             <label className="text-sm text-gray-400 mb-2 block">Categoría del Libro</label>
                             <div className="flex gap-2 flex-wrap">
-                                {['trading', 'finanzas', 'psicologia', 'analisis_tecnico', 'cripto'].map(cat => (
+                                {['trading', 'finanzas', 'psicologia', 'analisis_tecnico', 'bitacoras', 'cripto'].map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => setSelectedCategory(cat)}
                                         className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${selectedCategory === cat
-                                                ? 'bg-cyan-500 text-black'
-                                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                            ? 'bg-cyan-500 text-black'
+                                            : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                             }`}
                                     >
                                         #{cat}
@@ -137,7 +137,7 @@ export default function KnowledgePage() {
                                 id="file-upload"
                                 className="hidden"
                                 onChange={handleChange}
-                                accept=".pdf,.docx,.txt,.md"
+                                accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg"
                             />
 
                             {uploading ? (

@@ -62,7 +62,7 @@ async def upload_book(
     verify_token(token)
     
     # Verificar extensión
-    allowed_extensions = [".pdf", ".docx", ".txt", ".md"]
+    allowed_extensions = [".pdf", ".docx", ".txt", ".md", ".png", ".jpg", ".jpeg"]
     file_ext = os.path.splitext(file.filename)[1].lower()
     
     if file_ext not in allowed_extensions:

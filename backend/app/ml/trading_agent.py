@@ -293,49 +293,43 @@ class TopTraderAnalyzer:
     
     def get_consensus(self, symbol: str) -> Optional[Dict]:
         """
-        Obtener consenso de top traders para un símbolo.
-        
-        Returns:
-            Señal si hay consenso, None si no hay
+        Obtener consenso REAL de Top Traders (Binance Futures).
         """
-        # Simular posiciones actuales de traders
-        positions = []
-        for trader in self.top_traders:
-            if symbol in trader["favorite_pairs"]:
-                # Simular: 60% probabilidad de tener posición
-                if random.random() < 0.6:
-                    pos = {
-                        "trader": trader["nickname"],
-                        "side": random.choice(["LONG", "SHORT"]),
-                        "confidence": trader["win_rate"] / 100
-                    }
-                    positions.append(pos)
-        
-        if len(positions) < 2:
+        try:
+            from app.infrastructure.binance.client import get_binance_client
+            client = get_binance_client()
+            
+            # Obtener ratio real de Binance
+            data = client.get_top_long_short_ratio(symbol)
+            
+            if not data:
+                return None
+            
+            long_ratio = data["long_ratio"]
+            short_ratio = data["short_ratio"]
+            
+            # Determinar consenso (> 55% es significativo en top traders)
+            if long_ratio > 0.55:
+                direction = "LONG"
+                consensus = long_ratio
+            elif short_ratio > 0.55:
+                direction = "SHORT"
+                consensus = short_ratio
+            else:
+                return None # Mercado indeciso
+                
+            return {
+                "direction": direction,
+                "consensus": consensus,
+                "traders": ["Binance Top Traders"], # Anonimizado por API
+                "avg_confidence": consensus,
+                "ratio_value": data["ratio"],
+                "source": "Binance Futures Real-Time"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analizando top traders: {e}")
             return None
-        
-        # Contar votos
-        longs = sum(1 for p in positions if p["side"] == "LONG")
-        shorts = len(positions) - longs
-        
-        # Necesitamos >= 66% de consenso
-        total = len(positions)
-        if longs / total >= 0.66:
-            return {
-                "direction": "LONG",
-                "consensus": longs / total,
-                "traders": [p["trader"] for p in positions if p["side"] == "LONG"],
-                "avg_confidence": sum(p["confidence"] for p in positions if p["side"] == "LONG") / longs
-            }
-        elif shorts / total >= 0.66:
-            return {
-                "direction": "SHORT",
-                "consensus": shorts / total,
-                "traders": [p["trader"] for p in positions if p["side"] == "SHORT"],
-                "avg_confidence": sum(p["confidence"] for p in positions if p["side"] == "SHORT") / shorts
-            }
-        
-        return None
 
 
 # === Learning Engine ===

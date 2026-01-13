@@ -79,6 +79,8 @@ class DocumentProcessor:
             return DocumentProcessor._extract_docx(file_path)
         elif extension in [".txt", ".md"]:
             return DocumentProcessor._extract_text(file_path)
+        elif extension in [".png", ".jpg", ".jpeg"]:
+            return f"[IMAGEN] Imagen de trading procesada: {Path(file_path).name}"
         else:
             raise ValueError(f"Formato no soportado: {extension}")
     

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAI } from '@/hooks/useAI';
+import { useAIContext } from '../../context/AIContext';
 import {
     Brain,
     Activity,
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
-    const { analysis, loading, status, analyzeMarket } = useAI();
+    const { analysis, loading, status, analyzeMarket } = useAIContext();
     const [elapsed, setElapsed] = useState(0);
 
     // Timer para "Live" feel
@@ -106,10 +106,10 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                         </div>
                         {/* Fake terminal log */}
                         <div className="mx-4 p-3 rounded-lg bg-black/50 border border-white/5 font-mono text-[10px] text-emerald-500/80 space-y-1">
-                            <p>> Loading market data...</p>
-                            <p>> Running LSTM prediction...</p>
-                            <p>> Validating XGBoost confidence...</p>
-                            <p className="animate-pulse">> Generating semantic reasoning...</p>
+                            <p>&gt; Loading market data...</p>
+                            <p>&gt; Running LSTM prediction...</p>
+                            <p>&gt; Validating XGBoost confidence...</p>
+                            <p className="animate-pulse">&gt; Generating semantic reasoning...</p>
                         </div>
                     </div>
                 )}
@@ -172,7 +172,7 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                                         analysis.xgboost_class === 'DOWN' ? <TrendingDown size={16} className="text-rose-400" /> :
                                             <Minus size={16} className="text-slate-400" />}
                                     <span className={`text-sm font-bold ${analysis.xgboost_class === 'UP' ? 'text-emerald-400' :
-                                            analysis.xgboost_class === 'DOWN' ? 'text-rose-400' : 'text-slate-400'
+                                        analysis.xgboost_class === 'DOWN' ? 'text-rose-400' : 'text-slate-400'
                                         }`}>
                                         {analysis.xgboost_class}
                                     </span>
