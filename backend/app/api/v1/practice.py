@@ -149,7 +149,7 @@ async def get_virtual_wallet(
         balances_list.append({
             "asset": asset,
             "amount": round(float(amount), 8),
-            "usd_value": round(usd_value, 2),
+            "usd_value": round(usd_value, 8),
             "avg_buy_price": 0 # Simplificado por ahora
         })
     
@@ -168,8 +168,8 @@ async def get_virtual_wallet(
     
     return {
         "initial_capital": initial,
-        "current_value": round(total_usd, 2),
-        "pnl": round(pnl, 2),
+        "current_value": round(total_usd, 8),
+        "pnl": round(pnl, 8),
         "pnl_percent": round(pnl_percent, 2),
         "balances": balances_list,
         "trades_count": len(trades),

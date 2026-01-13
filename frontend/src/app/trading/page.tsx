@@ -218,7 +218,7 @@ export default function TradingPage() {
                         <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/5 flex items-center justify-between">
                             <div>
                                 <p className="text-slate-400 text-xs uppercase tracking-wider font-medium mb-1">Balance Disponible</p>
-                                <p className="text-xl font-bold text-emerald-400 tracking-tight">${usdtBalance.toFixed(2)}</p>
+                                <p className="text-xl font-bold text-emerald-400 tracking-tight">${usdtBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}</p>
                             </div>
                             <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                 <Wallet className="h-5 w-5 text-emerald-400" />
@@ -279,7 +279,7 @@ export default function TradingPage() {
                                 <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Estimado</label>
                             </div>
                             <div className="w-full bg-gradient-to-r from-white/5 to-white/[0.02] border border-white/10 rounded-xl px-4 py-4 text-white font-bold font-mono text-xl flex justify-between items-center">
-                                <span>${(parseFloat(order.quantity || '0') * currentPrice).toFixed(2)}</span>
+                                <span>${(parseFloat(order.quantity || '0') * currentPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</span>
                                 <span className="text-sm text-slate-500 font-sans">USDT</span>
                             </div>
                         </div>

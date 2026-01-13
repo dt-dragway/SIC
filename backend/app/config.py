@@ -3,6 +3,7 @@ SIC Ultra - Configuración Central
 
 Todas las configuraciones del sistema usando Pydantic Settings.
 Las variables se cargan desde .env automáticamente.
+Last modification: Force reload for env update
 """
 
 from pydantic_settings import BaseSettings

@@ -62,36 +62,34 @@ export default function Header() {
                         {isAuthenticated ? (
                             <div className="flex items-center gap-4">
                                 {/* Mode Switcher & Balance */}
-                                <div className="hidden sm:flex items-center gap-3 bg-white/5 rounded-full px-1 py-1 border border-white/10">
+                                <div className="flex items-center gap-3 bg-white/5 rounded-full px-1 py-1 border border-white/10">
                                     <button
                                         onClick={() => setMode('practice')}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                                            mode === 'practice' 
-                                            ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50' 
-                                            : 'text-slate-400 hover:text-white'
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${mode === 'practice'
+                                                ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50'
+                                                : 'text-slate-400 hover:text-white'
+                                            }`}
                                     >
                                         Práctica
                                     </button>
                                     <button
                                         onClick={() => setMode('real')}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                                            mode === 'real' 
-                                            ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50' 
-                                            : 'text-slate-400 hover:text-white'
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${mode === 'real'
+                                                ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50'
+                                                : 'text-slate-400 hover:text-white'
+                                            }`}
                                     >
                                         Real
                                     </button>
                                 </div>
-                                
+
                                 {/* Total Balance Display */}
                                 <div className="flex flex-col items-end mr-2">
                                     <span className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Balance Total</span>
                                     <div className="flex items-center gap-2">
                                         <Wallet className="h-3 w-3 text-slate-400" />
                                         <span className={`text-sm font-bold tracking-tight ${isLoading ? 'animate-pulse text-slate-500' : 'text-white'}`}>
-                                            ${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            ${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                         </span>
                                     </div>
                                 </div>

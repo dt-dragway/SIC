@@ -23,11 +23,31 @@ export default function WalletPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                            Billetera <span className="text-lg font-light text-slate-500 ml-2">
-                                ({mode === 'practice' ? 'Modo Práctica' : 'Modo Real'})
-                            </span>
+                            Billetera
                         </h1>
                         <p className="text-slate-400 text-sm mt-1">Gestión de activos y balances en tiempo real</p>
+                    </div>
+
+                    {/* Mode Switcher */}
+                    <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
+                        <button
+                            onClick={() => refreshWallet() && (mode !== 'practice' && (document.querySelector('header button:first-child') as HTMLButtonElement)?.click())}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'practice'
+                                    ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            Modo Práctica
+                        </button>
+                        <button
+                            onClick={() => refreshWallet() && (mode !== 'real' && (document.querySelector('header button:last-child') as HTMLButtonElement)?.click())}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'real'
+                                    ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            Modo Real
+                        </button>
                     </div>
                 </div>
 
@@ -46,7 +66,7 @@ export default function WalletPage() {
                             </div>
 
                             <div className="text-5xl font-bold text-white font-mono tracking-tight mb-6">
-                                {hideBalance ? '••••••' : `$${(totalUsd ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                                {hideBalance ? '••••••' : `$${(totalUsd ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`}
                                 <span className="text-lg text-slate-500 ml-2 font-sans font-normal">USD</span>
                             </div>
 
@@ -122,16 +142,16 @@ export default function WalletPage() {
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono text-slate-300">
-                                            {hideBalance ? '••••' : asset.total.toLocaleString()}
+                                            {hideBalance ? '••••' : asset.total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono text-slate-400">
-                                            {hideBalance ? '••••' : (asset.free ?? asset.total).toLocaleString()}
+                                            {hideBalance ? '••••' : (asset.free ?? asset.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono text-slate-500">
-                                            {hideBalance ? '••••' : (asset.locked ?? 0).toLocaleString()}
+                                            {hideBalance ? '••••' : (asset.locked ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono font-medium text-emerald-400">
-                                            {hideBalance ? '••••' : `$${asset.usd_value?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                            {hideBalance ? '••••' : `$${asset.usd_value?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}`}
                                         </td>
                                     </tr>
                                 ))}

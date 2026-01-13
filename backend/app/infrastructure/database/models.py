@@ -100,6 +100,10 @@ class VirtualTrade(Base):
     
     symbol = Column(String(20), nullable=False)
     side = Column(String(10), nullable=False)
+    type = Column(String(20), default="MARKET") # MARKET, LIMIT
+    strategy = Column(String(50), default="MANUAL") # MANUAL, AI_SIGNAL
+    reason = Column(Text, nullable=True) # Contexto o razón del trade
+    
     quantity = Column(Float, nullable=False)
     price = Column(Float, nullable=False)
     pnl = Column(Float, default=0)

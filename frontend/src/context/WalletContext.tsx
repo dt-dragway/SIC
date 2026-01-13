@@ -48,14 +48,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setTotalUsd(0);
     };
 
-    const refreshWallet = async () => {
+    const refreshWallet = async (silent: boolean = false) => {
         if (!isAuthenticated || !token) {
             setBalances([]);
             setTotalUsd(0);
             return;
         }
 
-        setIsLoading(true);
+        if (!silent) setIsLoading(true);
 
         try {
             let endpoint = '';
@@ -73,7 +73,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
             if (res.ok) {
                 const data = await res.json();
-                
+
                 if (mode === 'practice') {
                     // Practice API returns { current_value, balances: [...] }
                     setTotalUsd(data.current_value || 0);
@@ -94,7 +94,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                     // Real API returns { balances: [{ asset, free, locked, total, usd_value }] }
                     const fetchedBalances: Balance[] = data.balances || [];
                     setBalances(fetchedBalances);
-                    
+
                     // Calculate total USD for real wallet
                     const total = fetchedBalances.reduce((acc, b) => acc + (b.usd_value || 0), 0);
                     setTotalUsd(total);
@@ -108,7 +108,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
             console.error("Error fetching wallet", error);
         } finally {
-            setIsLoading(false);
+            if (!silent) setIsLoading(false);
         }
     };
 
@@ -117,12 +117,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         refreshWallet();
     }, [mode, isAuthenticated, token]);
 
-    // Polling (every 10s for practice, 30s for real)
+    // Polling (every 10s for practice, 30s for real) - SILENT
     useEffect(() => {
         if (!isAuthenticated) return;
 
         const intervalTime = mode === 'practice' ? 10000 : 30000;
-        const interval = setInterval(refreshWallet, intervalTime);
+        const interval = setInterval(() => refreshWallet(true), intervalTime);
         return () => clearInterval(interval);
     }, [mode, isAuthenticated]);
 
@@ -133,7 +133,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             totalUsd,
             balances,
             setMode: handleSetMode,
-            refreshWallet
+            refreshWallet: () => refreshWallet(false)
         }}>
             {children}
         </WalletContext.Provider>

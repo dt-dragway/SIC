@@ -45,6 +45,15 @@ docker run -d \
 echo "⏳ Esperando a que la base de datos esté lista (5s)..."
 sleep 5
 
+# 5.5 Iniciar Ollama
+echo "🦙 Iniciando Ollama..."
+if ! pgrep -x "ollama" > /dev/null; then
+    nohup ollama serve > /dev/null 2>&1 &
+    echo "   -> Ollama iniciado en background"
+else
+    echo "   -> Ollama ya está corriendo"
+fi
+
 # 6. Iniciar Backend
 echo "🐍 Iniciando Backend (Uvicorn)..."
 echo "   -> http://localhost:8000"

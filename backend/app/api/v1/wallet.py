@@ -11,6 +11,7 @@ from datetime import datetime
 
 from app.api.v1.auth import oauth2_scheme, verify_token
 from app.infrastructure.binance.client import get_binance_client
+from app.config import settings
 
 
 router = APIRouter()
@@ -91,14 +92,14 @@ async def get_wallet(token: str = Depends(oauth2_scheme)):
             "free": b['free'],
             "locked": b['locked'],
             "total": b['total'],
-            "usd_value": round(usd_value, 2)
+            "usd_value": round(usd_value, 8)
         })
     
     # Ordenar por valor USD descendente
     balances.sort(key=lambda x: x['usd_value'] or 0, reverse=True)
     
     return {
-        "total_usd": round(total_usd, 2),
+        "total_usd": round(total_usd, 8),
         "balances": balances,
         "last_update": datetime.utcnow(),
         "connected": True
@@ -124,7 +125,7 @@ async def get_balance(asset: str, token: str = Depends(oauth2_scheme)):
     
     return {
         **balance,
-        "usd_value": round(usd_value, 2) if usd_value else None
+        "usd_value": round(usd_value, 8) if usd_value else None
     }
 
 
@@ -193,6 +194,6 @@ async def get_connection_status(token: str = Depends(oauth2_scheme)):
     
     return {
         "connected": client.is_connected(),
-        "testnet": True,  # TODO: Leer de settings
+        "testnet": settings.binance_testnet,
         "timestamp": datetime.utcnow()
     }

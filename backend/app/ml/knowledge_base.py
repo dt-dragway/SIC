@@ -345,6 +345,12 @@ class KnowledgeBase:
 
 # === Ollama con RAG ===
 
+from app.config import settings
+
+# ... imports ...
+
+# ... inside OllamaWithKnowledge ...
+
 class OllamaWithKnowledge:
     """
     Ollama potenciado con base de conocimientos.
@@ -355,8 +361,8 @@ class OllamaWithKnowledge:
     
     BASE_URL = "http://localhost:11434/api/generate"
     
-    def __init__(self, model: str = "llama3"):
-        self.model = model
+    def __init__(self, model: str = None):
+        self.model = model or settings.ollama_model
         self.knowledge = KnowledgeBase()
     
     @property

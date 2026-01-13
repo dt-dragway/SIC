@@ -100,7 +100,7 @@ export default function Home() {
                             <p className="text-slate-400 text-sm font-medium">Balance Total</p>
                         </div>
                         <p className="text-3xl font-bold text-white tracking-tight">
-                            ${totalUsd.toFixed(2)}
+                            ${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                         </p>
                         <div className="mt-3 flex items-center gap-2">
                             <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${mode === 'practice' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-cyan-500/10 text-cyan-400'
