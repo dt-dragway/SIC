@@ -12,6 +12,7 @@ interface AuthState {
     user: User | null;
     loading: boolean;
     isAuthenticated: boolean;
+    token: string | null;
 }
 
 export function useAuth() {
@@ -19,32 +20,43 @@ export function useAuth() {
     const [state, setState] = useState<AuthState>({
         user: null,
         loading: true,
-        isAuthenticated: false
+        isAuthenticated: false,
+        token: null
     });
 
     useEffect(() => {
-        // Al iniciar, intentar obtener el usuario usando la cookie de sesión
-        checkSession();
+        // Load token from storage on mount
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            checkSession(storedToken);
+        } else {
+            setState(prev => ({ ...prev, loading: false }));
+        }
     }, []);
 
-    const checkSession = async () => {
+    const checkSession = async (token: string) => {
         try {
-            // Ya no necesitamos enviar el header Authorization
-            // El navegador envía la cookie automáticamente
-            const res = await fetch('/api/v1/auth/me');
+            const res = await fetch('/api/v1/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
             if (res.ok) {
                 const user = await res.json();
                 setState({
                     user,
                     loading: false,
-                    isAuthenticated: true
+                    isAuthenticated: true,
+                    token
                 });
             } else {
-                setState(prev => ({ ...prev, loading: false, isAuthenticated: false, user: null }));
+                localStorage.removeItem('token');
+                setState({ user: null, loading: false, isAuthenticated: false, token: null });
             }
         } catch (error) {
-            setState(prev => ({ ...prev, loading: false, isAuthenticated: false, user: null }));
+            localStorage.removeItem('token');
+            setState({ user: null, loading: false, isAuthenticated: false, token: null });
         }
     };
 
@@ -69,8 +81,9 @@ export function useAuth() {
             }
 
             if (res.ok) {
-                // El backend ya estableció la cookie HttpOnly
-                await checkSession();
+                const token = data.access_token;
+                localStorage.setItem('token', token);
+                await checkSession(token);
                 return { success: true };
             } else {
                 return { success: false, error: data.detail || 'Error al iniciar sesión' };
@@ -98,19 +111,8 @@ export function useAuth() {
     };
 
     const logout = async () => {
-        try {
-            // Llamar al endpoint de logout para borrar cookies
-            await fetch('/api/v1/auth/logout', { method: 'POST' });
-        } catch (error) {
-            console.error('Error durante logout', error);
-        }
-
-        // Limpiar estado local
-        setState({
-            user: null,
-            loading: false,
-            isAuthenticated: false
-        });
+        localStorage.removeItem('token');
+        setState({ user: null, loading: false, isAuthenticated: false, token: null });
         router.push('/login');
     };
 
@@ -118,7 +120,6 @@ export function useAuth() {
         ...state,
         login,
         register,
-        logout,
-        checkSession // Exportamos por si necesitamos revalidar manualmente
+        logout
     };
 }

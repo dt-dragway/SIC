@@ -22,7 +22,7 @@ interface WalletData {
 }
 
 export default function WalletPage() {
-    const { isAuthenticated, loading: authLoading } = useAuth();
+    const { isAuthenticated, loading: authLoading, token } = useAuth();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<WalletData | null>(null);
     const [hideBalance, setHideBalance] = useState(false);
@@ -30,17 +30,27 @@ export default function WalletPage() {
 
     const fetchWallet = async () => {
         try {
+            if (!token) return;
             setLoading(true);
-            const res = await fetch('/api/v1/wallet/');
+            const res = await fetch(`/api/v1/wallet?t=${Date.now()}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (res.ok) {
                 const walletData = await res.json();
                 setData(walletData);
             } else {
-                toast.error('Error al cargar la billetera');
+                console.error('Wallet Error:', res.status, res.statusText);
+                if (res.status === 401) {
+                    toast.error('Sesión expirada. Por favor, recarga.');
+                } else {
+                    toast.error(`Error ${res.status}: No se pudo cargar la billetera`);
+                }
             }
         } catch (error) {
-            console.error(error);
-            toast.error('Error de conexión');
+            console.error('Connection Error:', error);
+            toast.error('Error de conexión con el servidor');
         } finally {
             setLoading(false);
         }

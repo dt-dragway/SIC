@@ -45,7 +45,8 @@ class PriceResponse(BaseModel):
 
 # === Endpoints ===
 
-@router.get("/", response_model=WalletResponse)
+@router.get("/", response_model=WalletResponse, include_in_schema=False)
+@router.get("", response_model=WalletResponse)
 async def get_wallet(token: str = Depends(oauth2_scheme)):
     """
     Obtener tu cartera de Binance REAL.
