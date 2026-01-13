@@ -263,3 +263,49 @@ async def get_trading_symbols(token: str = Depends(oauth2_scheme)):
     ]
     
     return {"symbols": symbols}
+
+
+@router.get("/depth/{symbol}")
+async def get_market_depth(
+    symbol: str, 
+    limit: int = 20, 
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Obtener Profundidad de Mercado (Order Book).
+    Retorna bids (compras) y asks (ventas).
+    """
+    verify_token(token)
+    client = get_binance_client()
+    
+    depth = client.get_order_book(symbol, limit)
+    
+    # Procesar para mostrar acumulado? Por ahora raw.
+    return {
+        "symbol": symbol.upper(),
+        "bids": depth.get("bids", []),
+        "asks": depth.get("asks", []),
+        "timestamp": datetime.utcnow()
+    }
+
+
+@router.get("/funding/{symbol}")
+async def get_funding_data(
+    symbol: str, 
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Obtener Funding Rate y Precios de Marca (Futuros).
+    Vital para detectar sentimiento y liquidaciones.
+    """
+    verify_token(token)
+    client = get_binance_client()
+    
+    funding = client.get_funding_rate(symbol)
+    
+    if not funding:
+        # Fallback si no hay datos de futuros (ej: par spot sin contratos)
+        # O devolver error 404
+        return {"symbol": symbol, "fundingRate": 0, "note": "No futures data"}
+        
+    return funding

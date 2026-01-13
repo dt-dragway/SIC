@@ -14,6 +14,7 @@ from app.api.v1.p2p import router as p2p_router
 from app.api.v1.signals import router as signals_router
 from app.api.v1.ml import router as ml_router
 from app.api.v1.knowledge import router as knowledge_router
+from app.api.v1.onchain import router as onchain_router
 
 router = APIRouter()
 
@@ -26,5 +27,6 @@ router.include_router(p2p_router, prefix="/p2p", tags=["💱 P2P VES"])
 router.include_router(signals_router, prefix="/signals", tags=["🎯 Señales IA"])
 router.include_router(ml_router, prefix="/ml", tags=["🧠 Machine Learning"])
 router.include_router(knowledge_router, prefix="/knowledge", tags=["📚 Base Conocimientos"])
+router.include_router(onchain_router, prefix="/onchain", tags=["🐋 On-Chain Analysis"])
 
 

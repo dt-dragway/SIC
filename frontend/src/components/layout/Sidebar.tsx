@@ -14,7 +14,8 @@ import {
     X,
     Brain,
     BookOpen,
-    User
+    User,
+    Monitor
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +30,7 @@ export default function Sidebar() {
     const links = [
         { href: '/', label: 'Inicio', icon: LayoutDashboard },
         { href: '/wallet', label: 'Billetera', icon: Wallet },
+        { href: '/terminal', label: 'Terminal Pro', icon: Monitor },
         { href: '/trading', label: 'Trading', icon: TrendingUp },
         { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },
         { href: '/signals', label: 'Señales IA', icon: Target },

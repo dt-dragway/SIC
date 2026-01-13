@@ -267,6 +267,7 @@ class BinanceClient:
                     "timestamp": datetime.fromtimestamp(latest["timestamp"] / 1000)
                 }
             return None
+        except Exception as e:
             logger.warning(f"No se pudo obtener Long/Short ratio para {symbol}: {e}")
             return None
 
@@ -300,6 +301,45 @@ class BinanceClient:
         except Exception as e:
             logger.warning(f"Error obteniendo historial P2P ({trade_type}): {e}")
             return []
+
+    def get_order_book(self, symbol: str, limit: int = 100) -> Dict:
+        """
+        Obtener Order Book (Profundidad de Mercado).
+        Muestra Bids (Compras) y Asks (Ventas).
+        """
+        if not self.client:
+            return {"bids": [], "asks": []}
+            
+        try:
+            return self.client.get_order_book(symbol=symbol.upper(), limit=limit)
+        except Exception as e:
+            logger.warning(f"Error obteniendo Order Book de {symbol}: {e}")
+            return {"bids": [], "asks": []}
+
+    def get_funding_rate(self, symbol: str) -> Optional[Dict]:
+        """
+        Obtener Tasa de Financiación (Funding Rate) actual.
+        """
+        if not self.client:
+            return None
+            
+        try:
+            # Usamos futures_mark_price para obtener funding rate actual
+            data = self.client.futures_mark_price(symbol=symbol.upper())
+            if isinstance(data, list): # A veces devuelve lista si no especificas symbol
+                data = next((x for x in data if x['symbol'] == symbol.upper()), {})
+                
+            return {
+                "symbol": data.get("symbol"),
+                "markPrice": float(data.get("markPrice", 0)),
+                "indexPrice": float(data.get("indexPrice", 0)),
+                "fundingRate": float(data.get("lastFundingRate", 0)),
+                "nextFundingTime": datetime.fromtimestamp(data.get("nextFundingTime", 0) / 1000)
+            }
+        except Exception as e:
+            logger.warning(f"Error obteniendo Funding Rate de {symbol}: {e}")
+            return None
+
 
 
 # Singleton para reusar la conexión
