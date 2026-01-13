@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useWallet } from '@/context/WalletContext'
 import {
     LayoutDashboard,
     TrendingUp,
@@ -12,11 +13,14 @@ import {
     User,
     LogOut,
     LogIn,
-    Activity
+    Activity,
+    Wallet,
+    RefreshCw
 } from 'lucide-react'
 
 export default function Header() {
     const { user, logout, isAuthenticated } = useAuth()
+    const { mode, setMode, totalUsd, isLoading } = useWallet()
     const router = useRouter()
 
     return (
@@ -56,23 +60,56 @@ export default function Header() {
                     {/* User Profile / Auth Actions */}
                     <div className="flex items-center gap-4">
                         {isAuthenticated ? (
-                            <div className="flex items-center gap-3 pl-6 border-l border-white/10">
-                                <Link href="/profile" className="flex items-center gap-2 group">
-                                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white border border-white/10 group-hover:border-white/30 transition-all shadow-lg shadow-violet-500/20">
-                                        {user?.name?.substring(0, 2).toUpperCase() || <User className="h-4 w-4" />}
+                            <div className="flex items-center gap-4">
+                                {/* Mode Switcher & Balance */}
+                                <div className="hidden sm:flex items-center gap-3 bg-white/5 rounded-full px-1 py-1 border border-white/10">
+                                    <button
+                                        onClick={() => setMode('practice')}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                                            mode === 'practice' 
+                                            ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50' 
+                                            : 'text-slate-400 hover:text-white'
+                                        }`}
+                                    >
+                                        Práctica
+                                    </button>
+                                    <button
+                                        onClick={() => setMode('real')}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                                            mode === 'real' 
+                                            ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50' 
+                                            : 'text-slate-400 hover:text-white'
+                                        }`}
+                                    >
+                                        Real
+                                    </button>
+                                </div>
+                                
+                                {/* Total Balance Display */}
+                                <div className="flex flex-col items-end mr-2">
+                                    <span className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Balance Total</span>
+                                    <div className="flex items-center gap-2">
+                                        <Wallet className="h-3 w-3 text-slate-400" />
+                                        <span className={`text-sm font-bold tracking-tight ${isLoading ? 'animate-pulse text-slate-500' : 'text-white'}`}>
+                                            ${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </span>
                                     </div>
-                                    <div className="hidden sm:block text-right">
-                                        <p className="text-xs font-medium text-white group-hover:text-cyan-400 transition-colors">{user?.name}</p>
-                                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Pro Trader</p>
-                                    </div>
-                                </Link>
-                                <button
-                                    onClick={logout}
-                                    className="p-2 text-slate-400 hover:text-rose-400 transition-colors hover:bg-rose-500/10 rounded-lg"
-                                    title="Cerrar Sesión"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                </button>
+                                </div>
+
+                                <div className="flex items-center gap-3 pl-4 border-l border-white/10">
+                                    <Link href="/profile" className="flex items-center gap-2 group">
+                                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white border border-white/10 group-hover:border-white/30 transition-all shadow-lg shadow-violet-500/20">
+                                            {user?.name?.substring(0, 2).toUpperCase() || <User className="h-4 w-4" />}
+                                        </div>
+                                    </Link>
+                                    <button
+                                        onClick={logout}
+                                        className="p-2 text-slate-400 hover:text-rose-400 transition-colors hover:bg-rose-500/10 rounded-lg"
+                                        title="Cerrar Sesión"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium transition-all text-white">

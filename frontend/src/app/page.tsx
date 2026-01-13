@@ -33,7 +33,7 @@ interface Signal {
 
 export default function Home() {
     const router = useRouter()
-    const { isAuthenticated, loading: authLoading } = useAuth()
+    const { isAuthenticated, loading: authLoading, token } = useAuth()
     const { mode, setMode, totalUsd, balances, isLoading: walletLoading } = useWallet() // Use Global Wallet
 
     const [signals, setSignals] = useState<Signal[]>([])
@@ -46,28 +46,35 @@ export default function Home() {
         }
     }, [authLoading, isAuthenticated, router])
 
-    // Fetch Signals Only (Wallet is in Context)
+    // Data Fetching
     useEffect(() => {
-        if (!isAuthenticated) return;
+        if (authLoading || !isAuthenticated || !token) return;
 
-        const fetchSignals = async () => {
-            setDataLoading(true);
+        const fetchData = async () => {
             try {
-                const signalsRes = await fetch('/api/v1/signals/scan');
+                // Signals
+                const signalsRes = await fetch('/api/v1/signals/scan', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (signalsRes.ok) {
-                    const signalsData = await signalsRes.json();
-                    setSignals(signalsData.signals || []);
+                    const data = await signalsRes.json();
+                    setSignals(data);
                 }
+
+                // Market Status (Optional global stats)
+                // const marketRes = await fetch('/api/v1/market/status');
             } catch (error) {
-                console.error("Error fetching signals:", error);
+                console.error("Error fetching dashboard data", error);
             }
-            setDataLoading(false);
         };
 
-        fetchSignals();
-        const interval = setInterval(fetchSignals, 30000);
+        fetchData();
+        const interval = setInterval(fetchData, 30000); // Live updates
+
         return () => clearInterval(interval);
-    }, [isAuthenticated]);
+    }, [authLoading, isAuthenticated, token]);
 
     if (authLoading || (walletLoading && isAuthenticated)) {
         return <LoadingSpinner />
@@ -81,42 +88,7 @@ export default function Home() {
         <DashboardLayout>
             {/* Header Profesional Reutilizable eliminado por DashboardLayout */}
 
-            {/* Mode Toggle Floating */}
-            <div className="max-w-7xl mx-auto px-6 py-6 flex justify-end">
-                <div className="bg-white/5 p-1 rounded-lg border border-white/5 flex relative">
-                    {/* Fondo animado para el toggle */}
-                    <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-gradient-to-r transition-all duration-300 rounded-md shadow-sm ${mode === 'practice'
-                        ? 'left-1 from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30'
-                        : 'left-[50%] from-rose-500/20 to-rose-600/20 border border-rose-500/30'
-                        }`}></div>
-
-                    <button
-                        onClick={() => setMode('practice')}
-                        className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'practice' ? 'text-emerald-400' : 'text-slate-400 hover:text-slate-200'
-                            }`}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-                            <line x1="16" y1="8" x2="2" y2="22"></line>
-                            <line x1="17.5" y1="15" x2="9" y2="15"></line>
-                        </svg>
-                        Laboratorio
-                    </button>
-
-                    <button
-                        onClick={() => setMode('real')}
-                        className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${mode === 'real' ? 'text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'text-slate-400 hover:text-slate-200'
-                            }`}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                        </svg>
-                        Mercado Real
-                    </button>
-                </div>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-6 pb-6">
+            <div className="max-w-7xl mx-auto px-6 py-6 pb-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     {/* Balance Card */}

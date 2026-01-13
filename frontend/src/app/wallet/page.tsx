@@ -1,68 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { useWallet } from '@/context/WalletContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { RefreshCw, Eye, EyeOff, Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, CreditCard } from 'lucide-react';
+import { RefreshCw, Eye, EyeOff, Wallet, TrendingUp, ArrowUpRight, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Balance {
-    asset: string;
-    free: number;
-    locked: number;
-    total: number;
-    usd_value: number;
-}
-
-interface WalletData {
-    total_usd: number;
-    balances: Balance[];
-    connected: boolean;
-}
-
 export default function WalletPage() {
-    const { isAuthenticated, loading: authLoading, token } = useAuth();
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState<WalletData | null>(null);
+    const { isAuthenticated, loading: authLoading } = useAuth();
+    const { balances, totalUsd, mode, isLoading: walletLoading, refreshWallet } = useWallet();
     const [hideBalance, setHideBalance] = useState(false);
-    const [mode, setMode] = useState<'real' | 'practice'>('real'); // Default to real per user request
 
-    const fetchWallet = async () => {
-        try {
-            if (!token) return;
-            setLoading(true);
-            const res = await fetch(`/api/v1/wallet?t=${Date.now()}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (res.ok) {
-                const walletData = await res.json();
-                setData(walletData);
-            } else {
-                console.error('Wallet Error:', res.status, res.statusText);
-                if (res.status === 401) {
-                    toast.error('Sesión expirada. Por favor, recarga.');
-                } else {
-                    toast.error(`Error ${res.status}: No se pudo cargar la billetera`);
-                }
-            }
-        } catch (error) {
-            console.error('Connection Error:', error);
-            toast.error('Error de conexión con el servidor');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchWallet();
-        }
-    }, [isAuthenticated]);
-
-    if (authLoading || (!data && loading)) return <LoadingSpinner />;
+    if (authLoading) return <LoadingSpinner />;
 
     return (
         <DashboardLayout>
@@ -72,28 +23,11 @@ export default function WalletPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                            Billetera
+                            Billetera <span className="text-lg font-light text-slate-500 ml-2">
+                                ({mode === 'practice' ? 'Modo Práctica' : 'Modo Real'})
+                            </span>
                         </h1>
                         <p className="text-slate-400 text-sm mt-1">Gestión de activos y balances en tiempo real</p>
-                    </div>
-
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
-                        <button
-                            onClick={() => setMode('practice')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'practice'
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Simulado
-                        </button>
-                        <button
-                            onClick={() => setMode('real')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'real'
-                                ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Real (Binance)
-                        </button>
                     </div>
                 </div>
 
@@ -112,7 +46,7 @@ export default function WalletPage() {
                             </div>
 
                             <div className="text-5xl font-bold text-white font-mono tracking-tight mb-6">
-                                {hideBalance ? '••••••' : `$${(data?.total_usd ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                                {hideBalance ? '••••••' : `$${(totalUsd ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
                                 <span className="text-lg text-slate-500 ml-2 font-sans font-normal">USD</span>
                             </div>
 
@@ -143,13 +77,13 @@ export default function WalletPage() {
                         <div className="mt-6 pt-6 border-t border-white/5">
                             <div className="flex justify-between items-center text-sm text-slate-400 mb-2">
                                 <span>Activos Totales</span>
-                                <span className="text-white font-medium">{data?.balances.length || 0}</span>
+                                <span className="text-white font-medium">{balances.length || 0}</span>
                             </div>
                             <div className="flex justify-between items-center text-sm text-slate-400">
                                 <span>Estado API</span>
-                                <span className={`flex items-center gap-2 font-medium ${data?.connected ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    <span className={`w-2 h-2 rounded-full ${data?.connected ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
-                                    {data?.connected ? 'Conectado' : 'Desconectado'}
+                                <span className={`flex items-center gap-2 font-medium ${!walletLoading ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                    <span className={`w-2 h-2 rounded-full ${!walletLoading ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                                    {!walletLoading ? 'Conectado' : 'Actualizando...'}
                                 </span>
                             </div>
                         </div>
@@ -160,8 +94,8 @@ export default function WalletPage() {
                 <div className="glass-card overflow-hidden rounded-3xl border border-white/5">
                     <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                         <h2 className="font-bold text-lg text-white">Mis Activos</h2>
-                        <button onClick={fetchWallet} disabled={loading} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
-                            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                        <button onClick={refreshWallet} disabled={walletLoading} className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
+                            <RefreshCw size={18} className={walletLoading ? 'animate-spin' : ''} />
                         </button>
                     </div>
 
@@ -177,7 +111,7 @@ export default function WalletPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {data?.balances.map((asset) => (
+                                {balances.map((asset) => (
                                     <tr key={asset.asset} className="hover:bg-white/[0.02] transition-colors group">
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
@@ -191,17 +125,17 @@ export default function WalletPage() {
                                             {hideBalance ? '••••' : asset.total.toLocaleString()}
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono text-slate-400">
-                                            {hideBalance ? '••••' : asset.free.toLocaleString()}
+                                            {hideBalance ? '••••' : (asset.free ?? asset.total).toLocaleString()}
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono text-slate-500">
-                                            {hideBalance ? '••••' : asset.locked.toLocaleString()}
+                                            {hideBalance ? '••••' : (asset.locked ?? 0).toLocaleString()}
                                         </td>
                                         <td className="py-4 px-6 text-right font-mono font-medium text-emerald-400">
                                             {hideBalance ? '••••' : `$${asset.usd_value?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                         </td>
                                     </tr>
                                 ))}
-                                {data?.balances.length === 0 && (
+                                {balances.length === 0 && (
                                     <tr>
                                         <td colSpan={5} className="py-12 text-center text-slate-500">
                                             No tienes activos con balance positivo.
