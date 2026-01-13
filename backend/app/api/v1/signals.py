@@ -22,6 +22,10 @@ from app.ml.indicators import (
     calculate_atr, get_trend
 )
 from app.infrastructure.binance.client import get_binance_client
+from sqlalchemy.orm import Session
+from app.infrastructure.database.session import get_db
+from app.infrastructure.database import models
+import json
 
 
 router = APIRouter()
@@ -127,7 +131,8 @@ def get_full_analysis(symbol: str) -> Optional[Dict]:
 @router.get("/analyze/{symbol}")
 async def analyze_symbol(
     symbol: str,
-    token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
 ) -> SignalResponse:
     """
     🤖 Análisis profundo con el Agente IA.
@@ -138,7 +143,7 @@ async def analyze_symbol(
     - Consenso de top traders
     - Aplica pesos aprendidos de trades anteriores
     
-    Retorna señal con confianza calibrada por historial.
+    Persistencia: Guarda cada análisis en la BD para aprendizaje continuo.
     """
     verify_token(token)
     
@@ -149,6 +154,36 @@ async def analyze_symbol(
             status_code=404,
             detail=f"No se pudo analizar {symbol} o no hay señal clara (HOLD)"
         )
+    
+    # === PERSISTENCIA ===
+    try:
+        # Create ML Data payload
+        ml_data = {
+            "patterns": signal.patterns_detected,
+            "indicators": signal.indicators_used,
+            "consensus": signal.top_trader_consensus
+        }
+        
+        db_signal = models.Signal(
+            symbol=signal.symbol,
+            type=signal.direction,
+            strength=signal.strength,
+            confidence=signal.confidence,
+            entry_price=signal.entry_price,
+            take_profit=signal.take_profit,
+            stop_loss=signal.stop_loss,
+            risk_reward=signal.risk_reward,
+            reasoning=json.dumps(signal.reasoning), # Convert list to JSON string
+            ml_data=json.dumps(ml_data),           # Save extended ML data
+            raw_response="Auto-generated",         # Placeholder for raw LLM response if available
+            expires_at=signal.expires_at,
+            created_at=signal.timestamp
+        )
+        db.add(db_signal)
+        db.commit()
+    except Exception as e:
+        print(f"Error saving signal to DB: {e}")
+        # Don't fail the request if saving fails, but log it
     
     return {
         "symbol": signal.symbol,
@@ -205,6 +240,51 @@ async def scan_market(token: str = Depends(oauth2_scheme)):
         "count": len(signals),
         "signals": signals,
         "timestamp": datetime.utcnow()
+    }
+
+
+
+@router.get("/latest/{symbol}")
+async def get_latest_signal(
+    symbol: str,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    🧠 Memoria: Devuelve el último análisis conocido desde la BD.
+    """
+    verify_token(token)
+    
+    # Buscar la última señal para este símbolo
+    last_signal = db.query(models.Signal)\
+        .filter(models.Signal.symbol == symbol.upper())\
+        .order_by(models.Signal.created_at.desc())\
+        .first()
+        
+    if not last_signal:
+        return None # No content / null
+        
+    # Reconstruct useful response
+    try:
+        reasoning_list = json.loads(last_signal.reasoning)
+    except:
+        reasoning_list = [last_signal.reasoning]
+        
+    try:
+        ml_data = json.loads(last_signal.ml_data) if last_signal.ml_data else {}
+    except:
+        ml_data = {}
+
+    return {
+        "signal": last_signal.type,
+        "confidence": last_signal.confidence,
+        "reasoning": reasoning_list,
+        "ml_data": {
+            "lstm_price": 0, # Placeholder or store in ml_data
+            "xgboost_signal": "NEUTRAL" # Placeholder or store in ml_data
+        },
+        "from_memory": True,
+        "timestamp": last_signal.created_at
     }
 
 

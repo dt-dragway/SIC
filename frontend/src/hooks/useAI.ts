@@ -15,7 +15,7 @@ interface OllamaStatus {
     message: string;
 }
 
-export function useAI() {
+export function useAI(symbol: string = 'BTCUSDT') {
     const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<OllamaStatus | null>(null);
@@ -34,6 +34,34 @@ export function useAI() {
             setStatus(data.ollama);
         } catch (e) {
             console.error("Error checking AI status", e);
+        }
+    };
+
+    // Cargar memoria (último análisis)
+    const loadMemory = async (symbol: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const res = await fetch(`/api/v1/signals/latest/${symbol}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data) {
+                    setAnalysis({
+                        signal: data.signal,
+                        confidence: data.confidence,
+                        reasoning: data.reasoning || [],
+                        lstm_prediction: data.ml_data?.lstm_price || 0,
+                        xgboost_class: data.ml_data?.xgboost_signal || "NEUTRAL",
+                        timestamp: data.timestamp
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Error loading AI memory", e);
         }
     };
 
@@ -74,6 +102,11 @@ export function useAI() {
         const interval = setInterval(checkStatus, 30000);
         return () => clearInterval(interval);
     }, []);
+
+    // Cargar memoria al cambiar de símbolo
+    useEffect(() => {
+        if (symbol) loadMemory(symbol);
+    }, [symbol]);
 
     return {
         analysis,

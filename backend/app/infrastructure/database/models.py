@@ -130,7 +130,9 @@ class Signal(Base):
     stop_loss = Column(Float, nullable=False)
     risk_reward = Column(Float, nullable=False)
     
-    reasoning = Column(Text)
+    reasoning = Column(Text) # JSON list of reasons
+    ml_data = Column(Text) # JSON storage for LSTM/XGBoost metrics
+    raw_response = Column(Text) # Store full LLM response for future training
     
     # Resultado
     result = Column(String(20), nullable=True)  # WIN, LOSS, PENDING
