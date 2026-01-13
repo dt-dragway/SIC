@@ -120,7 +120,10 @@ export function AIProvider({ children }: { children: ReactNode }) {
         if (typeof window === 'undefined') return;
 
         checkStatus();
-        loadMemory(symbol);
+        loadMemory(symbol).then(() => {
+            // Si no hay memoria, o para refrezcar, iniciamos análisis
+            analyzeMarket(symbol);
+        });
 
         // Heartbeat pulse every 30s
         // Heartbeat pulse every 30s

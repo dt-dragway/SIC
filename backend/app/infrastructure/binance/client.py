@@ -267,9 +267,39 @@ class BinanceClient:
                     "timestamp": datetime.fromtimestamp(latest["timestamp"] / 1000)
                 }
             return None
-        except Exception as e:
             logger.warning(f"No se pudo obtener Long/Short ratio para {symbol}: {e}")
             return None
+
+    def get_p2p_history(self, trade_type: str = "BUY") -> List[Dict]:
+        """
+        Obtener historial de órdenes P2P (C2C).
+        REQUIERE API KEY con permisos.
+        """
+        if not self.client:
+            return []
+            
+        try:
+            # Endpoint SAPI: GET /sapi/v1/c2c/orderMatch/listUserOrderHistory
+            # python-binance wrapper: get_c2c_trade_history
+            trades = self.client.get_c2c_trade_history(tradeType=trade_type.upper())
+            
+            # Map common fields
+            return [{
+                "orderNumber": t.get("orderNumber"),
+                "advertiser": t.get("counterPartNickName"),
+                "asset": t.get("asset"),
+                "amount": float(t.get("amount", 0)),
+                "fiat": t.get("fiat"),
+                "fiat_amount": float(t.get("totalPrice", 0)),
+                "price": float(t.get("unitPrice", 0)),
+                "status": t.get("orderStatus"),
+                "timestamp": datetime.fromtimestamp(t.get("createTime", 0) / 1000),
+                "type": trade_type.upper()
+            } for t in trades.get("data", [])]
+            
+        except Exception as e:
+            logger.warning(f"Error obteniendo historial P2P ({trade_type}): {e}")
+            return []
 
 
 # Singleton para reusar la conexión

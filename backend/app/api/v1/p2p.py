@@ -321,3 +321,33 @@ async def calculate_arbitrage(
         "profitable": profit_fiat > 0,
         "timestamp": datetime.utcnow()
     }
+
+
+@router.get("/history")
+async def get_p2p_history_endpoint(
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Obtener historial COMPLETO de P2P (Compras y Ventas).
+    Requiere API Key válida en el backend.
+    """
+    verify_token(token)
+    
+    from app.infrastructure.binance.client import get_binance_client
+    client = get_binance_client()
+    
+    if not client.is_connected():
+         return {"trades": [], "message": "No conectado a Binance"}
+    
+    # Fetch both BUY and SELL
+    buys = client.get_p2p_history("BUY")
+    sells = client.get_p2p_history("SELL")
+    
+    all_trades = buys + sells
+    # Sort by timestamp desc
+    all_trades.sort(key=lambda x: x["timestamp"], reverse=True)
+    
+    return {
+        "count": len(all_trades),
+        "trades": all_trades
+    }
