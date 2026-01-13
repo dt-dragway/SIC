@@ -13,6 +13,8 @@ import sys
 
 from app.config import settings
 from app.api.v1 import router as api_v1_router
+from app.middleware.rate_limit import rate_limit_middleware
+from app.middleware.security_headers import security_headers_middleware
 
 
 # Configurar logging con loguru
@@ -66,17 +68,38 @@ app = FastAPI(
 )
 
 
-# CORS - Permitir frontend
+# CORS - Configuración segura
+allowed_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# En producción, cambiar a dominio real
+if settings.app_env == "production":
+    allowed_origins = [
+        "https://sic-ultra.com",
+        "https://app.sic-ultra.com",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+    max_age=600,
 )
+
+# Security Middlewares
+try:
+    from app.middleware.rate_limit import rate_limit_middleware
+    from app.middleware.security_headers import security_headers_middleware
+    
+    app.middleware("http")(rate_limit_middleware)
+    app.middleware("http")(security_headers_middleware)
+    logger.info("✅ Security middlewares loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Security middlewares not loaded: {e}")
 
 
 # Montar routers

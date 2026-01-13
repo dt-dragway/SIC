@@ -22,12 +22,15 @@ def seed_users():
             print("⚠️  El usuario 'admin@sic.com' ya existe.")
             return
 
-        # Crear usuario Admin
+        # Crear usuario Admin con password aleatorio SEGURO
+        import secrets
+        admin_password = os.getenv("ADMIN_PASSWORD", secrets.token_urlsafe(16))
+        
         print("👤 Creando usuario administrador...")
         admin_user = User(
             email="admin@sic.com",
             name="Administrador SIC",
-            password_hash=hash_password("admin123"), # Contraseña por defecto
+            password_hash=hash_password(admin_password),
             has_2fa=False,
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
@@ -37,7 +40,9 @@ def seed_users():
         db.commit()
         print("✅ Usuario creado exitosamente:")
         print("   Email: admin@sic.com")
-        print("   Password: admin123")
+        print(f"   Password: {admin_password}")
+        print("\n⚠️  GUARDA ESTA PASSWORD EN UN LUGAR SEGURO")
+        print("⚠️  Esta es la única vez que se mostrará\n")
         
     except Exception as e:
         print(f"❌ Error al crear datos: {e}")

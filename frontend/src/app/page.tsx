@@ -9,6 +9,8 @@ import AIWidget from '../components/dashboard/AIWidget'
 import { useAuth } from '../hooks/useAuth'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useWallet } from '../context/WalletContext' // Import Context
+import InstitutionalAssistant from '../components/ai/InstitutionalAssistant'
+import AINeuroEngine from '../components/ai/AINeuroEngine'
 
 const CandlestickChart = dynamic(
     () => import('../components/charts/CandlestickChart').then(mod => mod.CandlestickChart),

@@ -19,6 +19,7 @@ from app.api.v1.derivatives import router as derivatives_router
 from app.api.v1.defi import router as defi_router
 from app.api.v1.automation import router as automation_router
 from app.api.v1.risk import router as risk_router
+from app.api.v1.ai_analysis import router as ai_analysis_router
 
 router = APIRouter()
 
@@ -36,5 +37,6 @@ router.include_router(derivatives_router, prefix="/derivatives", tags=["📊 Der
 router.include_router(defi_router, prefix="/defi", tags=["🔷 DeFi Advanced"])
 router.include_router(automation_router, prefix="/automation", tags=["🤖 Automation & Backtesting"])
 router.include_router(risk_router, prefix="/risk", tags=["⚖️ Risk Management"])
+router.include_router(ai_analysis_router, prefix="/ai", tags=["🧠 AI Institutional Agent"])
 
 

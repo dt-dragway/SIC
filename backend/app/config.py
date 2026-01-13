@@ -21,13 +21,20 @@ class Settings(BaseSettings):
     debug: bool = True
     secret_key: str = Field(..., min_length=32)
     
+    
     # === Database ===
-    postgres_user: str = "sic_user"
-    postgres_password: str = "sic_password"
-    postgres_db: str = "sic_db"
-    postgres_host: str = "localhost"
-    postgres_port: int = 5432
-    database_url: str = "postgresql://sic_user:sic_password@localhost:5432/sic_db"
+    postgres_user: str = Field(default="sic_user", env="POSTGRES_USER")
+    postgres_password: str = Field(..., env="POSTGRES_PASSWORD")  # MUST be in .env
+    postgres_db: str = Field(default="sic_db", env="POSTGRES_DB")
+    postgres_host: str = Field(default="localhost", env="POSTGRES_HOST")
+    postgres_port: int = Field(default=5432, env="POSTGRES_PORT")
+    database_url: str = ""  # Se construye en __init__
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Construir database_url después de que los campos se validen
+        if not self.database_url:
+            self.database_url = f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
     
     # === Redis ===
     redis_url: str = "redis://localhost:6379/0"
