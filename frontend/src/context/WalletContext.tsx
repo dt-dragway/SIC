@@ -75,29 +75,24 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                 const data = await res.json();
 
                 if (mode === 'practice') {
-                    // Practice API returns { current_value, balances: [...] }
-                    setTotalUsd(data.current_value || 0);
-                    // Map practice balances to unified structure if needed, 
-                    // though the API should return compatible structures.
-                    // Practice API: { asset, amount, usd_value, avg_buy_price }
-                    // We map 'amount' to 'total' to match interface
-                    const formattedBalances = data.balances.map((b: any) => ({
+                    // Practice API response structure
+                    setTotalUsd(data.total_usd || 0);
+
+                    // Map practice balances to unified structure
+                    const formattedBalances = (data.balances || []).map((b: any) => ({
                         asset: b.asset,
-                        total: b.amount,
-                        usd_value: b.usd_value,
-                        free: b.amount, // In practice, all is free for now
+                        total: b.amount || 0,
+                        usd_value: b.usd_value || 0,
+                        free: b.amount || 0,
                         locked: 0
                     }));
                     setBalances(formattedBalances);
 
                 } else {
-                    // Real API returns { balances: [{ asset, free, locked, total, usd_value }] }
+                    // Real API returns { total_usd, balances: [...] }
+                    setTotalUsd(data.total_usd || 0);
                     const fetchedBalances: Balance[] = data.balances || [];
                     setBalances(fetchedBalances);
-
-                    // Calculate total USD for real wallet
-                    const total = fetchedBalances.reduce((acc, b) => acc + (b.usd_value || 0), 0);
-                    setTotalUsd(total);
                 }
             } else {
                 console.error(`Failed to fetch ${mode} wallet`, res.status);

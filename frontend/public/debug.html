@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SIC Ultra - Debug Balance</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0B0E14;
+            color: #fff;
+            padding: 20px;
+        }
+        .test {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #059669; }
+    </style>
+</head>
+<body>
+    <h1>🔍 SIC Ultra - Balance Debug Tool</h1>
+    
+    <div class="test">
+        <h3>1. Check Token</h3>
+        <button onclick="checkToken()">Check LocalStorage Token</button>
+        <pre id="token-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>2. Test Backend Health</h3>
+        <button onclick="testHealth()">Test /health</button>
+        <pre id="health-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>3. Test Binance Wallet API</h3>
+        <button onclick="testWallet()">Test /api/v1/wallet</button>
+        <pre id="wallet-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>4. Test Practice Wallet API</h3>
+        <button onclick="testPractice()">Test /api/v1/practice/wallet</button>
+        <pre id="practice-result"></pre>
+    </div>
+
+    <div class="test">
+        <h3>5. Manual Login</h3>
+        <input type="email" id="email" placeholder="Email" style="padding: 8px; margin: 5px;">
+        <input type="password" id="password" placeholder="Password" style="padding: 8px; margin: 5px;">
+        <button onclick="doLogin()">Login</button>
+        <pre id="login-result"></pre>
+    </div>
+
+    <script>
+        function checkToken() {
+            const token = localStorage.getItem('token');
+            const result = document.getElementById('token-result');
+            if (token) {
+                result.textContent = `✅ Token found:\n${token.substring(0, 50)}...\n\nLength: ${token.length} chars`;
+                result.parentElement.classList.add('success');
+            } else {
+                result.textContent = '❌ No token found in localStorage!\nYou need to login first.';
+                result.parentElement.classList.add('error');
+            }
+        }
+
+        async function testHealth() {
+            const result = document.getElementById('health-result');
+            try {
+                const res = await fetch('http://localhost:8000/health');
+                const data = await res.json();
+                result.textContent = `✅ Status: ${res.status}\n${JSON.stringify(data, null, 2)}`;
+                result.parentElement.classList.add('success');
+            } catch (err) {
+                result.textContent = `❌ Error: ${err.message}`;
+                result.parentElement.classList.add('error');
+            }
+        }
+
+        async function testWallet() {
+            const result = document.getElementById('wallet-result');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                result.textContent = '❌ No token! Login first.';
+                result.parentElement.classList.add('error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/v1/wallet', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await res.json();
+                result.textContent = `Status: ${res.status}\n\n${JSON.stringify(data, null, 2)}`;
+                
+                if (res.ok) {
+                    result.parentElement.classList.add('success');
+                } else {
+                    result.parentElement.classList.add('error');
+                }
+            } catch (err) {
+                result.textContent = `❌ Error: ${err.message}`;
+                result.parentElement.classList.add('error');
+            }
+        }
+
+        async function testPractice() {
+            const result = document.getElementById('practice-result');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                result.textContent = '❌ No token! Login first.';
+                result.parentElement.classList.add('error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/v1/practice/wallet', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await res.json();
+                result.textContent = `Status: ${res.status}\n\n${JSON.stringify(data, null, 2)}`;
+                
+                if (res.ok) {
+                    result.parentElement.classList.add('success');
+                } else {
+                    result.parentElement.classList.add('error');
+                }
+            } catch (err) {
+                result.textContent = `❌ Error: ${err.message}`;
+                result.parentElement.classList.add('error');
+            }
+        }
+
+        async function doLogin() {
+            const result = document.getElementById('login-result');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                result.textContent = '❌ Enter email and password';
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', email);
+                formData.append('password', password);
+
+                const res = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const data = await res.json();
+                
+                if (res.ok && data.access_token) {
+                    localStorage.setItem('token', data.access_token);
+                    result.textContent = `✅ Login successful!\nToken saved to localStorage.\n\n${JSON.stringify(data, null, 2)}`;
+                    result.parentElement.classList.add('success');
+                } else {
+                    result.textContent = `❌ Login failed: ${data.detail || 'Unknown error'}\n${JSON.stringify(data, null, 2)}`;
+                    result.parentElement.classList.add('error');
+                }
+            } catch (err) {
+                result.textContent = `❌ Error: ${err.message}`;
+                result.parentElement.classList.add('error');
+            }
+        }
+
+        // Auto-check token on load
+        window.onload = checkToken;
+    </script>
+</body>
+</html>

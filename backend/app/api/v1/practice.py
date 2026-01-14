@@ -79,8 +79,8 @@ def get_or_create_wallet(db: Session, user_id: int) -> VirtualWalletModel:
     if not wallet:
         wallet = VirtualWalletModel(
             user_id=user_id,
-            initial_capital=100.0,
-            balances=json.dumps({"USDT": 100.0}),
+            initial_capital=10000.0,  # $10,000 USD inicial
+            balances=json.dumps({"USDT": 10000.0}),  # $10,000 en USDT
             created_at=datetime.utcnow()
         )
         db.add(wallet)
@@ -117,64 +117,69 @@ async def get_virtual_wallet(
     """
     Obtener wallet virtual para modo práctica.
     """
-    payload = verify_token(token)
-    user_id = payload.get("user_id", 1)
-    
-    wallet = get_or_create_wallet(db, user_id)
-    balances_dict = json.loads(wallet.balances)
-    
-    binance = get_binance_client()
-    prices = binance.get_all_prices()
-    
-    # Calcular balances con valores USD
-    balances_list = []
-    total_usd = 0.0
-    
-    # Calcular precio promedio desde trades (simple approximation)
-    # En una implementación más robusta, guardaríamos avg_price en el JSON de balances
-    
-    for asset, amount in balances_dict.items():
-        if float(amount) <= 0:
-            continue
+    try:
+        payload = verify_token(token)
+        user_id = payload.get("user_id", 1)
+        
+        wallet = get_or_create_wallet(db, user_id)
+        balances_dict = json.loads(wallet.balances)
+        
+        binance = get_binance_client()
+        prices = binance.get_all_prices()
+        
+        # Calcular balances con valores USD
+        balances_list = []
+        total_usd = 0.0
+        
+        # Calcular precio promedio desde trades (simple approximation)
+        # En una implementación más robusta, guardaríamos avg_price en el JSON de balances
+        
+        for asset, amount in balances_dict.items():
+            if float(amount) <= 0:
+                continue
+                
+            if asset in ["USDT", "BUSD", "USD"]:
+                usd_value = float(amount)
+            else:
+                symbol = f"{asset}USDT"
+                price = prices.get(symbol, 0)
+                usd_value = float(amount) * price
             
-        if asset in ["USDT", "BUSD", "USD"]:
-            usd_value = float(amount)
-        else:
-            symbol = f"{asset}USDT"
-            price = prices.get(symbol, 0)
-            usd_value = float(amount) * price
+            total_usd += usd_value
+            
+            balances_list.append({
+                "asset": asset,
+                "amount": round(float(amount), 8),
+                "usd_value": round(usd_value, 8),
+                "avg_buy_price": 0 # Simplificado por ahora
+            })
         
-        total_usd += usd_value
+        # Ordenar por valor
+        balances_list.sort(key=lambda x: x["usd_value"], reverse=True)
         
-        balances_list.append({
-            "asset": asset,
-            "amount": round(float(amount), 8),
-            "usd_value": round(usd_value, 8),
-            "avg_buy_price": 0 # Simplificado por ahora
-        })
-    
-    # Ordenar por valor
-    balances_list.sort(key=lambda x: x["usd_value"], reverse=True)
-    
-    # Calcular P&L
-    initial = wallet.initial_capital
-    pnl = total_usd - initial
-    pnl_percent = (pnl / initial) * 100 if initial > 0 else 0
-    
-    # Win rate
-    trades = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id).all()
-    winning = len([t for t in trades if (t.pnl or 0) > 0])
-    win_rate = (winning / len(trades) * 100) if trades else None
-    
-    return {
-        "initial_capital": initial,
-        "current_value": round(total_usd, 8),
-        "pnl": round(pnl, 8),
-        "pnl_percent": round(pnl_percent, 2),
-        "balances": balances_list,
-        "trades_count": len(trades),
-        "win_rate": round(win_rate, 1) if win_rate else None
-    }
+        # Calcular P&L
+        initial = wallet.initial_capital
+        pnl = total_usd - initial
+        pnl_percent = (pnl / initial) * 100 if initial > 0 else 0
+        
+        # Win rate
+        trades = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id).all()
+        winning = len([t for t in trades if (t.pnl or 0) > 0])
+        win_rate = (winning / len(trades) * 100) if trades else None
+        
+        return {
+            "initial_capital": initial,
+            "current_value": round(total_usd, 8),
+            "total_usd": round(total_usd, 8),  # Alias for frontend compatibility
+            "pnl": round(pnl, 8),
+            "pnl_percent": round(pnl_percent, 2),
+            "balances": balances_list,
+            "trades_count": len(trades),
+            "win_rate": round(win_rate, 1) if win_rate else None
+        }
+    except Exception as e:
+        logger.error(f"Error in practice wallet: {e}")
+        raise HTTPException(500, f"Error fetching practice wallet: {str(e)}")
 
 
 @router.post("/order")
