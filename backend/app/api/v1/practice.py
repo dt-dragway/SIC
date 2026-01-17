@@ -134,7 +134,15 @@ async def get_virtual_wallet(
         # Calcular precio promedio desde trades (simple approximation)
         # En una implementación más robusta, guardaríamos avg_price en el JSON de balances
         
-        for asset, amount in balances_dict.items():
+        for asset, balance_data in balances_dict.items():
+            # Soportar formato antiguo (número) y nuevo (dict)
+            if isinstance(balance_data, dict):
+                amount = balance_data.get("amount", 0)
+                avg_buy_price_val = balance_data.get("avg_buy_price", 0)
+            else:
+                amount = float(balance_data)
+                avg_buy_price_val = 0
+            
             if float(amount) <= 0:
                 continue
                 
@@ -151,7 +159,7 @@ async def get_virtual_wallet(
                 "asset": asset,
                 "amount": round(float(amount), 8),
                 "usd_value": round(usd_value, 8),
-                "avg_buy_price": 0 # Simplificado por ahora
+                "avg_buy_price": round(avg_buy_price_val, 2) if avg_buy_price_val else 0
             })
         
         # Ordenar por valor
@@ -215,45 +223,95 @@ async def create_virtual_order(
     
     pnl = None
     
+    # Parsear balances (soportar formato antiguo y nuevo)
+    def parse_balance(balance_value):
+        """Convertir balance a nuevo formato si es necesario"""
+        if isinstance(balance_value, dict):
+            return balance_value
+        else:
+            # Formato antiguo: solo número
+            return {
+                "amount": float(balance_value),
+                "avg_buy_price": 0,
+                "total_cost": 0
+            }
+    
     if side == "BUY":
         # === COMPRAR ===
         cost = order.quantity * current_price
         
-        usdt_balance = float(balances.get(quote, 0))
-        if usdt_balance < cost:
+        # Obtener balance USDT
+        quote_balance = parse_balance(balances.get(quote, 0))
+        usdt_amount = quote_balance.get("amount", 0) if isinstance(quote_balance, dict) else float(quote_balance)
+        
+        if usdt_amount < cost:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Saldo USDT insuficiente. Tienes ${usdt_balance:.2f}, necesitas ${cost:.2f}"
+                detail=f"Saldo USDT insuficiente. Tienes ${usdt_amount:.2f}, necesitas ${cost:.2f}"
             )
         
-        # Actualizar balances
-        balances[quote] = usdt_balance - cost
-        balances[base] = float(balances.get(base, 0)) + order.quantity
+        # Actualizar balance USDT
+        balances[quote] = {
+            "amount": usdt_amount - cost,
+            "avg_buy_price": 1.0,
+            "total_cost": usdt_amount - cost
+        }
+        
+        # Calcular nuevo avg_buy_price para el asset
+        old_balance = parse_balance(balances.get(base, 0))
+        old_amount = old_balance.get("amount", 0)
+        old_avg_price = old_balance.get("avg_buy_price", 0)
+        old_total_cost = old_balance.get("total_cost", 0)
+        
+        new_amount = old_amount + order.quantity
+        new_total_cost = old_total_cost + cost
+        new_avg_price = new_total_cost / new_amount if new_amount > 0 else 0
+        
+        balances[base] = {
+            "amount": new_amount,
+            "avg_buy_price": new_avg_price,
+            "total_cost": new_total_cost
+        }
         
     else:  # SELL
         # === VENDER ===
-        crypto_balance = float(balances.get(base, 0))
-        if crypto_balance < order.quantity:
+        crypto_balance = parse_balance(balances.get(base, 0))
+        crypto_amount = crypto_balance.get("amount", 0)
+        avg_buy_price = crypto_balance.get("avg_buy_price", current_price)
+        
+        if crypto_amount < order.quantity:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Saldo {base} insuficiente. Tienes {crypto_balance:.8f}, quieres vender {order.quantity}"
+                detail=f"Saldo {base} insuficiente. Tienes {crypto_amount:.8f}, quieres vender {order.quantity}"
             )
         
-        # Calcular P&L aproximado (precio actual vs precio cuando se compró?)
-        # Nota: Para P&L exacto necesitamos FIFO/LIFO o Avg Price guardado.
-        # Por ahora simplificamos: PnL = (Precio Venta - Precio Mercado Anterior??)
-        # Mejor aproximación: Usar un precio promedio estimado almacenado (TODO: implementar avg_price en JSON)
+        # Calcular PnL EXACTO usando avg_buy_price
+        pnl = (current_price - avg_buy_price) * order.quantity
         
-        # Restar cripto
-        balances[base] = crypto_balance - order.quantity
+        # Actualizar balance cripto
+        remaining_amount = crypto_amount - order.quantity
+        remaining_cost = crypto_balance.get("total_cost", 0) * (remaining_amount / crypto_amount) if crypto_amount > 0 else 0
         
-        # Añadir USDT
-        received = order.quantity * current_price
-        balances[quote] = float(balances.get(quote, 0)) + received
-        
-        # Limpiar si es 0
-        if balances[base] <= 0:
+        if remaining_amount > 0:
+            balances[base] = {
+                "amount": remaining_amount,
+                "avg_buy_price": avg_buy_price,  # Mantener mismo avg
+                "total_cost": remaining_cost
+            }
+        else:
+            # Eliminar si se vendió todo
             balances.pop(base, None)
+        
+        # Añadir USDT recibido
+        quote_balance = parse_balance(balances.get(quote, 0))
+        quote_amount = quote_balance.get("amount", 0) if isinstance(quote_balance, dict) else float(quote_balance)
+        received = order.quantity * current_price
+        
+        balances[quote] = {
+            "amount": quote_amount + received,
+            "avg_buy_price": 1.0,
+            "total_cost": quote_amount + received
+        }
     
     # Guardar cambios en DB
     wallet.balances = json.dumps(balances)

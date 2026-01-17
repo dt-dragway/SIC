@@ -180,3 +180,30 @@ class P2PRate(Base):
     volume = Column(Float, nullable=True)
     
     recorded_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class AgentTrade(Base):
+    """Trades registrados por el Agente IA (para sincronización)"""
+    __tablename__ = "agent_trades"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    trade_id = Column(String(50), unique=True, nullable=False, index=True)
+    
+    symbol = Column(String(20), nullable=False)
+    side = Column(String(10), nullable=False)  # BUY, SELL
+    
+    entry_price = Column(Float, nullable=False)
+    exit_price = Column(Float, nullable=False)
+    pnl = Column(Float, nullable=False)
+    
+    # Datos del análisis (JSON)
+    signals_used = Column(Text, nullable=True)  # JSON array de signals usados
+    patterns_detected = Column(Text, nullable=True)  # JSON array de patrones
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Índice para búsquedas rápidas
+    __table_args__ = (
+        {'comment': 'Trades del Agente IA para sincronización con agent_memory.json'}
+    )

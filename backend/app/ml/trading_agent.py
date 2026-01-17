@@ -38,6 +38,22 @@ class AgentMemory:
             memory_file
         )
         self.data = self._load()
+        
+        # Sistema de backups automáticos
+        try:
+            from app.ml.backup_manager import BackupManager
+            backup_dir = os.path.join(os.path.dirname(__file__), "backups")
+            self.backup_manager = BackupManager(
+                source_file=self.memory_file,
+                backup_dir=backup_dir,
+                retention_days=30
+            )
+            # Crear backup al iniciar
+            self.backup_manager.create_backup()
+            self.backup_manager.rotate_backups()
+            logger.info("✅ Sistema de backups inicializado")
+        except Exception as e:
+            logger.warning(f"⚠️ Backups no disponibles: {e}")
     
     def _load(self) -> dict:
         """Cargar memoria desde archivo"""
@@ -73,9 +89,73 @@ class AgentMemory:
         }
     
     def save(self):
-        """Guardar memoria a archivo"""
-        with open(self.memory_file, 'w') as f:
-            json.dump(self.data, f, indent=2, default=str)
+        """Guardar memoria a archivo con file locking"""
+        try:
+            import fcntl  # Unix/Linux file locking
+            with open(self.memory_file, 'w') as f:
+                # Adquirir lock exclusivo para escritura
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                try:
+                    json.dump(self.data, f, indent=2, default=str)
+                finally:
+                    # Liberar lock
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        except ImportError:
+            # En Windows, fcntl no está disponible, usar método simple
+            logger.warning("File locking no disponible en este sistema")
+            with open(self.memory_file, 'w') as f:
+                json.dump(self.data, f, indent=2, default=str)
+    
+    def sync_to_database(self, db_session, trade_id: str, symbol: str, side: str, 
+                         entry_price: float, exit_price: float, pnl: float,
+                         signals_used: list, patterns_detected: list):
+        """
+        Sincronizar trade con base de datos PostgreSQL.
+        
+        Args:
+            db_session: Sesión de SQLAlchemy
+            trade_id: ID del trade
+            symbol: Símbolo (ej: BTCUSDT)
+            side: BUY o SELL
+            entry_price: Precio de entrada
+            exit_price: Precio de salida
+            pnl: Profit and Loss
+            signals_used: Lista de señales usadas
+            patterns_detected: Lista de patrones detectados
+        """
+        try:
+            from app.infrastructure.database.models import AgentTrade
+            import json as json_lib
+            
+            # Verificar si ya existe
+            existing = db_session.query(AgentTrade).filter(
+                AgentTrade.trade_id == trade_id
+            ).first()
+            
+            if existing:
+                logger.debug(f"Trade {trade_id} ya existe en BD")
+                return
+            
+            # Crear nuevo registro
+            agent_trade = AgentTrade(
+                trade_id=trade_id,
+                symbol=symbol,
+                side=side,
+                entry_price=entry_price,
+                exit_price=exit_price,
+                pnl=pnl,
+                signals_used=json_lib.dumps(signals_used),
+                patterns_detected=json_lib.dumps(patterns_detected)
+            )
+            
+            db_session.add(agent_trade)
+            db_session.commit()
+            logger.info(f"✅ Trade {trade_id} sincronizado con BD")
+            
+        except Exception as e:
+            logger.error(f"❌ Error sincronizando trade con BD: {e}")
+            if db_session:
+                db_session.rollback()
     
     def get_win_rate(self) -> float:
         """Calcular win rate actual"""
@@ -352,10 +432,14 @@ class LearningEngine:
         exit_price: float,
         pnl: float,
         signals_used: List[str],
-        patterns_detected: List[str]
+        patterns_detected: List[str],
+        db_session=None
     ):
         """
         Registrar resultado de un trade para aprendizaje.
+        
+        Args:
+            db_session: (Opcional) Sesión de BD para sincronización
         """
         success = pnl > 0
         
@@ -404,7 +488,22 @@ class LearningEngine:
         if len(self.memory.data["evolution_history"]) > 1000:
             self.memory.data["evolution_history"] = self.memory.data["evolution_history"][-1000:]
         
+        # Guardar en JSON
         self.memory.save()
+        
+        # NUEVO: Sincronizar con BD si está disponible
+        if db_session:
+            self.memory.sync_to_database(
+                db_session=db_session,
+                trade_id=trade_id,
+                symbol=symbol,
+                side=side,
+                entry_price=entry_price,
+                exit_price=exit_price,
+                pnl=pnl,
+                signals_used=signals_used,
+                patterns_detected=patterns_detected
+            )
         
         logger.info(f"📚 Aprendizaje registrado: Trade {trade_id}, PnL: ${pnl:.2f}, Win Rate: {self.memory.get_win_rate():.1f}%")
     
