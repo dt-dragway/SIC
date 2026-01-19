@@ -291,43 +291,180 @@ async def get_latest_signal(
 @router.get("/performance")
 async def get_agent_performance(token: str = Depends(oauth2_scheme)):
     """
-    📊 Estadísticas de rendimiento del Agente IA.
-    
-    Muestra:
-    - Win rate histórico
-    - PnL total
-    - Mejor/peor trade
-    - Patrones aprendidos
-    - Pesos de estrategias actuales
+    Obtener estadísticas de performance del agente IA.
     """
     verify_token(token)
-    
     agent = get_trading_agent()
-    stats = agent.get_performance_stats()
+    
+    performance = {
+        "total_trades": agent.memory.data["total_trades"],
+        "winning_trades": agent.memory.data["winning_trades"],
+        "losing_trades": agent.memory.data["losing_trades"],
+        "win_rate": agent.memory.get_win_rate(),
+        "total_pnl": agent.memory.data["total_pnl"],
+        "best_trade": agent.memory.data["best_trade"],
+        "worst_trade": agent.memory.data["worst_trade"],
+        "patterns_learned": len(agent.memory.data["patterns_learned"]),
+        "strategy_weights": agent.memory.data["current_strategy_weights"]
+    }
+    
+    return performance
+
+
+@router.get("/learning-progress")
+async def get_learning_progress(token: str = Depends(oauth2_scheme)):
+    """
+    Obtener métricas de progreso y aprendizaje de la IA con barras de progreso.
+    
+    Retorna 6 dimensiones de aprendizaje:
+    - Experiencia de trading
+    - Tasa de éxito (win rate)
+    - Patrones aprendidos
+    - Confianza promedio
+    - Nivel de maestría
+    - Evolución temporal
+    """
+    verify_token(token)
+    agent = get_trading_agent()
+    
+    # Datos base
+    total_trades = agent.memory.data["total_trades"]
+    winning_trades = agent.memory.data["winning_trades"]
+    losing_trades = agent.memory.data["losing_trades"]
+    win_rate = agent.memory.get_win_rate()
+    patterns_count = len(agent.memory.data["patterns_learned"])
+    
+    # 1. Experiencia (0-100% basado en 100 trades)
+    experience_level = min(100.0, (total_trades / 100) * 100)
+    
+    # 2. Win Rate
+    win_rate_status = "beginner" if win_rate < 50 else "intermediate" if win_rate < 70 else "expert"
+    
+    # 3. Patrones (meta: 20 patrones)
+    patterns_progress = min(100.0, (patterns_count / 20) * 100)
+    
+    # 4. Confianza promedio (incrementa con experiencia y win rate)
+    base_confidence = 50.0
+    experience_bonus = min(30.0, (total_trades / 100) * 30)
+    winrate_bonus = win_rate * 0.2
+    avg_confidence = min(100.0, base_confidence + experience_bonus + winrate_bonus)
+    
+    # 5. Nivel de maestría (combinación de todas las métricas)
+    exp_score = experience_level * 0.3
+    winrate_score = win_rate * 0.5
+    patterns_score = patterns_progress * 0.2
+    mastery_score = exp_score + winrate_score + patterns_score
+    
+    # Título de maestría
+    if mastery_score < 20:
+        mastery_title = "🌱 Novato"
+        next_level = 20
+    elif mastery_score < 40:
+        mastery_title = "📚 Aprendiz"
+        next_level = 40
+    elif mastery_score < 60:
+        mastery_title = "⚡ Intermedio"
+        next_level = 60
+    elif mastery_score < 80:
+        mastery_title = "🚀 Avanzado"
+        next_level = 80
+    elif mastery_score < 95:
+        mastery_title = "⭐ Experto"
+        next_level = 95
+    else:
+        mastery_title = "👑 Maestro"
+        next_level = 100
+    
+    # 6. Evolución temporal (últimos 30 trades)
+    evolution_history = agent.memory.data["evolution_history"][-30:]
+    
+    # Calcular tendencia de win rate
+    if len(evolution_history) >= 2:
+        recent_winrate = sum(1 for e in evolution_history[-10:] if e.get("pnl", 0) > 0) / min(10, len(evolution_history[-10:])) * 100
+        trend = "improving" if recent_winrate > win_rate else "stable" if abs(recent_winrate - win_rate) < 5 else "declining"
+    else:
+        recent_winrate = win_rate
+        trend = "stable"
     
     return {
-        **stats,
-        "timestamp": datetime.utcnow()
+        "experience": {
+            "level": round(experience_level, 1),
+            "trades_completed": total_trades,
+            "target_trades": 100,
+            "percentage": round(experience_level, 1),
+            "status": "learning" if total_trades < 50 else "experienced"
+        },
+        "win_rate": {
+            "current": round(win_rate, 1),
+            "target": 70.0,
+            "winning_trades": winning_trades,
+            "losing_trades": losing_trades,
+            "status": win_rate_status,
+            "color": "red" if win_rate < 50 else "yellow" if win_rate < 70 else "green"
+        },
+        "patterns": {
+            "learned": patterns_count,
+            "target": 20,
+            "percentage": round(patterns_progress, 1),
+            "list": list(agent.memory.data["patterns_learned"].keys())[:10],  # Top 10
+            "status": "exploring" if patterns_count < 10 else "mastering"
+        },
+        "confidence": {
+            "average": round(avg_confidence, 1),
+            "target": 80.0,
+            "percentage": round(avg_confidence, 1),
+            "status": "building" if avg_confidence < 70 else "strong"
+        },
+        "mastery": {
+            "level": round(mastery_score, 1),
+            "title": mastery_title,
+            "next_level": next_level,
+            "progress_to_next": round((mastery_score / next_level) * 100, 1) if next_level > mastery_score else 100.0
+        },
+        "evolution": {
+            "history": [
+                {
+                    "timestamp": e.get("timestamp", ""),
+                    "win_rate": e.get("win_rate", 0),
+                    "pnl": e.get("pnl", 0)
+                }
+                for e in evolution_history
+            ],
+            "trend": trend,
+            "recent_winrate": round(recent_winrate, 1)
+        },
+        "stats": {
+            "total_pnl": round(agent.memory.data["total_pnl"], 2),
+            "best_trade": round(agent.memory.data["best_trade"], 2) if agent.memory.data["best_trade"] else 0.0,
+            "worst_trade": round(agent.memory.data["worst_trade"], 2) if agent.memory.data["worst_trade"] else 0.0
+        },
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 
 @router.get("/patterns")
 async def get_learned_patterns(token: str = Depends(oauth2_scheme)):
     """
-    📚 Patrones aprendidos por el Agente IA.
-    
-    Muestra la precisión histórica de cada patrón detectado.
+    Obtener patrones aprendidos por el agente.
     """
     verify_token(token)
-    
     agent = get_trading_agent()
-    patterns = agent.get_learned_patterns()
     
-    return {
-        "count": len(patterns),
-        "patterns": patterns,
-        "timestamp": datetime.utcnow()
-    }
+    patterns = []
+    for pattern, data in agent.memory.data["patterns_learned"].items():
+        accuracy = (data["wins"] / data["total"] * 100) if data["total"] > 0 else 0
+        patterns.append({
+            "name": pattern,
+            "total": data["total"],
+            "wins": data["wins"],
+            "losses": data["losses"],
+            "accuracy": round(accuracy, 1)
+        })
+    
+    # Ordenar por accuracy
+    patterns.sort(key=lambda x: x["accuracy"], reverse=True)
+    
+    return patterns
 
 
 @router.post("/record-result")
