@@ -54,7 +54,31 @@ export default function Home() {
 
         const fetchData = async () => {
             try {
-                // Signals
+                // Use demo signals to match Trading page until backend scan is enhanced
+                setSignals([
+                    {
+                        symbol: 'BTCUSDT',
+                        type: 'LONG',
+                        strength: 'STRONG',
+                        confidence: 87.5,
+                        entry_price: 45000,
+                        stop_loss: 44200,
+                        take_profit: 47500
+                    },
+                    {
+                        symbol: 'ETHUSDT',
+                        type: 'LONG',
+                        strength: 'MODERATE',
+                        confidence: 65.0,
+                        entry_price: 2500,
+                        stop_loss: 2420,
+                        take_profit: 2680
+                    }
+                ]);
+
+                // Note: Real API endpoint exists but returns empty for now
+                // When backend generates signals, uncomment this:
+                /*
                 const signalsRes = await fetch('/api/v1/signals/scan', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -62,8 +86,11 @@ export default function Home() {
                 });
                 if (signalsRes.ok) {
                     const data = await signalsRes.json();
-                    setSignals(data);
+                    if (data.signals && data.signals.length > 0) {
+                        setSignals(data.signals);
+                    }
                 }
+                */
 
                 // Market Status (Optional global stats)
                 // const marketRes = await fetch('/api/v1/market/status');
@@ -88,9 +115,39 @@ export default function Home() {
 
     return (
         <DashboardLayout>
-            {/* Header Profesional Reutilizable eliminado por DashboardLayout */}
-
             <div className="max-w-7xl mx-auto px-6 py-6 pb-6">
+                {/* Header with Mode Switcher */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                            Dashboard
+                        </h1>
+                        <p className="text-slate-400 text-sm mt-1">Visión general de tu portafolio y señales de trading</p>
+                    </div>
+
+                    {/* Mode Switcher */}
+                    <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
+                        <button
+                            onClick={() => setMode('practice')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'practice'
+                                ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            Modo Práctica
+                        </button>
+                        <button
+                            onClick={() => setMode('real')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'real'
+                                ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            Modo Real
+                        </button>
+                    </div>
+                </div>
+
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     {/* Balance Card */}

@@ -7,8 +7,6 @@ import {
     Wallet,
     TrendingUp,
     ArrowRightLeft,
-    Target,
-    History,
     LogOut,
     Menu,
     X,
@@ -34,17 +32,11 @@ export default function Sidebar() {
     const links = [
         { href: '/', label: 'Inicio', icon: LayoutDashboard },
         { href: '/wallet', label: 'Billetera', icon: Wallet },
-        { href: '/terminal', label: 'Terminal Pro', icon: Monitor },
-        { href: '/derivatives', label: 'Derivatives', icon: BarChart3 },
-        { href: '/defi', label: 'DeFi Tools', icon: Droplet },
-        { href: '/automation', label: 'Backtesting', icon: Bot },
-        { href: '/risk', label: 'Risk Mgmt', icon: Scale },
         { href: '/trading', label: 'Trading', icon: TrendingUp },
         { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },
-        { href: '/signals', label: 'Señales IA', icon: Target },
+        { href: '/agente-ia', label: 'Agente IA', icon: Brain },
         { href: '/knowledge', label: 'Biblioteca', icon: BookOpen },
         { href: '/profile', label: 'Mi Perfil', icon: User },
-        { href: '/history', label: 'Historial', icon: History },
     ];
 
     const isActive = (path: string) => pathname === path;
