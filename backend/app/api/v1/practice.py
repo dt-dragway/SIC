@@ -18,6 +18,7 @@ from app.infrastructure.database.models import VirtualWallet as VirtualWalletMod
 
 from app.api.v1.auth import oauth2_scheme, verify_token
 from app.infrastructure.binance.client import get_binance_client
+from loguru import logger
 
 
 router = APIRouter()
@@ -35,6 +36,7 @@ class VirtualBalance(BaseModel):
 class VirtualWallet(BaseModel):
     initial_capital: float = 100.0
     current_value: float
+    total_usd: Optional[float] = None  # Alias for frontend compatibility
     pnl: float
     pnl_percent: float
     balances: List[VirtualBalance]

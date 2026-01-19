@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 export default function WalletPage() {
     const { isAuthenticated, loading: authLoading } = useAuth();
-    const { balances, totalUsd, mode, isLoading: walletLoading, refreshWallet } = useWallet();
+    const { balances, totalUsd, mode, setMode, isLoading: walletLoading, refreshWallet } = useWallet();
     const [hideBalance, setHideBalance] = useState(false);
 
     if (authLoading) return <LoadingSpinner />;
@@ -31,12 +31,7 @@ export default function WalletPage() {
                     {/* Mode Switcher */}
                     <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
                         <button
-                            onClick={() => {
-                                refreshWallet();
-                                if (mode !== 'practice') {
-                                    (document.querySelector('header button:first-child') as HTMLButtonElement)?.click();
-                                }
-                            }}
+                            onClick={() => setMode('practice')}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'practice'
                                 ? 'bg-emerald-500/20 text-emerald-400 shadow-sm ring-1 ring-emerald-500/50'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -45,12 +40,7 @@ export default function WalletPage() {
                             Modo Práctica
                         </button>
                         <button
-                            onClick={() => {
-                                refreshWallet();
-                                if (mode !== 'real') {
-                                    (document.querySelector('header button:last-child') as HTMLButtonElement)?.click();
-                                }
-                            }}
+                            onClick={() => setMode('real')}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'real'
                                 ? 'bg-blue-500/20 text-blue-400 shadow-sm ring-1 ring-blue-500/50'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'
