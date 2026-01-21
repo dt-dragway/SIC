@@ -119,6 +119,10 @@ export function AIProvider({ children }: { children: ReactNode }) {
         // Only run on client
         if (typeof window === 'undefined') return;
 
+        // Only run analysis if we have authentication
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         checkStatus();
         loadMemory(symbol).then(() => {
             // Si no hay memoria, o para refrezcar, iniciamos análisis
@@ -126,14 +130,15 @@ export function AIProvider({ children }: { children: ReactNode }) {
         });
 
         // Heartbeat pulse every 30s
-        // Heartbeat pulse every 30s
         const interval = setInterval(() => {
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken) return;
             checkStatus();
             analyzeMarket(symbol);
         }, 30000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [symbol]);
 
     // Also reload memory if symbol changes (future proofing)
     useEffect(() => {

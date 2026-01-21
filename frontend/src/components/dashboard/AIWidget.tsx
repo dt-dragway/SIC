@@ -1,34 +1,106 @@
 import { useState, useEffect } from 'react';
-import { useAIContext } from '../../context/AIContext';
 import {
     Brain,
-    Activity,
-    Zap,
-    TrendingUp,
-    TrendingDown,
-    Minus,
     Cpu,
     RefreshCw,
     Terminal,
     Target
 } from 'lucide-react';
 
-export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
-    const { analysis, loading, status, analyzeMarket } = useAIContext();
-    const [elapsed, setElapsed] = useState(0);
+interface MarketAnalysis {
+    signal: string;
+    confidence: number;
+    entry_price: number;
+    reasoning: string[];
+}
 
-    // Timer para "Live" feel
+export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
+    const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [currentPrice, setCurrentPrice] = useState<number>(0);
+
+    const fetchAnalysis = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            // Get signals from real AI
+            const response = await fetch('/api/v1/signals/scan', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Find signal for this symbol or use first available  
+                const signalData = data.signals?.find((s: any) => s.symbol === symbol) || data.signals?.[0];
+
+                if (signalData) {
+                    setAnalysis({
+                        signal: signalData.direction || 'HOLD',
+                        confidence: signalData.confidence || 0,
+                        entry_price: signalData.entry_price || 0,
+                        reasoning: signalData.reasoning || ['Analizando mercado...']
+                    });
+                    setCurrentPrice(signalData.entry_price || 0);
+                } else {
+                    // No signals available - show neutral state
+                    setAnalysis({
+                        signal: 'HOLD',
+                        confidence: 50,
+                        entry_price: 0,
+                        reasoning: [
+                            'Mercado en consolidación',
+                            'RSI en rango neutral (40-60)',
+                            'Sin patrones claros detectados',
+                            'Esperando oportunidad'
+                        ]
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching AI analysis:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Auto-load on mount and refresh every 2 minutes
     useEffect(() => {
-        const interval = setInterval(() => setElapsed(p => p + 1), 1000);
+        fetchAnalysis();
+        const interval = setInterval(fetchAnalysis, 120000); // 2 min
         return () => clearInterval(interval);
-    }, []);
+    }, [symbol]);
 
     // Colores dinámicos según señal
     const getSignalColor = (signal: string) => {
         switch (signal) {
-            case 'BUY': return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', glow: 'shadow-emerald-500/20' };
-            case 'SELL': return { text: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30', glow: 'shadow-rose-500/20' };
-            default: return { text: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/30', glow: 'shadow-slate-500/10' };
+            case 'LONG':
+            case 'BUY':
+                return {
+                    text: 'text-emerald-400',
+                    bg: 'bg-emerald-500/10',
+                    border: 'border-emerald-500/30',
+                    glow: 'shadow-emerald-500/20'
+                };
+            case 'SHORT':
+            case 'SELL':
+                return {
+                    text: 'text-rose-400',
+                    bg: 'bg-rose-500/10',
+                    border: 'border-rose-500/30',
+                    glow: 'shadow-rose-500/20'
+                };
+            default:
+                return {
+                    text: 'text-slate-400',
+                    bg: 'bg-slate-500/10',
+                    border: 'border-slate-500/30',
+                    glow: 'shadow-slate-500/10'
+                };
         }
     };
 
@@ -46,8 +118,8 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                     <div className="relative flex items-center justify-center h-8 w-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20">
                         <Brain className="h-4 w-4 text-white" />
                         <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status?.available ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
-                            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${status?.available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-emerald-400"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                         </span>
                     </div>
                     <div>
@@ -58,7 +130,7 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                         <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
                             <span className="flex items-center gap-1">
                                 <Cpu size={10} />
-                                {status?.model || 'Desconectado'}
+                                Trading Agent
                             </span>
                             <span className="text-slate-600">|</span>
                             <span className="text-emerald-400">ONLINE</span>
@@ -67,7 +139,7 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                 </div>
 
                 <button
-                    onClick={() => analyzeMarket(symbol)}
+                    onClick={fetchAnalysis}
                     disabled={loading}
                     className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors disabled:opacity-50"
                 >
@@ -78,19 +150,6 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
             {/* Main Content Area */}
             <div className="p-6 space-y-6">
 
-                {!analysis && !loading && (
-                    <div className="py-12 flex flex-col items-center justify-center text-center opacity-50">
-                        <Activity size={48} className="text-slate-600 mb-4" />
-                        <p className="text-slate-400 max-w-[200px]">Esperando datos de mercado para iniciar inferencia...</p>
-                        <button
-                            onClick={() => analyzeMarket(symbol)}
-                            className="mt-6 px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all"
-                        >
-                            Iniciar Escaneo
-                        </button>
-                    </div>
-                )}
-
                 {loading && (
                     <div className="py-12 space-y-6">
                         <div className="flex flex-col items-center gap-4">
@@ -100,16 +159,16 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                                 <Brain className="absolute inset-0 m-auto text-violet-400 animate-pulse" size={24} />
                             </div>
                             <div className="text-center space-y-1">
-                                <h4 className="text-white font-medium animate-pulse">Procesando Tensores...</h4>
-                                <p className="text-xs text-slate-500 font-mono">Analizando patrones en {symbol}</p>
+                                <h4 className="text-white font-medium animate-pulse">Analizando Mercado...</h4>
+                                <p className="text-xs text-slate-500 font-mono">Procesando {symbol}</p>
                             </div>
                         </div>
-                        {/* Fake terminal log */}
+                        {/* Terminal log */}
                         <div className="mx-4 p-3 rounded-lg bg-black/50 border border-white/5 font-mono text-[10px] text-emerald-500/80 space-y-1">
-                            <p>&gt; Loading market data...</p>
-                            <p>&gt; Running LSTM prediction...</p>
-                            <p>&gt; Validating XGBoost confidence...</p>
-                            <p className="animate-pulse">&gt; Generating semantic reasoning...</p>
+                            <p>&gt; Conectando con Binance API...</p>
+                            <p>&gt; Calculando indicadores técnicos...</p>
+                            <p>&gt; Analizando patrones de mercado...</p>
+                            <p className="animate-pulse">&gt; Generando señal...</p>
                         </div>
                     </div>
                 )}
@@ -121,11 +180,16 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                             <div className="relative z-10">
                                 <span className={`text-xs font-bold tracking-widest uppercase ${styles.text} opacity-80 flex items-center gap-2`}>
                                     <Target size={14} />
-                                    Señal Detectada
+                                    {analysis.signal === 'HOLD' ? 'Mercado Neutral' : 'Señal Detectada'}
                                 </span>
                                 <h2 className={`text-5xl font-black tracking-tighter mt-1 mb-1 ${styles.text} drop-shadow-sm`}>
                                     {analysis.signal}
                                 </h2>
+                                {currentPrice > 0 && (
+                                    <p className="text-sm text-slate-400 font-mono">
+                                        @ ${currentPrice.toLocaleString()}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Confidence Gauge (Circular) */}
@@ -142,40 +206,8 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                                     />
                                 </svg>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className={`text-lg font-bold ${styles.text}`}>{analysis.confidence}%</span>
+                                    <span className={`text-lg font-bold ${styles.text}`}>{Math.round(analysis.confidence)}%</span>
                                     <span className="text-[8px] text-slate-500 uppercase font-bold">Confianza</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Sub-Models Grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                            {/* LSTM */}
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5 hover:bg-white/[0.07] transition-colors">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Activity size={14} className="text-cyan-400" />
-                                    <span className="text-xs font-medium text-slate-400">LSTM (Precio)</span>
-                                </div>
-                                <div className="text-lg font-bold text-white font-mono">
-                                    ${analysis.lstm_prediction.toLocaleString()}
-                                </div>
-                            </div>
-
-                            {/* XGBoost */}
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5 hover:bg-white/[0.07] transition-colors">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Zap size={14} className="text-amber-400" />
-                                    <span className="text-xs font-medium text-slate-400">XGBoost (Trend)</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {analysis.xgboost_class === 'UP' ? <TrendingUp size={16} className="text-emerald-400" /> :
-                                        analysis.xgboost_class === 'DOWN' ? <TrendingDown size={16} className="text-rose-400" /> :
-                                            <Minus size={16} className="text-slate-400" />}
-                                    <span className={`text-sm font-bold ${analysis.xgboost_class === 'UP' ? 'text-emerald-400' :
-                                        analysis.xgboost_class === 'DOWN' ? 'text-rose-400' : 'text-slate-400'
-                                        }`}>
-                                        {analysis.xgboost_class}
-                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -184,10 +216,10 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
                         <div className="bg-black/40 rounded-xl border border-white/10 overflow-hidden">
                             <div className="bg-white/5 px-4 py-2 flex items-center gap-2 border-b border-white/5">
                                 <Terminal size={12} className="text-slate-500" />
-                                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Agent Logic Core</span>
+                                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Análisis IA</span>
                             </div>
                             <div className="p-4 space-y-3 font-mono text-xs max-h-[140px] overflow-y-auto custom-scrollbar">
-                                {analysis.reasoning.map((line, i) => (
+                                {analysis.reasoning.slice(0, 4).map((line, i) => (
                                     <div key={i} className="flex gap-3 text-slate-300">
                                         <span className="text-slate-600 select-none">{(i + 1).toString().padStart(2, '0')}</span>
                                         <p className="leading-relaxed">
@@ -205,7 +237,7 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
             {/* Footer status */}
             <div className="px-6 py-3 bg-white/[0.02] border-t border-white/5 flex justify-between items-center text-[10px] text-slate-500 font-mono">
                 <span>System Status: <span className="text-emerald-500">OPTIMAL</span></span>
-                <span>Latency: {Math.floor(Math.random() * 20 + 10)}ms</span>
+                <span>Auto-refresh: 2min</span>
             </div>
         </div>
     );

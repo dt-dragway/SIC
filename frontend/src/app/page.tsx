@@ -54,53 +54,39 @@ export default function Home() {
 
         const fetchData = async () => {
             try {
-                // Use demo signals to match Trading page until backend scan is enhanced
-                setSignals([
-                    {
-                        symbol: 'BTCUSDT',
-                        type: 'LONG',
-                        strength: 'STRONG',
-                        confidence: 87.5,
-                        entry_price: 45000,
-                        stop_loss: 44200,
-                        take_profit: 47500
-                    },
-                    {
-                        symbol: 'ETHUSDT',
-                        type: 'LONG',
-                        strength: 'MODERATE',
-                        confidence: 65.0,
-                        entry_price: 2500,
-                        stop_loss: 2420,
-                        take_profit: 2680
-                    }
-                ]);
+                setDataLoading(true);
 
-                // Note: Real API endpoint exists but returns empty for now
-                // When backend generates signals, uncomment this:
-                /*
+                // === REAL AI ANALYSIS ===
+                // Connect to trading agent for real market analysis
                 const signalsRes = await fetch('/api/v1/signals/scan', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+
                 if (signalsRes.ok) {
                     const data = await signalsRes.json();
-                    if (data.signals && data.signals.length > 0) {
-                        setSignals(data.signals);
-                    }
+                    // Only show top 5 signals in dashboard
+                    const topSignals = data.signals ? data.signals.slice(0, 5) : [];
+                    setSignals(topSignals);
+                } else {
+                    // Fallback to empty if API fails
+                    console.warn('Signals API failed, showing empty state');
+                    setSignals([]);
                 }
-                */
 
                 // Market Status (Optional global stats)
                 // const marketRes = await fetch('/api/v1/market/status');
             } catch (error) {
                 console.error("Error fetching dashboard data", error);
+                setSignals([]); // Clear signals on error
+            } finally {
+                setDataLoading(false);
             }
         };
 
         fetchData();
-        const interval = setInterval(fetchData, 30000); // Live updates
+        const interval = setInterval(fetchData, 120000); // Update every 2 minutes
 
         return () => clearInterval(interval);
     }, [authLoading, isAuthenticated, token]);

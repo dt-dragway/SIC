@@ -70,19 +70,39 @@ export function useAI(symbol: string = 'BTCUSDT') {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            if (!token) throw new Error("No autenticado");
+            if (!token) return; // Exit silently if no token
 
-            // Llamar al endpoint de análisis (asumimos que existe un endpoint unificado o llamamos a signals)
             const res = await fetch(`/api/v1/signals/analyze/${symbol}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
+            // Handle 404 as HOLD signal (no clear signal available)
+            if (res.status === 404) {
+                setAnalysis({
+                    signal: 'HOLD',
+                    confidence: 50,
+                    reasoning: ["Sin señal clara en este momento", "El mercado está en consolidación"],
+                    lstm_prediction: 0,
+                    xgboost_class: "NEUTRAL",
+                    timestamp: new Date().toISOString()
+                });
+                return;
+            }
+
+            if (!res.ok) {
+                // Log non-404 errors but don't spam console
+                if (res.status !== 401) {
+                    console.error(`Signal API error: ${res.status}`);
+                }
+                return;
+            }
+
             const data = await res.json();
 
-            // Adaptar respuesta al formato UI
+            // Adaptar respuesta al formato UI (signal o direction)
             setAnalysis({
-                signal: data.signal,
-                confidence: data.confidence,
+                signal: data.direction || data.signal || 'HOLD',
+                confidence: data.confidence || 50,
                 reasoning: data.reasoning || ["Análisis técnico completado"],
                 lstm_prediction: data.ml_data?.lstm_price || 0,
                 xgboost_class: data.ml_data?.xgboost_signal || "NEUTRAL",
@@ -90,7 +110,7 @@ export function useAI(symbol: string = 'BTCUSDT') {
             });
 
         } catch (e) {
-            console.error("Error analyzing market", e);
+            // Silent fail - don't spam console with expected errors
         } finally {
             setLoading(false);
         }

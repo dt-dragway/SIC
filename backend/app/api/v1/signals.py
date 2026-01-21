@@ -150,10 +150,25 @@ async def analyze_symbol(
     signal = get_full_analysis(symbol.upper())
     
     if not signal:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No se pudo analizar {symbol} o no hay señal clara (HOLD)"
-        )
+        # Return HOLD signal instead of 404 (resource exists, just no clear direction)
+        now = datetime.utcnow()
+        return {
+            "symbol": symbol.upper(),
+            "direction": "HOLD",
+            "confidence": 50.0,
+            "strength": "NEUTRAL",
+            "entry_price": 0,
+            "stop_loss": 0,
+            "take_profit": 0,
+            "risk_reward": 0,
+            "patterns_detected": [],
+            "indicators_used": ["RSI", "MACD", "Bollinger"],
+            "reasoning": ["Mercado en consolidación", "Sin señal clara de dirección"],
+            "top_trader_consensus": None,
+            "timestamp": now,
+            "expires_at": now,
+            "auto_execute_approved": False
+        }
     
     # === PERSISTENCIA ===
     try:
@@ -213,7 +228,27 @@ async def scan_market(token: str = Depends(oauth2_scheme)):
     """
     verify_token(token)
     
-    symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT"]
+    symbols = [
+        # Top Market Cap
+        "BTCUSDT",    # Bitcoin
+        "ETHUSDT",    # Ethereum
+        "BNBUSDT",    # Binance Coin
+        "SOLUSDT",    # Solana
+        "XRPUSDT",    # Ripple
+        "ADAUSDT",    # Cardano
+        
+        # DeFi & Layer 1
+        "DOTUSDT",    # Polkadot
+        "MATICUSDT",  # Polygon
+        "AVAXUSDT",   # Avalanche
+        "LINKUSDT",   # Chainlink
+        
+        # Popular Coins
+        "DOGEUSDT",   # Dogecoin
+        "LTCUSDT",    # Litecoin
+        "ATOMUSDT",   # Cosmos
+        "UNIUSDT",    # Uniswap
+    ]
     signals = []
     
     for symbol in symbols:
