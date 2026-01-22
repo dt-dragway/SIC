@@ -20,6 +20,7 @@ interface WalletState {
     balances: Balance[];
     setMode: (mode: Mode) => void;
     refreshWallet: () => Promise<void>;
+    refreshBalances: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletState | undefined>(undefined);
@@ -128,7 +129,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             totalUsd,
             balances,
             setMode: handleSetMode,
-            refreshWallet: () => refreshWallet(false)
+            refreshWallet: () => refreshWallet(false),
+            refreshBalances: () => refreshWallet(false)
         }}>
             {children}
         </WalletContext.Provider>

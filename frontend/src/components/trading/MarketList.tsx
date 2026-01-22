@@ -14,6 +14,14 @@ const SYMBOLS: Symbol[] = [
     { symbol: 'SOLUSDT', name: 'Solana' },
     { symbol: 'XRPUSDT', name: 'XRP' },
     { symbol: 'ADAUSDT', name: 'Cardano' },
+    { symbol: 'DOGEUSDT', name: 'Dogecoin' },
+    { symbol: 'DOTUSDT', name: 'Polkadot' },
+    { symbol: 'MATICUSDT', name: 'Polygon' },
+    { symbol: 'AVAXUSDT', name: 'Avalanche' },
+    { symbol: 'LINKUSDT', name: 'Chainlink' },
+    { symbol: 'LTCUSDT', name: 'Litecoin' },
+    { symbol: 'TRXUSDT', name: 'Tron' },
+    { symbol: 'ATOMUSDT', name: 'Cosmos' },
 ]
 
 interface MarketListProps {
@@ -31,8 +39,8 @@ export default function MarketList({ currentSymbol, onSymbolChange }: MarketList
                         key={sym.symbol}
                         onClick={() => onSymbolChange(sym.symbol)}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${currentSymbol === sym.symbol
-                                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                            ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-white'
                             }`}
                     >
                         <div className="flex items-center justify-between">

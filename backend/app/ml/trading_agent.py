@@ -22,6 +22,7 @@ from loguru import logger
 import random
 
 from app.config import settings
+from app.ml.candlestick_analyzer import CandlestickAnalyzer, CandlestickPattern
 
 
 # === Memory Storage ===
@@ -537,11 +538,23 @@ class TradingSignal:
     risk_reward: float
     
     # Análisis detallado
-    patterns_detected: List[str]
-    indicators_used: List[str]
+    patterns_detected: List[str]  # Nombres de patrones técnicos
+    indicators_used: List[str]  # Indicadores usados (RSI, MACD, etc.)
     top_trader_consensus: Optional[Dict]
     
-    # Razonamiento
+    # NUEVO: Patrones de velas detectados
+    candlestick_patterns: List[Dict]  # Patrones de velas con detalles
+    
+    # NUEVO: Explicación en español para usuarios novatos
+    explanation_es: str  # Explicación clara y concisa
+    
+    # NUEVO: Pasos de ejecución para el usuario
+    execution_steps: List[str]  # Instrucciones paso a paso
+    
+    # NUEVO: Análisis multi-timeframe
+    timeframe_analysis: Dict[str, str]  # {"1h": "BULLISH", "4h": "BULLISH", ...}
+    
+    # Razonamiento (técnico)
     reasoning: List[str]
     
     # Metadata
@@ -566,10 +579,13 @@ class TradingAgentAI:
         self.learning = LearningEngine(self.memory)
         self.pattern_recognizer = PatternRecognizer()
         self.top_trader_analyzer = TopTraderAnalyzer()
+        # NUEVO: Analizador de patrones de velas
+        self.candlestick_analyzer = CandlestickAnalyzer(min_confidence=65.0)
         
         logger.info("🤖 Agente IA Trading iniciado")
         logger.info(f"📊 Trades históricos: {self.memory.data['total_trades']}")
         logger.info(f"🏆 Win Rate: {self.memory.get_win_rate():.1f}%")
+        logger.info(f"🕯️ Candlestick Analyzer: Activo (confianza mínima: 65%)")
     
     def analyze(
         self, 
@@ -722,7 +738,34 @@ class TradingAgentAI:
         reward = abs(take_profit - current_price)
         risk_reward = reward / risk if risk > 0 else 0
         
-        # === 6. Calcular Confianza ===
+        # === 6. Análisis de Patrones de Velas ===
+        candlestick_patterns_detected = self.candlestick_analyzer.analyze(candles, timeframe="1h")
+        
+        # Agregar patrones de velas al score
+        for cp in candlestick_patterns_detected:
+            if cp.direction == "BULLISH" and direction == "LONG":
+                long_score += cp.confidence / 20  # Normalizar a escala de score
+                reasoning.append(f"Patrón vela: {cp.name_es} ({cp.confidence:.0f}% confianza)")
+            elif cp.direction == "BEARISH" and direction == "SHORT":
+                short_score += cp.confidence / 20
+                reasoning.append(f"Patrón vela: {cp.name_es} ({cp.confidence:.0f}% confianza)")
+        
+        # Convertir patrones a formato dict para serialización
+        candlestick_patterns_list = [
+            {
+                "name": cp.name,
+                "name_es": cp.name_es,
+                "direction": cp.direction,
+                "strength": cp.strength_label.value,
+                "confidence": cp.confidence,
+                "description_es": cp.description_es,
+                "icon": cp.icon,
+                "color": cp.color
+            }
+            for cp in candlestick_patterns_detected
+        ]
+        
+        # === 7. Calcular Confianza ===
         max_possible_score = 15  # Score máximo teórico
         confidence = min((score / max_possible_score) * 100, 100)
         
@@ -731,6 +774,11 @@ class TradingAgentAI:
         if historical_win_rate > 0:
             confidence = confidence * 0.7 + historical_win_rate * 0.3
         
+        # Boost de confianza si hay patrones de velas fuertes
+        if candlestick_patterns_detected:
+            avg_pattern_confidence = sum(cp.confidence for cp in candlestick_patterns_detected) / len(candlestick_patterns_detected)
+            confidence = confidence * 0.8 + avg_pattern_confidence * 0.2
+        
         # Determinar fuerza
         if confidence >= 80:
             strength = "STRONG"
@@ -738,6 +786,42 @@ class TradingAgentAI:
             strength = "MODERATE"
         else:
             strength = "WEAK"
+        
+        # === 8. Generar Explicación en Español ===
+        from app.ml.signal_explanation import (
+            generate_spanish_explanation,
+            generate_execution_steps
+        )
+        
+        indicators_summary = {
+            "rsi": rsi[-1] if rsi else None,
+            "macd_signal": "alcista" if (macd.get("histogram") and len(macd["histogram"]) >= 2 and 
+                                         macd["histogram"][-1] > 0 and macd["histogram"][-2] <= 0) else "bajista",
+            "trend": indicators.get("trend", "NEUTRAL")
+        }
+        
+        explanation_es = generate_spanish_explanation(
+            direction=direction,
+            symbol=symbol,
+            candlestick_patterns=candlestick_patterns_detected,
+            indicators_summary=indicators_summary,
+            consensus=consensus
+        )
+        
+        execution_steps = generate_execution_steps(
+            direction=direction,
+            entry_price=current_price,
+            stop_loss=stop_loss,
+            take_profit=take_profit,
+            risk_reward=risk_reward
+        )
+        
+        # === 9. Análisis Multi-Timeframe (Placeholder - se implementará después) ===
+        timeframe_analysis = {
+            "1h": direction,  # Por ahora solo analizamos 1h
+            # "4h": "NEUTRAL",  # TODO: implementar análisis de múltiples timeframes
+            # "1d": "NEUTRAL"
+        }
         
         return TradingSignal(
             symbol=symbol,
@@ -751,6 +835,10 @@ class TradingAgentAI:
             patterns_detected=patterns_detected,
             indicators_used=indicators_used,
             top_trader_consensus=consensus,
+            candlestick_patterns=candlestick_patterns_list,
+            explanation_es=explanation_es,
+            execution_steps=execution_steps,
+            timeframe_analysis=timeframe_analysis,
             reasoning=reasoning,
             timestamp=datetime.utcnow(),
             expires_at=datetime.utcnow() + timedelta(hours=4),
