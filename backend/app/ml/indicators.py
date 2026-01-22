@@ -211,3 +211,31 @@ def get_trend(prices: List[float], short_period: int = 10, long_period: int = 50
         return "BEARISH"
     else:
         return "NEUTRAL"
+
+
+def calculate_indicators(candles: List[Dict]) -> Dict:
+    """
+    Calcular todos los indicadores técnicos para una lista de velas.
+    
+    Args:
+        candles: Lista de velas con formato:
+                [{"open": float, "high": float, "low": float, "close": float, "volume": float}]
+    
+    Returns:
+        Dict con todos los indicadores calculados
+    """
+    if not candles or len(candles) < 50:
+        return {}
+    
+    closes = [c["close"] for c in candles]
+    highs = [c["high"] for c in candles]
+    lows = [c["low"] for c in candles]
+    
+    return {
+        "rsi": calculate_rsi(closes, 14),
+        "macd": calculate_macd(closes, 12, 26, 9),
+        "bollinger": calculate_bollinger_bands(closes, 20, 2.0),
+        "atr": calculate_atr(highs, lows, closes, 14),
+        "trend": get_trend(closes, 10, 50),
+        "support_resistance": calculate_support_resistance(closes, 20)
+    }
