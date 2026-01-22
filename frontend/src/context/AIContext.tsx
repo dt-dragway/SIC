@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface AIAnalysis {
+    symbol: string;  // Símbolo de la cripto analizada (BTC, ETH, etc.)
     signal: 'BUY' | 'SELL' | 'HOLD';
     confidence: number;
     reasoning: string[];
@@ -70,6 +71,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
                 const data = await res.json();
                 if (data) {
                     setAnalysis({
+                        symbol: sym,  // Símbolo de la cripto
                         signal: data.signal,
                         confidence: data.confidence,
                         reasoning: data.reasoning || [],
@@ -106,6 +108,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
 
                 if (signalData) {
                     setAnalysis({
+                        symbol: signalData.symbol || sym,  // Símbolo de la cripto
                         signal: signalData.direction || 'HOLD',
                         confidence: signalData.confidence || 50,
                         reasoning: signalData.reasoning || ['Análisis de mercado completado'],
@@ -116,6 +119,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
                 } else {
                     // No hay señales - mostrar estado neutral
                     setAnalysis({
+                        symbol: sym,  // Símbolo por defecto
                         signal: 'HOLD',
                         confidence: 50,
                         reasoning: ['Mercado en consolidación', 'Sin patrones claros detectados'],
@@ -127,6 +131,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
             } else {
                 // Respuesta no OK - mostrar HOLD como fallback
                 setAnalysis({
+                    symbol: sym,  // Símbolo por defecto
                     signal: 'HOLD',
                     confidence: 50,
                     reasoning: ['Analizando condiciones del mercado'],
@@ -140,6 +145,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
             console.error("Error analyzing market context", e);
             // En caso de error, mostrar HOLD
             setAnalysis({
+                symbol: sym,  // Símbolo por defecto
                 signal: 'HOLD',
                 confidence: 50,
                 reasoning: ['Error de conexión - reintenando...'],

@@ -85,6 +85,10 @@ export default function Sidebar() {
                             <p className="text-[10px] text-violet-300 font-bold uppercase tracking-wider">Neural Engine</p>
                             {analysis ? (
                                 <div className="flex items-center gap-1.5">
+                                    {/* Mostrar símbolo de la cripto (ej: BTC) */}
+                                    <span className="text-[10px] text-cyan-400 font-bold">
+                                        {analysis.symbol?.replace('USDT', '') || 'BTC'}:
+                                    </span>
                                     <span className={`text-[10px] font-bold ${analysis.signal === 'BUY' || analysis.signal === 'HOLD' && analysis.confidence > 50 ? 'text-emerald-400' :
                                         analysis.signal === 'SELL' ? 'text-rose-400' : 'text-slate-400'
                                         }`}>
