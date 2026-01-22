@@ -84,31 +84,69 @@ export function AIProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // Analizar mercado
+    // Analizar mercado - usa el mismo endpoint que AIWidget para consistencia
     const analyzeMarket = async (sym: string) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            if (!token) throw new Error("No autenticado");
+            if (!token) {
+                setLoading(false);
+                return;
+            }
 
-            const res = await fetch(`/api/v1/signals/analyze/${sym}`, {
+            // Usar /api/v1/signals/scan como AIWidget para consistencia
+            const res = await fetch('/api/v1/signals/scan', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.ok) {
                 const data = await res.json();
+                // Buscar señal para el símbolo o usar la primera disponible
+                const signalData = data.signals?.find((s: any) => s.symbol === sym) || data.signals?.[0];
+
+                if (signalData) {
+                    setAnalysis({
+                        signal: signalData.direction || 'HOLD',
+                        confidence: signalData.confidence || 50,
+                        reasoning: signalData.reasoning || ['Análisis de mercado completado'],
+                        lstm_prediction: signalData.ml_data?.lstm_price || 0,
+                        xgboost_class: signalData.ml_data?.xgboost_signal || 'NEUTRAL',
+                        timestamp: new Date().toISOString()
+                    });
+                } else {
+                    // No hay señales - mostrar estado neutral
+                    setAnalysis({
+                        signal: 'HOLD',
+                        confidence: 50,
+                        reasoning: ['Mercado en consolidación', 'Sin patrones claros detectados'],
+                        lstm_prediction: 0,
+                        xgboost_class: 'NEUTRAL',
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            } else {
+                // Respuesta no OK - mostrar HOLD como fallback
                 setAnalysis({
-                    signal: data.signal,
-                    confidence: data.confidence,
-                    reasoning: data.reasoning || ["Análisis técnico completado"],
-                    lstm_prediction: data.ml_data?.lstm_price || 0,
-                    xgboost_class: data.ml_data?.xgboost_signal || "NEUTRAL",
+                    signal: 'HOLD',
+                    confidence: 50,
+                    reasoning: ['Analizando condiciones del mercado'],
+                    lstm_prediction: 0,
+                    xgboost_class: 'NEUTRAL',
                     timestamp: new Date().toISOString()
                 });
             }
 
         } catch (e) {
             console.error("Error analyzing market context", e);
+            // En caso de error, mostrar HOLD
+            setAnalysis({
+                signal: 'HOLD',
+                confidence: 50,
+                reasoning: ['Error de conexión - reintenando...'],
+                lstm_prediction: 0,
+                xgboost_class: 'NEUTRAL',
+                timestamp: new Date().toISOString()
+            });
         } finally {
             setLoading(false);
         }

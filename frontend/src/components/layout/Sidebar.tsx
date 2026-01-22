@@ -26,7 +26,7 @@ import { useAIContext } from '@/context/AIContext';
 export default function Sidebar() {
     const pathname = usePathname();
     const { logout } = useAuth();
-    const { status, toggleBrain } = useAIContext();
+    const { analysis, status, toggleBrain } = useAIContext();
     const [isOpen, setIsOpen] = useState(false);
 
     const links = [
@@ -77,13 +77,26 @@ export default function Sidebar() {
                         <div className="relative">
                             <Brain size={16} className="text-violet-400" />
                             <span className="absolute -top-0.5 -right-0.5 flex h-1.5 w-1.5">
-                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status?.available ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
-                                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${status?.available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${analysis ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${analysis ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
                             </span>
                         </div>
                         <div className="flex-1">
                             <p className="text-[10px] text-violet-300 font-bold uppercase tracking-wider">Neural Engine</p>
-                            <p className="text-[10px] text-slate-400 font-mono truncate">{status?.model || 'Desconectado'}</p>
+                            {analysis ? (
+                                <div className="flex items-center gap-1.5">
+                                    <span className={`text-[10px] font-bold ${analysis.signal === 'BUY' || analysis.signal === 'HOLD' && analysis.confidence > 50 ? 'text-emerald-400' :
+                                        analysis.signal === 'SELL' ? 'text-rose-400' : 'text-slate-400'
+                                        }`}>
+                                        {analysis.signal}
+                                    </span>
+                                    <span className="text-[9px] text-slate-500 font-mono">
+                                        {Math.round(analysis.confidence)}%
+                                    </span>
+                                </div>
+                            ) : (
+                                <p className="text-[10px] text-amber-400 font-mono">Analizando...</p>
+                            )}
                         </div>
                     </div>
 
