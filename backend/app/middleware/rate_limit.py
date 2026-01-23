@@ -58,6 +58,10 @@ rate_limiter = RateLimiter()
 async def rate_limit_middleware(request: Request, call_next):
     """Middleware para aplicar rate limiting"""
     
+    # Control via environment variable (default: enabled)
+    if os.getenv("ENABLE_RATE_LIMIT", "true").lower() != "true":
+        return await call_next(request)
+    
     # Skip en modo test
     if os.getenv("TESTING") == "true":
         return await call_next(request)

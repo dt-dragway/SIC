@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 export type Mode = 'practice' | 'real';
@@ -49,7 +49,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         setTotalUsd(0);
     };
 
-    const refreshWallet = async (silent: boolean = false) => {
+    const refreshWallet = useCallback(async (silent: boolean = false) => {
         if (!isAuthenticated || !token) {
             setBalances([]);
             setTotalUsd(0);
@@ -59,12 +59,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         if (!silent) setIsLoading(true);
 
         try {
-            let endpoint = '';
-            if (mode === 'practice') {
-                endpoint = '/api/v1/practice/wallet';
-            } else {
-                endpoint = '/api/v1/wallet';
-            }
+            // Determinar endpoint según el modo
+            const endpoint = mode === 'practice'
+                ? '/api/v1/practice/wallet'
+                : '/api/v1/wallet'; // CORREGIDO: era /api/v1/wallet/balance
 
             const res = await fetch(endpoint, {
                 headers: {
@@ -106,7 +104,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         } finally {
             if (!silent) setIsLoading(false);
         }
-    };
+    }, [mode, token, isAuthenticated]);
 
     // Auto-refresh when mode or auth changes
     useEffect(() => {
