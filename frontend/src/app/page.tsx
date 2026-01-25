@@ -11,6 +11,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useWallet } from '../context/WalletContext' // Import Context
 import InstitutionalAssistant from '../components/ai/InstitutionalAssistant'
 import AINeuroEngine from '../components/ai/AINeuroEngine'
+import OrderExecutionModal from '../components/trading/OrderExecutionModal' // Import Modal
 
 const CandlestickChart = dynamic(
     () => import('../components/charts/CandlestickChart').then(mod => mod.CandlestickChart),
@@ -40,6 +41,15 @@ export default function Home() {
 
     const [signals, setSignals] = useState<Signal[]>([])
     const [dataLoading, setDataLoading] = useState(true)
+
+    // Ejecución de Señales
+    const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null)
+    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+
+    const handleExecuteSignal = (signal: Signal) => {
+        setSelectedSignal(signal)
+        setIsOrderModalOpen(true)
+    }
 
     // Auth Guard
     useEffect(() => {
@@ -272,7 +282,10 @@ export default function Home() {
                                             </div>
                                         </div>
 
-                                        <button className="w-full mt-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium transition-all">
+                                        <button
+                                            onClick={() => handleExecuteSignal(signal)}
+                                            className="w-full mt-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm font-medium transition-all"
+                                        >
                                             Ejecutar Trade
                                         </button>
                                     </div>
@@ -306,6 +319,26 @@ export default function Home() {
                     </Link>
                 </div>
             </div>
+
+            {/* Modal de Ejecución de Señales */}
+            {selectedSignal && (
+                <OrderExecutionModal
+                    isOpen={isOrderModalOpen}
+                    onClose={() => setIsOrderModalOpen(false)}
+                    symbol={selectedSignal.symbol}
+                    currentPrice={selectedSignal.entry_price}
+                    clickedPrice={selectedSignal.entry_price}
+                    accountBalance={mode === 'practice' ? 10000 : (balances.find(b => b.asset === 'USDT')?.total || 0)} // Usar balance real o práctica
+                    mode={mode === 'practice' ? 'practice' : 'real'}
+                    initialStopLoss={selectedSignal.stop_loss}
+                    initialTakeProfit={selectedSignal.take_profit}
+                    initialSide={selectedSignal.type === 'LONG' ? 'BUY' : 'SELL'}
+                    onOrderSubmit={() => {
+                        // Opcional: refrescar datos o mostrar notificación extra
+                        setIsOrderModalOpen(false)
+                    }}
+                />
+            )}
         </DashboardLayout>
     )
 }

@@ -14,6 +14,9 @@ interface OrderExecutionModalProps {
     accountBalance: number
     mode: 'practice' | 'real'
     onOrderSubmit?: () => void
+    initialStopLoss?: number
+    initialTakeProfit?: number
+    initialSide?: 'BUY' | 'SELL'
 }
 
 export default function OrderExecutionModal({
@@ -24,13 +27,16 @@ export default function OrderExecutionModal({
     symbol,
     accountBalance,
     mode,
-    onOrderSubmit
+    onOrderSubmit,
+    initialStopLoss,
+    initialTakeProfit,
+    initialSide = 'BUY'
 }: OrderExecutionModalProps) {
-    const [side, setSide] = useState<'BUY' | 'SELL'>('BUY')
+    const [side, setSide] = useState<'BUY' | 'SELL'>(initialSide)
     const [orderType, setOrderType] = useState<'MARKET' | 'LIMIT' | 'OCO'>('LIMIT')
     const [entryPrice, setEntryPrice] = useState(clickedPrice)
-    const [stopLoss, setStopLoss] = useState(0)
-    const [takeProfit, setTakeProfit] = useState(0)
+    const [stopLoss, setStopLoss] = useState(initialStopLoss || 0)
+    const [takeProfit, setTakeProfit] = useState(initialTakeProfit || 0)
     const [quantity, setQuantity] = useState(0)
     const [riskAmount, setRiskAmount] = useState(0)
     const [loading, setLoading] = useState(false)
@@ -38,9 +44,9 @@ export default function OrderExecutionModal({
     // ATR estimado (debería venir del backend en producción)
     const estimatedATR = currentPrice * 0.015 // 1.5% del precio
 
-    // Auto-sugerir SL y TP cuando cambia el entry
+    // Auto-sugerir SL y TP cuando cambia el entry, SOLO SI NO se proveyeron iniciales
     useEffect(() => {
-        if (entryPrice > 0) {
+        if (entryPrice > 0 && !initialStopLoss && !initialTakeProfit) {
             if (side === 'BUY') {
                 // SL: Entry - (1.5 * ATR)
                 setStopLoss(entryPrice - (estimatedATR * 1.5))
@@ -54,12 +60,17 @@ export default function OrderExecutionModal({
                 setTakeProfit(entryPrice - (risk * 3))
             }
         }
-    }, [entryPrice, side, estimatedATR])
+    }, [entryPrice, side, estimatedATR, initialStopLoss, initialTakeProfit])
 
-    // Reset cuando cambia el side
+    // Reset cuando cambia el side (pero respetar iniciales si coinciden con el side inicial)
     useEffect(() => {
         setEntryPrice(clickedPrice)
-    }, [side, clickedPrice])
+        // Reset SL/TP logic logic only if not using initial values or if side changed manually
+        if (side !== initialSide) {
+            // Logic to recalculate or reset could go here if needed, 
+            // but the previous effect handles calculation if no initial values.
+        }
+    }, [side, clickedPrice, initialSide])
 
     const handlePositionSizeCalculated = (size: number, risk: number) => {
         setQuantity(size)
@@ -161,8 +172,8 @@ export default function OrderExecutionModal({
                                 <button
                                     onClick={() => setSide('BUY')}
                                     className={`py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${side === 'BUY'
-                                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                                            : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                                        : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
                                         }`}
                                 >
                                     <TrendingUp className="h-4 w-4" />
@@ -171,8 +182,8 @@ export default function OrderExecutionModal({
                                 <button
                                     onClick={() => setSide('SELL')}
                                     className={`py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${side === 'SELL'
-                                            ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
-                                            : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+                                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
+                                        : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
                                         }`}
                                 >
                                     <TrendingDown className="h-4 w-4" />
@@ -190,8 +201,8 @@ export default function OrderExecutionModal({
                                         key={type}
                                         onClick={() => setOrderType(type)}
                                         className={`py-2 text-xs rounded-lg transition-all ${orderType === type
-                                                ? 'bg-white/10 text-white border border-white/20'
-                                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                            ? 'bg-white/10 text-white border border-white/20'
+                                            : 'text-slate-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         {type}
@@ -288,8 +299,8 @@ export default function OrderExecutionModal({
                         onClick={handleSubmit}
                         disabled={loading || quantity <= 0}
                         className={`w-full py-4 rounded-lg font-bold text-white text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${side === 'BUY'
-                                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/30'
-                                : 'bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 shadow-lg shadow-rose-500/30'
+                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/30'
+                            : 'bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 shadow-lg shadow-rose-500/30'
                             }`}
                     >
                         {loading ? 'Procesando...' : `${side === 'BUY' ? 'Ejecutar Compra' : 'Ejecutar Venta'} • ${orderType}`}
