@@ -21,6 +21,8 @@ from app.api.v1.automation import router as automation_router
 from app.api.v1.risk import router as risk_router
 from app.api.v1.ai_analysis import router as ai_analysis_router
 from app.api.v1.neural import router as neural_router
+from app.api.v1.market import router as market_router  # NUEVO
+from app.api.v1.advanced_trading import router as advanced_trading_router  # NUEVO
 
 router = APIRouter()
 
@@ -28,6 +30,7 @@ router = APIRouter()
 router.include_router(auth_router, prefix="/auth", tags=["🔐 Auth"])
 router.include_router(wallet_router, prefix="/wallet", tags=["💰 Wallet"])
 router.include_router(trading_router, prefix="/trading", tags=["📈 Trading"])
+router.include_router(advanced_trading_router, prefix="/trading", tags=["📈 Trading Avanzado"])  # NUEVO
 router.include_router(practice_router, prefix="/practice", tags=["🎮 Práctica"])
 router.include_router(p2p_router, prefix="/p2p", tags=["💱 P2P VES"])
 router.include_router(signals_router, prefix="/signals", tags=["🎯 Señales IA"])
@@ -40,5 +43,6 @@ router.include_router(automation_router, prefix="/automation", tags=["🤖 Autom
 router.include_router(risk_router, prefix="/risk", tags=["⚖️ Risk Management"])
 router.include_router(ai_analysis_router, prefix="/ai", tags=["🧠 AI Institutional Agent"])
 router.include_router(neural_router, prefix="/neural", tags=["🕯️ Neural Engine - Señales Inteligentes"])
+router.include_router(market_router, prefix="/market", tags=["📊 Market Data & Order Flow"])  # NUEVO
 
 

@@ -177,10 +177,10 @@ export function AIProvider({ children }: { children: ReactNode }) {
         if (!token) return;
 
         checkStatus();
-        loadMemory(symbol).then(() => {
-            // Si no hay memoria, o para refrezcar, iniciamos análisis
-            analyzeMarket(symbol);
-        });
+
+        // SIEMPRE hacer análisis fresco en tiempo real
+        // Esto garantiza que Sidebar y Dashboard estén 100% sincronizados
+        analyzeMarket(symbol);
 
         // Heartbeat pulse every 30s
         const interval = setInterval(() => {
