@@ -22,7 +22,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="es">
-            <body className={`${inter.variable} ${jetbrains.variable} antialiased`}>
+            <body className={`${inter.variable} ${jetbrains.variable} antialiased`} suppressHydrationWarning>
                 <AIProvider>
                     <WalletProvider>
                         {children}

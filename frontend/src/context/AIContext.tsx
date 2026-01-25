@@ -35,9 +35,16 @@ export function AIProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<OllamaStatus | null>(null);
     const [symbol, setSymbol] = useState('BTCUSDT'); // Global Symbol Focus
+    const [mounted, setMounted] = useState(false);
+
+    // Track mount state for client-side only operations
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Obtener estado de los modelos
     const checkStatus = async () => {
+        if (!mounted) return;
         try {
             const token = localStorage.getItem('token');
             // If we are not logged in, we might not be able to check securely, 
@@ -59,6 +66,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
 
     // Cargar memoria (último análisis)
     const loadMemory = async (sym: string) => {
+        if (!mounted) return;
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
@@ -88,6 +96,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
 
     // Analizar mercado - usa el mismo endpoint que AIWidget para consistencia
     const analyzeMarket = async (sym: string) => {
+        if (!mounted) return;
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -160,8 +169,8 @@ export function AIProvider({ children }: { children: ReactNode }) {
 
     // Initial Mount Logic (The "Brain" wakes up)
     useEffect(() => {
-        // Only run on client
-        if (typeof window === 'undefined') return;
+        // Only run on client after mount
+        if (!mounted) return;
 
         // Only run analysis if we have authentication
         const token = localStorage.getItem('token');
@@ -182,14 +191,14 @@ export function AIProvider({ children }: { children: ReactNode }) {
         }, 30000);
 
         return () => clearInterval(interval);
-    }, [symbol]);
+    }, [symbol, mounted]);
 
     // Also reload memory if symbol changes (future proofing)
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (mounted) {
             loadMemory(symbol);
         }
-    }, [symbol]);
+    }, [symbol, mounted]);
 
     const [isBrainOpen, setIsBrainOpen] = useState(false);
 

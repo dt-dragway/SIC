@@ -12,6 +12,9 @@ import { GamepadIcon as Gamepad2, Swords, ArrowUp, ArrowDown, Clock, CheckCircle
 import OrderBook from '../../components/trading/OrderBook'
 import TradingPanel from '../../components/trading/TradingPanel'
 import MarketList from '../../components/trading/MarketList'
+import { InteractiveCandlestickChart } from '../../components/charts/InteractiveCandlestickChart'
+import OrderExecutionModal from '../../components/trading/OrderExecutionModal'
+import OrderFlowAnalyzer from '../../components/trading/OrderFlowAnalyzer'
 
 interface Trade {
     id: string | number
@@ -36,7 +39,13 @@ export default function TradingPagePro() {
     const [trades, setTrades] = useState<Trade[]>([])
     const [tradesLoading, setTradesLoading] = useState(false)
 
+    // Nuevo estado para trading profesional
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [clickedPrice, setClickedPrice] = useState(0)
+    const [priceLines, setPriceLines] = useState<any[]>([])
+
     const usdtBalance = balances.find(b => b.asset === 'USDT')?.total || 0
+    const totalBalance = balances.reduce((sum, b) => sum + (b.usd_value || 0), 0)
 
     // Fetch current price
     useEffect(() => {
@@ -99,6 +108,15 @@ export default function TradingPagePro() {
         fetchHistory()
     }
 
+    const handleChartClick = (price: number) => {
+        setClickedPrice(price)
+        setIsModalOpen(true)
+    }
+
+    const handleModalSubmit = () => {
+        handleOrderSuccess()
+    }
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
         return date.toLocaleString('es-ES', {
@@ -159,21 +177,17 @@ export default function TradingPagePro() {
 
                 {/* Main Trading Area - Uses remaining space */}
                 <div className="flex-1 grid grid-cols-12 gap-2 py-2 min-h-0">
-                    {/* Left Column - Order Book */}
+                    {/* Left Column - Order Flow */}
                     <div className="col-span-2 bg-[#0a0a0f] rounded-lg border border-white/10 flex flex-col overflow-hidden">
-                        <div className="px-3 py-2 border-b border-white/10 shrink-0 text-xs font-medium text-slate-400">Order Book</div>
-                        <div className="flex-1 overflow-y-auto">
-                            <OrderBook symbol={selectedSymbol} />
-                        </div>
+                        <OrderFlowAnalyzer symbol={selectedSymbol} />
                     </div>
 
-                    {/* Center Column - Chart */}
+                    {/* Center Column - Interactive Chart */}
                     <div className="col-span-7 bg-[#0a0a0f] rounded-lg border border-white/10 overflow-hidden">
-                        <iframe
-                            src={`https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:${selectedSymbol}&interval=15&theme=dark&style=1&locale=es&toolbar_bg=%230a0a0f&enable_publishing=false&hide_top_toolbar=false&hide_side_toolbar=false&allow_symbol_change=true&save_image=false&watchlist=[]&hide_legend=true&studies=[]&show_popup_button=false&popup_width=1000&popup_height=650`}
-                            className="w-full h-full border-0"
-                            title="TradingView Chart"
-                            allowFullScreen
+                        <InteractiveCandlestickChart
+                            symbol={selectedSymbol}
+                            onPriceClick={handleChartClick}
+                            priceLines={priceLines}
                         />
                     </div>
 
@@ -246,6 +260,18 @@ export default function TradingPagePro() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de Ejecución Profesional */}
+            <OrderExecutionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                clickedPrice={clickedPrice}
+                currentPrice={currentPrice}
+                symbol={selectedSymbol}
+                accountBalance={totalBalance}
+                mode={mode}
+                onOrderSubmit={handleModalSubmit}
+            />
         </DashboardLayout>
     )
 }

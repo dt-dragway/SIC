@@ -29,21 +29,30 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, token } = useAuth();
     const [mode, setMode] = useState<Mode>('practice');
     const [isLoading, setIsLoading] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     // Unified State
     const [totalUsd, setTotalUsd] = useState(0.00);
     const [balances, setBalances] = useState<Balance[]>([]);
 
-    // Load persisted mode
+    // Track mount state for client-side only operations
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Load persisted mode (only on client)
+    useEffect(() => {
+        if (!mounted) return;
         const savedMode = localStorage.getItem('sic_mode') as Mode;
         if (savedMode) setMode(savedMode);
-    }, []);
+    }, [mounted]);
 
     // Persist mode change
     const handleSetMode = (newMode: Mode) => {
         setMode(newMode);
-        localStorage.setItem('sic_mode', newMode);
+        if (mounted) {
+            localStorage.setItem('sic_mode', newMode);
+        }
         // Trigger refresh immediately on mode change
         setBalances([]); // Clear previous balances
         setTotalUsd(0);
@@ -106,19 +115,20 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
     }, [mode, token, isAuthenticated]);
 
-    // Auto-refresh when mode or auth changes
+    // Auto-refresh when mode or auth changes (only after mount)
     useEffect(() => {
+        if (!mounted) return;
         refreshWallet();
-    }, [mode, isAuthenticated, token]);
+    }, [mode, isAuthenticated, token, mounted]);
 
     // Polling (every 10s for practice, 30s for real) - SILENT
     useEffect(() => {
-        if (!isAuthenticated) return;
+        if (!mounted || !isAuthenticated) return;
 
         const intervalTime = mode === 'practice' ? 10000 : 30000;
         const interval = setInterval(() => refreshWallet(true), intervalTime);
         return () => clearInterval(interval);
-    }, [mode, isAuthenticated]);
+    }, [mode, isAuthenticated, mounted]);
 
     return (
         <WalletContext.Provider value={{
