@@ -89,8 +89,8 @@ export default function Sidebar() {
                                     <span className="text-[10px] text-cyan-400 font-bold">
                                         {analysis.symbol?.replace('USDT', '') || 'BTC'}:
                                     </span>
-                                    <span className={`text-[10px] font-bold ${analysis.signal === 'BUY' || analysis.signal === 'HOLD' && analysis.confidence > 50 ? 'text-emerald-400' :
-                                        analysis.signal === 'SELL' ? 'text-rose-400' : 'text-slate-400'
+                                    <span className={`text-[10px] font-bold ${analysis.signal === 'BUY' || analysis.signal === 'LONG' || (analysis.signal === 'HOLD' && analysis.confidence > 50) ? 'text-emerald-400' :
+                                        analysis.signal === 'SELL' || analysis.signal === 'SHORT' ? 'text-rose-400' : 'text-slate-400'
                                         }`}>
                                         {analysis.signal}
                                     </span>
@@ -99,7 +99,12 @@ export default function Sidebar() {
                                     </span>
                                 </div>
                             ) : (
-                                <p className="text-[10px] text-amber-400 font-mono">Analizando...</p>
+                                <div className="flex items-center gap-1.5">
+                                    {/* Skeleton loader durante carga */}
+                                    <div className="h-2.5 w-8 bg-slate-700/50 rounded animate-pulse"></div>
+                                    <div className="h-2.5 w-12 bg-slate-700/50 rounded animate-pulse"></div>
+                                    <div className="h-2 w-6 bg-slate-700/50 rounded animate-pulse"></div>
+                                </div>
                             )}
                         </div>
                     </div>
