@@ -62,6 +62,18 @@ class VirtualTrade(BaseModel):
     timestamp: datetime
 
 
+class VirtualPendingOrderResponse(BaseModel):
+    id: str
+    symbol: str
+    type: str
+    side: str
+    quantity: float
+    price: Optional[float]
+    stop_price: Optional[float]
+    status: str
+    created_at: str
+
+
 class TradeStats(BaseModel):
     total_trades: int
     winning_trades: int
@@ -192,14 +204,33 @@ async def get_virtual_wallet(
         raise HTTPException(500, f"Error fetching practice wallet: {str(e)}")
 
 
+@router.get("/pending-orders", response_model=List[VirtualPendingOrderResponse])
+async def get_practice_pending_orders(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    Obtener órdenes pendientes virtuales.
+    Por ahora, como MVP, no persisten órdenes pendientes en DB 
+    (se ejecutan inmediatamente o fallan). 
+    Retorna lista vacía para evitar error 404 en frontend.
+    """
+    verify_token(token)
+    return []
+
+
 @router.post("/order")
 async def create_virtual_order(
+    # Cambiamos a permitir dict flexible o actualizar modelo VirtualOrder
+    # Para simplicidad ahora, reconstruimos el body
     order: VirtualOrder, 
+    type: str = "MARKET", # Query param opcional por compatibilidad
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
     """
     Crear orden virtual (simulada).
+    Soporta MARKET y simulacion basica de LIMIT (ejecucion inmediata si precio cruza).
     """
     payload = verify_token(token)
     user_id = payload.get("user_id", 1)

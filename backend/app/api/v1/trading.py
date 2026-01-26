@@ -138,6 +138,45 @@ async def get_risk_status(token: str = Depends(oauth2_scheme)):
     }
 
 
+@router.get("/pending-orders")
+async def get_pending_orders(
+    symbol: Optional[str] = None,
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Obtener órdenes abiertas (LIMIT, STOP, etc) desde Binance.
+    """
+    verify_token(token)
+    
+    client = get_binance_client()
+    
+    if not client.is_connected():
+        return {"orders": [], "message": "No conectado a Binance"}
+    
+    try:
+        if symbol:
+            orders = client.client.get_open_orders(symbol=symbol.upper())
+        else:
+            orders = client.client.get_open_orders()
+            
+        # Formatear la respuesta para que coincida con la interfaz PendingOrder
+        formatted_orders = [{
+            "id": str(o["orderId"]),
+            "symbol": o["symbol"],
+            "type": o["type"],
+            "side": o["side"],
+            "quantity": float(o["origQty"]),
+            "price": float(o["price"]),
+            "stop_price": float(o.get("stopPrice", 0)),
+            "status": o["status"],
+            "created_at": datetime.fromtimestamp(o["time"] / 1000).isoformat()
+        } for o in orders]
+        
+        return {"orders": formatted_orders, "count": len(formatted_orders)}
+    except Exception as e:
+        return {"orders": [], "error": str(e)}
+
+
 @router.get("/orders")
 async def get_orders(
     symbol: Optional[str] = None,
