@@ -15,6 +15,7 @@ import MarketList from '../../components/trading/MarketList'
 import { InteractiveCandlestickChart } from '../../components/charts/InteractiveCandlestickChart'
 import OrderExecutionModal from '../../components/trading/OrderExecutionModal'
 import OrderFlowAnalyzer from '../../components/trading/OrderFlowAnalyzer'
+import PendingOrdersPanel from '../../components/trading/PendingOrdersPanel' // Import nuevo componente
 
 interface Trade {
     id: string | number
@@ -43,6 +44,9 @@ export default function TradingPagePro() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [clickedPrice, setClickedPrice] = useState(0)
     const [priceLines, setPriceLines] = useState<any[]>([])
+
+    // Estado para tabs de órdenes
+    const [orderTab, setOrderTab] = useState<'history' | 'pending'>('history')
 
     const usdtBalance = balances.find(b => b.asset === 'USDT')?.total || 0
     const totalBalance = balances.reduce((sum, b) => sum + (b.usd_value || 0), 0)
@@ -214,49 +218,72 @@ export default function TradingPagePro() {
                     </div>
                 </div>
 
-                {/* Bottom - Order History - Fixed height */}
-                <div className="h-36 shrink-0 bg-[#0a0a0f] rounded-lg border border-white/10 overflow-hidden">
-                    <div className="px-4 py-2 border-b border-white/10 flex items-center justify-between shrink-0">
-                        <span className="text-xs font-medium text-slate-400">Historial de Órdenes</span>
-                        <span className="text-xs text-slate-500">{trades.length} órdenes</span>
+                {/* Bottom - Orders Section - Fixed height */}
+                <div className="h-48 shrink-0 bg-[#0a0a0f] rounded-lg border border-white/10 overflow-hidden flex flex-col">
+                    {/* Tabs Header */}
+                    <div className="px-4 border-b border-white/10 flex items-center gap-6 bg-white/[0.02]">
+                        <button
+                            onClick={() => setOrderTab('history')}
+                            className={`py-2 text-xs font-medium border-b-2 transition-all ${orderTab === 'history'
+                                ? 'text-white border-emerald-500'
+                                : 'text-slate-500 border-transparent hover:text-slate-300'
+                                }`}
+                        >
+                            Historial de Órdenes ({trades.length})
+                        </button>
+                        <button
+                            onClick={() => setOrderTab('pending')}
+                            className={`py-2 text-xs font-medium border-b-2 transition-all ${orderTab === 'pending'
+                                ? 'text-white border-cyan-500'
+                                : 'text-slate-500 border-transparent hover:text-slate-300'
+                                }`}
+                        >
+                            Órdenes Pendientes
+                        </button>
                     </div>
-                    <div className="overflow-y-auto h-[calc(100%-36px)]">
-                        <table className="w-full">
-                            <thead className="sticky top-0 bg-[#0a0a0f] border-b border-white/10">
-                                <tr>
-                                    <th className="text-left py-2 px-4 text-xs font-medium text-slate-500">Fecha</th>
-                                    <th className="text-left py-2 px-4 text-xs font-medium text-slate-500">Par</th>
-                                    <th className="text-left py-2 px-4 text-xs font-medium text-slate-500">Tipo</th>
-                                    <th className="text-right py-2 px-4 text-xs font-medium text-slate-500">Precio</th>
-                                    <th className="text-right py-2 px-4 text-xs font-medium text-slate-500">Cantidad</th>
-                                    <th className="text-right py-2 px-4 text-xs font-medium text-slate-500">Total</th>
-                                    <th className="text-center py-2 px-4 text-xs font-medium text-slate-500">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {tradesLoading ? (
-                                    <tr><td colSpan={7} className="py-4 text-center text-slate-500 text-xs">Cargando...</td></tr>
-                                ) : trades.length === 0 ? (
-                                    <tr><td colSpan={7} className="py-4 text-center text-slate-500 text-xs">Sin órdenes aún</td></tr>
-                                ) : (
-                                    trades.map((trade, i) => (
-                                        <tr key={i} className="hover:bg-white/5">
-                                            <td className="py-2 px-4 text-xs text-slate-400 font-mono">{formatDate(trade.timestamp)}</td>
-                                            <td className="py-2 px-4 text-xs text-white">{trade.symbol}</td>
-                                            <td className="py-2 px-4">
-                                                <span className={`px-1.5 py-0.5 rounded text-xs ${trade.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                                                    {trade.side}
-                                                </span>
-                                            </td>
-                                            <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">${trade.price.toLocaleString()}</td>
-                                            <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">{trade.quantity}</td>
-                                            <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">${(trade.total || trade.price * trade.quantity).toLocaleString()}</td>
-                                            <td className="py-2 px-4 text-center"><CheckCircle2 className="h-3 w-3 text-emerald-500 mx-auto" /></td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+
+                    {/* Content Area */}
+                    <div className="flex-1 overflow-y-auto relative">
+                        {orderTab === 'history' ? (
+                            <table className="w-full">
+                                <thead className="sticky top-0 bg-[#0a0a0f] border-b border-white/10">
+                                    <tr>
+                                        <th className="text-left py-2 px-4 text-xs font-medium text-slate-500">Fecha</th>
+                                        <th className="text-left py-2 px-4 text-xs font-medium text-slate-500">Par</th>
+                                        <th className="text-left py-2 px-4 text-xs font-medium text-slate-500">Tipo</th>
+                                        <th className="text-right py-2 px-4 text-xs font-medium text-slate-500">Precio</th>
+                                        <th className="text-right py-2 px-4 text-xs font-medium text-slate-500">Cantidad</th>
+                                        <th className="text-right py-2 px-4 text-xs font-medium text-slate-500">Total</th>
+                                        <th className="text-center py-2 px-4 text-xs font-medium text-slate-500">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {tradesLoading ? (
+                                        <tr><td colSpan={7} className="py-4 text-center text-slate-500 text-xs">Cargando...</td></tr>
+                                    ) : trades.length === 0 ? (
+                                        <tr><td colSpan={7} className="py-4 text-center text-slate-500 text-xs">Sin órdenes aún</td></tr>
+                                    ) : (
+                                        trades.map((trade, i) => (
+                                            <tr key={i} className="hover:bg-white/5">
+                                                <td className="py-2 px-4 text-xs text-slate-400 font-mono">{formatDate(trade.timestamp)}</td>
+                                                <td className="py-2 px-4 text-xs text-white">{trade.symbol}</td>
+                                                <td className="py-2 px-4">
+                                                    <span className={`px-1.5 py-0.5 rounded text-xs ${trade.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                                        {trade.side}
+                                                    </span>
+                                                </td>
+                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">${trade.price.toLocaleString()}</td>
+                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">{trade.quantity}</td>
+                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">${(trade.total || trade.price * trade.quantity).toLocaleString()}</td>
+                                                <td className="py-2 px-4 text-center"><CheckCircle2 className="h-3 w-3 text-emerald-500 mx-auto" /></td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <PendingOrdersPanel mode={mode} refreshTrigger={trades.length} />
+                        )}
                     </div>
                 </div>
             </div>
