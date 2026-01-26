@@ -16,6 +16,7 @@ import { InteractiveCandlestickChart } from '../../components/charts/Interactive
 import OrderExecutionModal from '../../components/trading/OrderExecutionModal'
 import OrderFlowAnalyzer from '../../components/trading/OrderFlowAnalyzer'
 import PendingOrdersPanel from '../../components/trading/PendingOrdersPanel' // Import nuevo componente
+import AIEvolutionWidget from '../../components/dashboard/AIEvolutionWidget'
 
 interface Trade {
     id: string | number
@@ -181,9 +182,15 @@ export default function TradingPagePro() {
 
                 {/* Main Trading Area - Uses remaining space */}
                 <div className="flex-1 grid grid-cols-12 gap-2 py-2 min-h-0">
-                    {/* Left Column - Order Flow */}
+                    {/* Left Column - Order Flow or AI Evolution */}
                     <div className="col-span-2 bg-[#0a0a0f] rounded-lg border border-white/10 flex flex-col overflow-hidden">
-                        <OrderFlowAnalyzer symbol={selectedSymbol} />
+                        {mode === 'practice' ? (
+                            <div className="h-full overflow-y-auto custom-scrollbar">
+                                <AIEvolutionWidget />
+                            </div>
+                        ) : (
+                            <OrderFlowAnalyzer symbol={selectedSymbol} />
+                        )}
                     </div>
 
                     {/* Center Column - Interactive Chart */}
