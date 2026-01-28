@@ -51,3 +51,14 @@ htmlcov/
 
 # MLflow
 mlruns/
+
+# AI/ML Memory and backups
+backend/app/ml/agent_memory.json
+backend/app/ml/backups/
+backend/app/ml/knowledge_base/chroma_db/
+backend/app/ml/knowledge_base/books/
+
+# Temp / Local Files
+login_response.json
+backend.log
+*.json_backup

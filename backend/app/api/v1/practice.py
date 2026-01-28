@@ -143,9 +143,109 @@ def analyze_patterns(trades: List[VirtualTradeModel]) -> List[str]:
         patterns.append("Breakout Master")
         
     return patterns
+# === Wallet Functions ===
+
+def get_or_create_wallet(db: Session, user_id: int) -> VirtualWalletModel:
+    """
+    Obtener o crear wallet virtual para un usuario.
+    Inicializa con $100 USD virtuales.
+    """
+    wallet = db.query(VirtualWalletModel).filter(VirtualWalletModel.user_id == user_id).first()
+    
+    if not wallet:
+        logger.info(f"🆕 Creando wallet virtual para usuario {user_id}")
+        wallet = VirtualWalletModel(
+            user_id=user_id,
+            balances=json.dumps({"USDT": 100.0}),
+            created_at=datetime.utcnow()
+        )
+        db.add(wallet)
+        db.commit()
+        db.refresh(wallet)
+        logger.success(f"✅ Wallet virtual creada con $100 USDT")
+    
+    return wallet
 
 
-# ... (get_or_create_wallet remains the same) ...
+@router.get("/wallet", response_model=VirtualWallet)
+async def get_virtual_wallet(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    Obtener balance de la wallet virtual (modo práctica).
+    Retorna el balance actual y el historial del usuario.
+    """
+    payload = verify_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+    
+    user_id = payload.get("user_id", 1)
+    wallet = get_or_create_wallet(db, user_id)
+    
+    # Parse balances
+    balances_dict = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
+    
+    # Get current prices from Binance
+    binance = get_binance_client()
+    
+    formatted_balances = []
+    total_usd = 0.0
+    
+    for asset, amount in balances_dict.items():
+        if amount <= 0:
+            continue
+            
+        if asset == "USDT":
+            usd_value = amount
+        else:
+            try:
+                price = binance.get_price(f"{asset}USDT")
+                usd_value = amount * price
+            except:
+                usd_value = 0.0
+        
+        total_usd += usd_value
+        formatted_balances.append(VirtualBalance(
+            asset=asset,
+            amount=amount,
+            usd_value=round(usd_value, 2)
+        ))
+    
+    # Calculate PNL
+    initial_capital = 100.0
+    pnl = total_usd - initial_capital
+    pnl_percent = (pnl / initial_capital) * 100 if initial_capital > 0 else 0
+    
+    # Count trades
+    trades_count = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id).count()
+    
+    # Calculate win rate
+    sell_trades = db.query(VirtualTradeModel).filter(
+        VirtualTradeModel.wallet_id == wallet.id,
+        VirtualTradeModel.side == "SELL"
+    ).all()
+    winning = [t for t in sell_trades if (t.pnl or 0) > 0]
+    win_rate = (len(winning) / len(sell_trades) * 100) if sell_trades else 0
+    
+    return VirtualWallet(
+        initial_capital=initial_capital,
+        current_value=round(total_usd, 2),
+        total_usd=round(total_usd, 2),  # Alias for frontend
+        pnl=round(pnl, 2),
+        pnl_percent=round(pnl_percent, 2),
+        balances=formatted_balances,
+        trades_count=trades_count,
+        win_rate=round(win_rate, 1)
+    )
+
+
+def require_valid_token(token: str) -> dict:
+    """Verifica token y lanza excepción si es inválido."""
+    payload = verify_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+    return payload
 
 
 @router.get("/stats", response_model=TradeStats)
@@ -156,8 +256,9 @@ async def get_trade_stats(
     """
     Obtener estadísticas de trading del modo práctica con Gamificación.
     """
-    payload = verify_token(token)
+    payload = require_valid_token(token)
     user_id = payload.get("user_id", 1)
+
     
     wallet = get_or_create_wallet(db, user_id)
     trades = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id).all()
@@ -215,7 +316,7 @@ async def reset_virtual_wallet(
     """
     Resetear wallet virtual a $100 USDT iniciales.
     """
-    payload = verify_token(token)
+    payload = require_valid_token(token)
     user_id = payload.get("user_id", 1)
     
     wallet = get_or_create_wallet(db, user_id)
@@ -244,7 +345,7 @@ async def get_position(
     """
     Obtener posición actual de un símbolo.
     """
-    payload = verify_token(token)
+    payload = require_valid_token(token)
     user_id = payload.get("user_id", 1)
     
     wallet = get_or_create_wallet(db, user_id)
