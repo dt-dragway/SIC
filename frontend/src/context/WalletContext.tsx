@@ -53,9 +53,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
             localStorage.setItem('sic_mode', newMode);
         }
-        // Trigger refresh immediately on mode change
-        setBalances([]); // Clear previous balances
-        setTotalUsd(0);
+        // No limpiamos los saldos aquí - esperamos a que lleguen los nuevos datos
+        // Esto evita el flash de "$0.00" mientras carga
     };
 
     const refreshWallet = useCallback(async (silent: boolean = false) => {

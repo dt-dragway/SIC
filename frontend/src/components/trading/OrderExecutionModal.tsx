@@ -47,17 +47,20 @@ export default function OrderExecutionModal({
     // Auto-sugerir SL y TP cuando cambia el entry, SOLO SI NO se proveyeron iniciales
     useEffect(() => {
         if (entryPrice > 0 && !initialStopLoss && !initialTakeProfit) {
+            // Redondear a 2 decimales para montos limpios
+            const round2 = (n: number) => Math.round(n * 100) / 100
+
             if (side === 'BUY') {
                 // SL: Entry - (1.5 * ATR)
-                setStopLoss(entryPrice - (estimatedATR * 1.5))
+                setStopLoss(round2(entryPrice - (estimatedATR * 1.5)))
                 // TP: Entry + (3 * riesgo) para R:R 3:1
                 const risk = estimatedATR * 1.5
-                setTakeProfit(entryPrice + (risk * 3))
+                setTakeProfit(round2(entryPrice + (risk * 3)))
             } else {
                 // SELL: invertir
-                setStopLoss(entryPrice + (estimatedATR * 1.5))
+                setStopLoss(round2(entryPrice + (estimatedATR * 1.5)))
                 const risk = estimatedATR * 1.5
-                setTakeProfit(entryPrice - (risk * 3))
+                setTakeProfit(round2(entryPrice - (risk * 3)))
             }
         }
     }, [entryPrice, side, estimatedATR, initialStopLoss, initialTakeProfit])
@@ -250,7 +253,7 @@ export default function OrderExecutionModal({
                             </label>
                             <input
                                 type="number"
-                                value={stopLoss}
+                                value={Number(stopLoss.toFixed(2))}
                                 onChange={(e) => setStopLoss(parseFloat(e.target.value))}
                                 className="w-full bg-white/5 border border-rose-500/20 rounded-lg px-4 py-3 text-white text-lg font-mono focus:outline-none focus:border-rose-500/50"
                                 step="0.01"
@@ -268,7 +271,7 @@ export default function OrderExecutionModal({
                             </label>
                             <input
                                 type="number"
-                                value={takeProfit}
+                                value={Number(takeProfit.toFixed(2))}
                                 onChange={(e) => setTakeProfit(parseFloat(e.target.value))}
                                 className="w-full bg-white/5 border border-emerald-500/20 rounded-lg px-4 py-3 text-white text-lg font-mono focus:outline-none focus:border-emerald-500/50"
                                 step="0.01"

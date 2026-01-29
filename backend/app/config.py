@@ -47,10 +47,10 @@ class Settings(BaseSettings):
     # === JWT Auth ===
     jwt_secret_key: str = Field(..., min_length=32)
     jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 30
-    remember_me_expire_days: int = 30
-    trusted_device_expire_days: int = 30  # 2FA solo cada 30 días
+    access_token_expire_minutes: int = 525600  # 1 año (no expira por inactividad)
+    refresh_token_expire_days: int = 365       # 1 año
+    remember_me_expire_days: int = 365         # 1 año
+    trusted_device_expire_days: int = 365      # 2FA solo cada año
     
     # === 2FA ===
     totp_issuer: str = "SIC Ultra"

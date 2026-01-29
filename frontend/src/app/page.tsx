@@ -42,6 +42,18 @@ export default function Home() {
     const [signals, setSignals] = useState<Signal[]>([])
     const [dataLoading, setDataLoading] = useState(true)
 
+    // Estadísticas de Trading
+    const [stats, setStats] = useState({
+        total_trades: 0,
+        winning_trades: 0,
+        losing_trades: 0,
+        win_rate: 0,
+        total_pnl: 0,
+        roi_percent: 0,
+        current_value: 0,
+        initial_capital: 100
+    })
+
     // Ejecución de Señales
     const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null)
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
@@ -66,27 +78,46 @@ export default function Home() {
             try {
                 setDataLoading(true);
 
-                // === REAL AI ANALYSIS ===
-                // Connect to trading agent for real market analysis
-                const signalsRes = await fetch('/api/v1/signals/scan', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                // Reset stats para el nuevo modo (evita datos mezclados)
+                setStats({
+                    total_trades: 0,
+                    winning_trades: 0,
+                    losing_trades: 0,
+                    win_rate: 0,
+                    total_pnl: 0,
+                    roi_percent: 0,
+                    current_value: 0,
+                    initial_capital: 100
                 });
 
-                if (signalsRes.ok) {
+                // === CARGAR DATA EN PARALELO (más rápido) ===
+                const statsEndpoint = mode === 'practice'
+                    ? '/api/v1/practice/stats'
+                    : '/api/v1/trading/stats';
+
+                const [signalsRes, statsRes] = await Promise.all([
+                    fetch('/api/v1/signals/scan', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(() => null),
+                    fetch(statsEndpoint, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).catch(() => null)
+                ]);
+
+                // Procesar señales
+                if (signalsRes?.ok) {
                     const data = await signalsRes.json();
-                    // Only show top 5 signals in dashboard
                     const topSignals = data.signals ? data.signals.slice(0, 5) : [];
                     setSignals(topSignals);
                 } else {
-                    // Fallback to empty if API fails
-                    console.warn('Signals API failed, showing empty state');
                     setSignals([]);
                 }
 
-                // Market Status (Optional global stats)
-                // const marketRes = await fetch('/api/v1/market/status');
+                // Procesar stats
+                if (statsRes?.ok) {
+                    const statsData = await statsRes.json();
+                    setStats(statsData);
+                }
             } catch (error) {
                 console.error("Error fetching dashboard data", error);
                 setSignals([]); // Clear signals on error
@@ -99,9 +130,11 @@ export default function Home() {
         const interval = setInterval(fetchData, 120000); // Update every 2 minutes
 
         return () => clearInterval(interval);
-    }, [authLoading, isAuthenticated, token]);
+    }, [authLoading, isAuthenticated, token, mode]); // Añadido mode como dependencia
 
-    if (authLoading || (walletLoading && isAuthenticated)) {
+    // Solo mostrar pantalla de carga durante autenticación inicial
+    // El wallet se recarga en background sin bloquear la UI
+    if (authLoading) {
         return <LoadingSpinner />
     }
 
@@ -168,15 +201,17 @@ export default function Home() {
                     {/* P&L Card */}
                     <div className="relative overflow-hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm hover:border-white/10 transition-all group">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20 transition-colors">
+                            <div className={`p-2 rounded-lg ${stats.total_pnl >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} group-hover:opacity-80 transition-colors`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" /></svg>
                             </div>
-                            <p className="text-slate-400 text-sm font-medium">P&L 24h</p>
+                            <p className="text-slate-400 text-sm font-medium">P&L Total</p>
                         </div>
-                        <p className="text-3xl font-bold text-emerald-400 tracking-tight">
-                            +$0.00
+                        <p className={`text-3xl font-bold tracking-tight ${stats.total_pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {stats.total_pnl >= 0 ? '+' : ''}${stats.total_pnl.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </p>
-                        <p className="text-xs text-emerald-500/80 mt-1 font-mono">+0.00%</p>
+                        <p className={`text-xs mt-1 font-mono ${stats.roi_percent >= 0 ? 'text-emerald-500/80' : 'text-rose-500/80'}`}>
+                            ROI: {stats.roi_percent >= 0 ? '+' : ''}{stats.roi_percent.toFixed(2)}%
+                        </p>
                     </div>
 
                     {/* Signals Card */}
@@ -185,26 +220,28 @@ export default function Home() {
                             <div className="p-2 rounded-lg bg-violet-500/10 text-violet-400 group-hover:bg-violet-500/20 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="22" y1="12" x2="18" y2="12" /><line x1="6" y1="12" x2="2" y2="12" /><line x1="12" y1="6" x2="12" y2="2" /><line x1="12" y1="22" x2="12" y2="18" /></svg>
                             </div>
-                            <p className="text-slate-400 text-sm font-medium">Señales Activas</p>
+                            <p className="text-slate-400 text-sm font-medium">Operaciones</p>
                         </div>
                         <p className="text-3xl font-bold text-violet-400 tracking-tight">
-                            {signals.length}
+                            {stats.total_trades}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">Actualizado: Ahora</p>
+                        <p className="text-xs text-slate-500 mt-1">{signals.length} señales activas</p>
                     </div>
 
                     {/* Win Rate Card */}
                     <div className="relative overflow-hidden rounded-xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm hover:border-white/10 transition-all group">
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/20 transition-colors">
+                            <div className={`p-2 rounded-lg ${stats.win_rate >= 50 ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-500/10 text-slate-400'} group-hover:opacity-80 transition-colors`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
                             </div>
                             <p className="text-slate-400 text-sm font-medium">Tasa de Acierto</p>
                         </div>
-                        <p className="text-3xl font-bold text-amber-400 tracking-tight">
-                            --%
+                        <p className={`text-3xl font-bold tracking-tight ${stats.win_rate >= 50 ? 'text-amber-400' : 'text-slate-400'}`}>
+                            {stats.total_trades > 0 ? `${stats.win_rate.toFixed(1)}%` : '--%'}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">Sin operaciones</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                            {stats.winning_trades}W / {stats.losing_trades}L
+                        </p>
                     </div>
                 </div>
 

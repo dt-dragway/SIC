@@ -138,6 +138,122 @@ async def get_risk_status(token: str = Depends(oauth2_scheme)):
     }
 
 
+@router.get("/stats")
+async def get_real_trading_stats(token: str = Depends(oauth2_scheme)):
+    """
+    Obtener estadísticas de trading REAL desde Binance.
+    Incluye ROI, P&L, Win Rate basado en órdenes ejecutadas.
+    """
+    verify_token(token)
+    
+    client = get_binance_client()
+    
+    if not client.is_connected():
+        return {
+            "total_trades": 0,
+            "winning_trades": 0,
+            "losing_trades": 0,
+            "win_rate": 0,
+            "total_pnl": 0,
+            "unrealized_pnl": 0,
+            "roi_percent": 0,
+            "initial_capital": 0,
+            "current_value": 0,
+            "best_trade": None,
+            "worst_trade": None,
+            "avg_trade": None,
+            "mode": "real",
+            "error": "No conectado a Binance"
+        }
+    
+    try:
+        # Obtener balance total actual en USD
+        current_value = client.get_wallet_value_usd()
+        
+        # Obtener historial de órdenes de símbolos principales
+        all_orders = []
+        symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT"]
+        
+        for sym in symbols:
+            try:
+                orders = client.client.get_all_orders(symbol=sym, limit=100)
+                # Solo órdenes FILLED
+                filled = [o for o in orders if o.get("status") == "FILLED"]
+                all_orders.extend(filled)
+            except:
+                pass
+        
+        # Calcular estadísticas de trades
+        total_trades = len(all_orders)
+        
+        # Agrupar trades por símbolo y calcular P&L
+        pnls = []
+        buy_orders = [o for o in all_orders if o.get("side") == "BUY"]
+        sell_orders = [o for o in all_orders if o.get("side") == "SELL"]
+        
+        # Calcular P&L simple basado en ventas
+        for sell in sell_orders:
+            try:
+                sell_total = float(sell.get("cummulativeQuoteQty", 0))
+                if sell_total > 0:
+                    # Buscar la compra correspondiente más reciente antes de esta venta
+                    matching_buys = [b for b in buy_orders 
+                                    if b.get("symbol") == sell.get("symbol")
+                                    and b.get("time", 0) < sell.get("time", 0)]
+                    if matching_buys:
+                        # Usar la compra más reciente
+                        buy = max(matching_buys, key=lambda x: x.get("time", 0))
+                        buy_total = float(buy.get("cummulativeQuoteQty", 0))
+                        pnl = sell_total - buy_total
+                        pnls.append(pnl)
+            except:
+                pass
+        
+        winning = [p for p in pnls if p > 0]
+        losing = [p for p in pnls if p < 0]
+        total_pnl = sum(pnls)
+        win_rate = (len(winning) / len(pnls) * 100) if pnls else 0
+        
+        # Capital inicial estimado (basado en depósitos) - usamos un valor por defecto
+        # En producción, esto debería leerse de los depósitos históricos
+        initial_capital = max(100, current_value - total_pnl)  # Estimación
+        roi_percent = ((current_value - initial_capital) / initial_capital * 100) if initial_capital > 0 else 0
+        
+        return {
+            "total_trades": total_trades,
+            "winning_trades": len(winning),
+            "losing_trades": len(losing),
+            "win_rate": round(win_rate, 1),
+            "total_pnl": round(total_pnl, 2),
+            "unrealized_pnl": 0,  # Se calcularía comparando posiciones abiertas
+            "roi_percent": round(roi_percent, 2),
+            "initial_capital": round(initial_capital, 2),
+            "current_value": round(current_value, 2),
+            "best_trade": round(max(pnls), 2) if pnls else None,
+            "worst_trade": round(min(pnls), 2) if pnls else None,
+            "avg_trade": round(sum(pnls) / len(pnls), 2) if pnls else None,
+            "mode": "real"
+        }
+        
+    except Exception as e:
+        return {
+            "total_trades": 0,
+            "winning_trades": 0,
+            "losing_trades": 0,
+            "win_rate": 0,
+            "total_pnl": 0,
+            "unrealized_pnl": 0,
+            "roi_percent": 0,
+            "initial_capital": 0,
+            "current_value": 0,
+            "best_trade": None,
+            "worst_trade": None,
+            "avg_trade": None,
+            "mode": "real",
+            "error": str(e)
+        }
+
+
 @router.get("/pending-orders")
 async def get_pending_orders(
     symbol: Optional[str] = None,

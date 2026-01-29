@@ -75,18 +75,32 @@ class VirtualPendingOrderResponse(BaseModel):
 
 
 class TradeStats(BaseModel):
+    # Métricas de Trading
     total_trades: int
     winning_trades: int
     losing_trades: int
     win_rate: float
-    total_pnl: float
+    
+    # P&L y ROI
+    total_pnl: float  # P&L realizado (de trades cerrados)
+    unrealized_pnl: float = 0  # P&L no realizado (posiciones abiertas)
+    roi_percent: float = 0  # Return on Investment %
+    
+    # Capital
+    initial_capital: float = 100.0
+    current_value: float = 0  # Valor actual del portafolio
+    
+    # Detalles de trades
     best_trade: Optional[float] = None
     worst_trade: Optional[float] = None
+    avg_trade: Optional[float] = None
+    
     # Gamification Fields
     level: int = 1
     xp: int = 0
     next_level_xp: int = 100
     mastered_patterns: List[str] = []
+
     
     
 # === Helper Functions ===
@@ -186,8 +200,9 @@ async def get_virtual_wallet(
     # Parse balances
     balances_dict = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
     
-    # Get current prices from Binance
+    # Get ALL prices in ONE call (much faster than individual calls)
     binance = get_binance_client()
+    all_prices = binance.get_all_prices()  # Returns {"BTCUSDT": 87000.0, "ETHUSDT": 2900.0, ...}
     
     formatted_balances = []
     total_usd = 0.0
@@ -199,11 +214,9 @@ async def get_virtual_wallet(
         if asset == "USDT":
             usd_value = amount
         else:
-            try:
-                price = binance.get_price(f"{asset}USDT")
-                usd_value = amount * price
-            except:
-                usd_value = 0.0
+            symbol = f"{asset}USDT"
+            price = all_prices.get(symbol, 0)
+            usd_value = amount * price
         
         total_usd += usd_value
         formatted_balances.append(VirtualBalance(
@@ -254,14 +267,35 @@ async def get_trade_stats(
     db: Session = Depends(get_db)
 ):
     """
-    Obtener estadísticas de trading del modo práctica con Gamificación.
+    Obtener estadísticas de trading del modo práctica con ROI y métricas profesionales.
     """
     payload = require_valid_token(token)
     user_id = payload.get("user_id", 1)
-
     
     wallet = get_or_create_wallet(db, user_id)
     trades = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id).all()
+    balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
+    binance = get_binance_client()
+    
+    # Calcular valor actual del portafolio
+    current_value = float(balances.get("USDT", 0))
+    unrealized_pnl = 0
+    
+    for asset, amount in balances.items():
+        if asset != "USDT" and float(amount) > 0:
+            try:
+                price = binance.get_price(f"{asset}USDT")
+                asset_value = float(amount) * price
+                current_value += asset_value
+            except:
+                pass
+    
+    # Capital inicial
+    initial_capital = wallet.initial_capital or 100.0
+    
+    # Calcular ROI
+    roi_percent = ((current_value - initial_capital) / initial_capital) * 100 if initial_capital > 0 else 0
+    total_pnl = current_value - initial_capital
     
     if not trades:
         return {
@@ -269,38 +303,57 @@ async def get_trade_stats(
             "winning_trades": 0,
             "losing_trades": 0,
             "win_rate": 0,
-            "total_pnl": 0,
+            "total_pnl": round(total_pnl, 2),
+            "unrealized_pnl": 0,
+            "roi_percent": round(roi_percent, 2),
+            "initial_capital": initial_capital,
+            "current_value": round(current_value, 2),
             "best_trade": None,
             "worst_trade": None,
+            "avg_trade": None,
             "level": 1,
             "xp": 0,
             "next_level_xp": 100,
             "mastered_patterns": []
         }
     
-    # Solo trades con P&L (ventas) - en este modelo simple, asumimos PNL en ventas
+    # Calcular P&L no realizado para posiciones abiertas (BUY sin SELL correspondiente)
+    buy_trades = [t for t in trades if t.side == 'BUY']
     sell_trades = [t for t in trades if t.side == 'SELL']
     
-    total_pnl = sum(t.pnl for t in sell_trades)
-    winning = [t for t in sell_trades if t.pnl > 0]
-    losing = [t for t in sell_trades if t.pnl < 0]
+    for buy in buy_trades:
+        try:
+            current_price = binance.get_price(buy.symbol)
+            unrealized_pnl += (current_price - buy.price) * buy.quantity
+        except:
+            pass
+    
+    # Calcular estadísticas de trades cerrados (ventas)
+    realized_pnl = sum(t.pnl for t in sell_trades if t.pnl)
+    winning = [t for t in sell_trades if t.pnl and t.pnl > 0]
+    losing = [t for t in sell_trades if t.pnl and t.pnl < 0]
     
     win_rate = (len(winning) / len(sell_trades) * 100) if sell_trades else 0
     
-    pnls = [t.pnl for t in sell_trades]
+    pnls = [t.pnl for t in sell_trades if t.pnl]
     
     # Calcular Gamificación
-    gamification = calculate_level(len(sell_trades), total_pnl, win_rate)
+    gamification = calculate_level(len(trades), total_pnl, win_rate)
     patterns = analyze_patterns(sell_trades)
     
     return {
-        "total_trades": len(trades), # Contamos todos (buy+sell) para volumen
+        "total_trades": len(trades),
         "winning_trades": len(winning),
         "losing_trades": len(losing),
         "win_rate": round(win_rate, 1),
         "total_pnl": round(total_pnl, 2),
-        "best_trade": max(pnls) if pnls else None,
-        "worst_trade": min(pnls) if pnls else None,
+        "unrealized_pnl": round(unrealized_pnl, 2),
+        "roi_percent": round(roi_percent, 2),
+        "initial_capital": initial_capital,
+        "current_value": round(current_value, 2),
+        "best_trade": round(max(pnls), 2) if pnls else None,
+        "worst_trade": round(min(pnls), 2) if pnls else None,
+        "avg_trade": round(sum(pnls) / len(pnls), 2) if pnls else None,
         "level": gamification["level"],
         "xp": gamification["xp"],
         "next_level_xp": gamification["next_level_xp"],
