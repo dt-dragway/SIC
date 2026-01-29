@@ -78,8 +78,15 @@ export default function OrderExecutionModal({
     }
 
     const handleSubmit = async () => {
+        const totalAmount = quantity * entryPrice
+
         if (quantity <= 0) {
             toast.error('Cantidad inválida')
+            return
+        }
+
+        if (totalAmount < 5) {
+            toast.error('El monto mínimo de inversión es $5 USD')
             return
         }
 

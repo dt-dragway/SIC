@@ -11,7 +11,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useWallet } from '../context/WalletContext' // Import Context
 import InstitutionalAssistant from '../components/ai/InstitutionalAssistant'
 import AINeuroEngine from '../components/ai/AINeuroEngine'
-import OrderExecutionModal from '../components/trading/OrderExecutionModal' // Import Modal
+import SignalExecutionModal from '../components/trading/SignalExecutionModal' // Import Modal
 
 const CandlestickChart = dynamic(
     () => import('../components/charts/CandlestickChart').then(mod => mod.CandlestickChart),
@@ -322,19 +322,13 @@ export default function Home() {
 
             {/* Modal de Ejecución de Señales */}
             {selectedSignal && (
-                <OrderExecutionModal
+                <SignalExecutionModal
                     isOpen={isOrderModalOpen}
                     onClose={() => setIsOrderModalOpen(false)}
-                    symbol={selectedSignal.symbol}
-                    currentPrice={selectedSignal.entry_price}
-                    clickedPrice={selectedSignal.entry_price}
-                    accountBalance={mode === 'practice' ? 10000 : (balances.find(b => b.asset === 'USDT')?.total || 0)} // Usar balance real o práctica
+                    signal={selectedSignal}
+                    accountBalance={mode === 'practice' ? totalUsd : (balances.find(b => b.asset === 'USDT')?.total || 0)}
                     mode={mode === 'practice' ? 'practice' : 'real'}
-                    initialStopLoss={selectedSignal.stop_loss}
-                    initialTakeProfit={selectedSignal.take_profit}
-                    initialSide={selectedSignal.type === 'LONG' ? 'BUY' : 'SELL'}
                     onOrderSubmit={() => {
-                        // Opcional: refrescar datos o mostrar notificación extra
                         setIsOrderModalOpen(false)
                     }}
                 />

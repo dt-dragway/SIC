@@ -95,13 +95,6 @@ export default function LoginPage() {
                             ) : 'Iniciar Sesión'}
                         </button>
                     </form>
-
-                    <div className="mt-6 text-center text-sm text-slate-500">
-                        ¿No tienes cuenta?{' '}
-                        <Link href="/register" className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
-                            Crear cuenta gratis
-                        </Link>
-                    </div>
                 </div>
             </div>
         </div>

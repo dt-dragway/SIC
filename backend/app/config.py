@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     openai_api_key: str = ""    # https://platform.openai.com
     ollama_model: str = "llama3"  # Modelo local (gratis)
     
+    # === Admin Account ===
+    admin_email: str = "admin"
+    admin_password: str = "admin123"  # Cambiar en .env
+    
     class Config:
         env_file = "../.env"
         env_file_encoding = "utf-8"

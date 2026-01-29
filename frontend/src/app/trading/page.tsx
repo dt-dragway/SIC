@@ -15,8 +15,8 @@ import MarketList from '../../components/trading/MarketList'
 import { InteractiveCandlestickChart } from '../../components/charts/InteractiveCandlestickChart'
 import OrderExecutionModal from '../../components/trading/OrderExecutionModal'
 import OrderFlowAnalyzer from '../../components/trading/OrderFlowAnalyzer'
-import PendingOrdersPanel from '../../components/trading/PendingOrdersPanel' // Import nuevo componente
-import AIEvolutionWidget from '../../components/dashboard/AIEvolutionWidget'
+import PendingOrdersPanel from '../../components/trading/PendingOrdersPanel'
+import AIStatusBar from '../../components/trading/AIStatusBar'
 
 interface Trade {
     id: string | number
@@ -81,7 +81,7 @@ export default function TradingPagePro() {
             if (!token) return
 
             const endpoint = mode === 'practice'
-                ? '/api/v1/practice/trades'
+                ? '/api/v1/practice/orders'
                 : '/api/v1/trading/orders'
 
             const response = await fetch(endpoint, {
@@ -92,8 +92,21 @@ export default function TradingPagePro() {
 
             if (response.ok) {
                 const data = await response.json()
-                const tradesData = mode === 'practice' ? data : data.orders || []
-                setTrades(tradesData.slice(0, 20)) // Last 20 trades
+                const tradesData = data.orders || []
+                // Mapear datos al formato Trade
+                const mappedTrades = tradesData.map((t: any) => ({
+                    id: t.id,
+                    symbol: t.symbol,
+                    side: t.side,
+                    quantity: t.quantity,
+                    price: t.entry_price || t.price,
+                    total: t.total,
+                    pnl: t.pnl,
+                    pnl_percent: t.pnl_percent,
+                    timestamp: t.created_at,
+                    status: t.status || 'FILLED'
+                }))
+                setTrades(mappedTrades.slice(0, 20)) // Last 20 trades
             }
         } catch (error) {
             console.error('Error fetching history:', error)
@@ -161,6 +174,13 @@ export default function TradingPagePro() {
                         </span>
                     </div>
 
+                    {/* AI Stats (only in practice mode) */}
+                    {mode === 'practice' && (
+                        <div className="hidden md:flex">
+                            <AIStatusBar />
+                        </div>
+                    )}
+
                     {/* Mode Toggle - Compact */}
                     <div className="bg-white/5 p-1 rounded-lg border border-white/10 flex">
                         <button
@@ -182,15 +202,9 @@ export default function TradingPagePro() {
 
                 {/* Main Trading Area - Uses remaining space */}
                 <div className="flex-1 grid grid-cols-12 gap-2 py-2 min-h-0">
-                    {/* Left Column - Order Flow or AI Evolution */}
+                    {/* Left Column - Order Book */}
                     <div className="col-span-2 bg-[#0a0a0f] rounded-lg border border-white/10 flex flex-col overflow-hidden">
-                        {mode === 'practice' ? (
-                            <div className="h-full overflow-y-auto custom-scrollbar">
-                                <AIEvolutionWidget />
-                            </div>
-                        ) : (
-                            <OrderFlowAnalyzer symbol={selectedSymbol} />
-                        )}
+                        <OrderBook symbol={selectedSymbol} />
                     </div>
 
                     {/* Center Column - Interactive Chart */}

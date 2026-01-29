@@ -43,9 +43,69 @@ async def lifespan(app: FastAPI):
     logger.info(f"📊 Entorno: {settings.app_env}")
     logger.info(f"🔗 Database: {settings.database_url.split('@')[-1]}")
     
-    # TODO: Conectar a PostgreSQL
-    # TODO: Conectar a Redis
-    # TODO: Inicializar cliente Binance
+    # Auto-crear cuenta admin si no existe
+    try:
+        from app.infrastructure.database.session import SessionLocal
+        from app.infrastructure.database.models import User, VirtualWallet
+        from passlib.context import CryptContext
+        import json
+        
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        db = SessionLocal()
+        
+        try:
+            # Buscar admin existente
+            admin = db.query(User).filter(User.email == settings.admin_email).first()
+            
+            if not admin:
+                # Crear usuario admin
+                admin = User(
+                    email=settings.admin_email,
+                    hashed_password=pwd_context.hash(settings.admin_password),
+                    is_active=True,
+                    is_verified=True
+                )
+                db.add(admin)
+                db.commit()
+                db.refresh(admin)
+                logger.success(f"👤 Usuario admin creado: {settings.admin_email}")
+            else:
+                # Actualizar contraseña si cambió
+                admin.hashed_password = pwd_context.hash(settings.admin_password)
+                db.commit()
+                logger.info(f"👤 Usuario admin existente: {settings.admin_email}")
+            
+            # Auto-crear wallet virtual con fondos de prueba
+            wallet = db.query(VirtualWallet).filter(VirtualWallet.user_id == admin.id).first()
+            
+            if not wallet:
+                # Crear wallet con criptos de prueba
+                initial_balances = {
+                    "USDT": 1000.0,
+                    "BTC": 0.01,
+                    "ETH": 0.5,
+                    "SOL": 10.0,
+                    "XRP": 500.0,
+                    "ADA": 1000.0,
+                    "DOT": 100.0,
+                    "DOGE": 5000.0,
+                    "LINK": 50.0
+                }
+                wallet = VirtualWallet(
+                    user_id=admin.id,
+                    balances=json.dumps(initial_balances),
+                    initial_capital=5000.0
+                )
+                db.add(wallet)
+                db.commit()
+                logger.success(f"💰 Wallet de práctica creada para admin con fondos de prueba")
+            
+            db.close()
+        except Exception as e:
+            logger.warning(f"⚠️ Error creando admin: {e}")
+            db.close()
+    except Exception as e:
+        logger.warning(f"⚠️ No se pudo crear usuario admin: {e}")
     
     logger.success("✅ SIC Ultra iniciado correctamente")
     
@@ -53,7 +113,6 @@ async def lifespan(app: FastAPI):
     
     # === SHUTDOWN ===
     logger.info("🛑 Cerrando SIC Ultra...")
-    # TODO: Cerrar conexiones
     logger.info("👋 SIC Ultra cerrado")
 
 

@@ -43,7 +43,7 @@ export default function RiskCalculator({
     const kellySuggestedSize = accountBalance * kellyPercent / 100
 
     // Validaciones
-    const isRRValid = rrRatio >= 2.0
+    const isRRValid = rrRatio >= 1.0
     const isRiskValid = maxRiskPercent <= 2.0
     const isTradeValid = isRRValid && isRiskValid && riskPerUnit > 0
 
@@ -188,7 +188,7 @@ export default function RiskCalculator({
                             <div className="flex-1">
                                 <span className="text-sm text-rose-300 font-medium block">Trade Rechazado</span>
                                 <ul className="text-xs text-rose-200 mt-1 space-y-0.5">
-                                    {!isRRValid && <li>• R:R debe ser ≥ 2:1</li>}
+                                    {!isRRValid && <li>• R:R debe ser ≥ 1:1</li>}
                                     {!isRiskValid && <li>• Riesgo máximo 2% por trade</li>}
                                     {riskPerUnit <= 0 && <li>• SL debe estar por debajo de Entry (BUY)</li>}
                                 </ul>

@@ -308,6 +308,276 @@ async def get_trade_stats(
     }
 
 
+class DepositRequest(BaseModel):
+    asset: str
+    amount: float
+
+
+@router.post("/deposit")
+async def deposit_funds(
+    deposit: DepositRequest,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    Depositar fondos virtuales en modo práctica.
+    Útil para testear operaciones de venta.
+    """
+    payload = require_valid_token(token)
+    user_id = payload.get("user_id", 1)
+    
+    wallet = get_or_create_wallet(db, user_id)
+    balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
+    
+    asset = deposit.asset.upper()
+    current = float(balances.get(asset, 0))
+    balances[asset] = current + deposit.amount
+    
+    wallet.balances = json.dumps(balances)
+    db.commit()
+    
+    logger.success(f"💰 Depositado {deposit.amount} {asset} en wallet de usuario {user_id}")
+    
+    return {
+        "message": f"✅ Depositado {deposit.amount} {asset}",
+        "asset": asset,
+        "new_balance": balances[asset],
+        "all_balances": balances
+    }
+
+
+@router.post("/deposit-all-cryptos")
+async def deposit_all_cryptos(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    Depositar $50 equivalentes en las principales criptomonedas.
+    Ideal para configurar un ambiente de prueba completo.
+    """
+    payload = require_valid_token(token)
+    user_id = payload.get("user_id", 1)
+    
+    wallet = get_or_create_wallet(db, user_id)
+    balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
+    binance = get_binance_client()
+    
+    # Cryptos principales con $50 cada una
+    cryptos = ["BTC", "ETH", "SOL", "XRP", "ADA", "DOT", "DOGE", "LINK"]
+    deposited = {}
+    
+    for crypto in cryptos:
+        try:
+            price = binance.get_price(f"{crypto}USDT")
+            amount = 50.0 / price  # $50 equivalente
+            current = float(balances.get(crypto, 0))
+            balances[crypto] = round(current + amount, 8)
+            deposited[crypto] = {
+                "amount": round(amount, 8),
+                "usd_value": 50.0,
+                "price": price
+            }
+        except Exception as e:
+            logger.warning(f"No se pudo obtener precio de {crypto}: {e}")
+            continue
+    
+    # Añadir USDT adicional
+    balances["USDT"] = float(balances.get("USDT", 100)) + 500
+    deposited["USDT"] = {"amount": 500, "usd_value": 500}
+    
+    wallet.balances = json.dumps(balances)
+    db.commit()
+    
+    logger.success(f"💰 Depositadas {len(deposited)} criptos para usuario {user_id}")
+    
+    return {
+        "message": f"✅ Depositadas {len(deposited)} criptomonedas",
+        "deposited": deposited,
+        "total_deposited_usd": sum(d.get("usd_value", 0) for d in deposited.values()),
+        "all_balances": balances
+    }
+
+
+class OrderRequest(BaseModel):
+    symbol: str
+    side: str  # BUY or SELL
+    type: str = "MARKET"  # MARKET, LIMIT, OCO
+    quantity: float
+    price: Optional[float] = None
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+
+
+@router.post("/order")
+async def execute_virtual_order(
+    order: OrderRequest,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    """
+    Ejecutar una orden virtual (compra/venta) en modo práctica.
+    """
+    payload = require_valid_token(token)
+    user_id = payload.get("user_id", 1)
+    
+    wallet = get_or_create_wallet(db, user_id)
+    balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
+    binance = get_binance_client()
+    
+    symbol = order.symbol.upper()
+    base_asset = symbol.replace("USDT", "").replace("BUSD", "")
+    
+    # Obtener precio actual si es orden de mercado
+    current_price = binance.get_price(symbol)
+    execution_price = order.price if order.type == "LIMIT" and order.price else current_price
+    
+    # Calcular monto total
+    total_amount = order.quantity * execution_price
+    fee = total_amount * 0.001  # 0.1% fee
+    
+    # Validar monto mínimo $5
+    if total_amount < 5:
+        raise HTTPException(status_code=400, detail="El monto mínimo de inversión es $5 USD")
+    
+    if order.side.upper() == "BUY":
+        # Verificar saldo USDT
+        usdt_balance = float(balances.get("USDT", 0))
+        if usdt_balance < total_amount + fee:
+            raise HTTPException(status_code=400, detail=f"Saldo insuficiente. Necesitas ${total_amount + fee:.2f} USDT")
+        
+        # Ejecutar compra
+        balances["USDT"] = round(usdt_balance - total_amount - fee, 2)
+        current_asset_balance = float(balances.get(base_asset, 0))
+        balances[base_asset] = round(current_asset_balance + order.quantity, 8)
+        
+        action = "Compra"
+        
+    elif order.side.upper() == "SELL":
+        # Verificar saldo del activo
+        asset_balance = float(balances.get(base_asset, 0))
+        if asset_balance < order.quantity:
+            raise HTTPException(status_code=400, detail=f"Saldo insuficiente. Solo tienes {asset_balance:.8f} {base_asset}")
+        
+        # Ejecutar venta
+        balances[base_asset] = round(asset_balance - order.quantity, 8)
+        usdt_balance = float(balances.get("USDT", 0))
+        balances["USDT"] = round(usdt_balance + total_amount - fee, 2)
+        
+        # Limpiar activos con saldo 0
+        if balances[base_asset] <= 0.00000001:
+            del balances[base_asset]
+        
+        action = "Venta"
+    else:
+        raise HTTPException(status_code=400, detail="Side debe ser BUY o SELL")
+    
+    # Guardar balances actualizados
+    wallet.balances = json.dumps(balances)
+    
+    # Guardar el trade en historial
+    new_trade = VirtualTradeModel(
+        wallet_id=wallet.id,
+        symbol=symbol,
+        side=order.side.upper(),
+        type=order.type,
+        strategy="AI_SIGNAL" if order.stop_loss or order.take_profit else "MANUAL",
+        reason=f"SL: {order.stop_loss}, TP: {order.take_profit}" if order.stop_loss else None,
+        quantity=order.quantity,
+        price=execution_price,
+        pnl=0  # Se calculará al cerrar la posición
+    )
+    db.add(new_trade)
+    db.commit()
+    db.refresh(new_trade)
+    
+    logger.success(f"📈 {action} virtual: {order.quantity} {base_asset} @ ${execution_price:.2f} (Total: ${total_amount:.2f})")
+    
+    return {
+        "success": True,
+        "message": f"✅ {action} ejecutada: {order.quantity:.6f} {base_asset} @ ${execution_price:.2f}",
+        "order": {
+            "id": new_trade.id,
+            "symbol": symbol,
+            "side": order.side.upper(),
+            "type": order.type,
+            "quantity": order.quantity,
+            "price": execution_price,
+            "total": round(total_amount, 2),
+            "fee": round(fee, 2),
+            "created_at": new_trade.created_at.isoformat()
+        },
+        "balances": {
+            "USDT": balances.get("USDT", 0),
+            base_asset: balances.get(base_asset, 0)
+        }
+    }
+
+
+@router.get("/orders")
+async def get_virtual_orders(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+    limit: int = 50,
+    symbol: Optional[str] = None
+):
+    """
+    Obtener historial de órdenes virtuales.
+    """
+    payload = require_valid_token(token)
+    user_id = payload.get("user_id", 1)
+    
+    wallet = get_or_create_wallet(db, user_id)
+    
+    # Query base
+    query = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id)
+    
+    # Filtrar por símbolo si se especifica
+    if symbol:
+        query = query.filter(VirtualTradeModel.symbol == symbol.upper())
+    
+    # Ordenar por fecha más reciente y limitar
+    trades = query.order_by(VirtualTradeModel.created_at.desc()).limit(limit).all()
+    
+    # Obtener precios actuales para calcular P&L no realizado
+    binance = get_binance_client()
+    
+    orders = []
+    for trade in trades:
+        try:
+            current_price = binance.get_price(trade.symbol)
+            # Calcular P&L
+            if trade.side == "BUY":
+                unrealized_pnl = (current_price - trade.price) * trade.quantity
+            else:
+                unrealized_pnl = (trade.price - current_price) * trade.quantity
+            pnl_percent = (unrealized_pnl / (trade.price * trade.quantity)) * 100
+        except:
+            current_price = trade.price
+            unrealized_pnl = 0
+            pnl_percent = 0
+        
+        orders.append({
+            "id": trade.id,
+            "symbol": trade.symbol,
+            "side": trade.side,
+            "type": trade.type,
+            "strategy": trade.strategy,
+            "quantity": trade.quantity,
+            "entry_price": trade.price,
+            "current_price": current_price,
+            "total": round(trade.price * trade.quantity, 2),
+            "pnl": round(unrealized_pnl, 2),
+            "pnl_percent": round(pnl_percent, 2),
+            "status": "FILLED",
+            "created_at": trade.created_at.isoformat()
+        })
+    
+    return {
+        "orders": orders,
+        "total": len(orders)
+    }
+
+
 @router.post("/reset")
 async def reset_virtual_wallet(
     token: str = Depends(oauth2_scheme),
