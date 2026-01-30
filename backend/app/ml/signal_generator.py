@@ -356,13 +356,39 @@ class ProSignalGenerator:
             # Calcular R:R real
             risk_reward = abs(take_profit - current_price) / abs(current_price - stop_loss)
             
-            # Combinar razones de todos los timeframes
+            # Combinar razones de todos los timeframes PERO solo las que apoyan la dirección final
             all_reasons = []
-            for tf_name, tf_data in [("4h", tf_4h), ("1h", tf_1h), ("15m", tf_15m)]:
-                for reason in tf_data.get("reasons", []):
-                    if reason not in all_reasons:
-                        all_reasons.append(f"[{tf_name}] {reason}")
+            target_direction = "BULLISH" if signal_type == SignalType.LONG else "BEARISH"
             
+            # Mapas de razones comunes para identificar su dirección
+            # (En una implementación ideal, las razones vendrían ya clasificadas, 
+            #  aquí hacemos un filtrado heurístico basado en palabras clave o lógica del analyze_timeframe)
+            
+            for tf_name, tf_data in [("4h", tf_4h), ("1h", tf_1h), ("15m", tf_15m)]:
+                # Solo incluir razones de timeframes que coinciden con la dirección general o son neutrales/críticas
+                # O mejor: filtrar las strings de razones
+                
+                for reason in tf_data.get("reasons", []):
+                    # Heurística simple: si la señal es LONG, ignorar razones que suenen a bajista
+                    is_bullish_reason = any(x in reason.lower() for x in ["alcista", "sobreventa", "soporte", "bullish", "long", "positivo", "inferior"])
+                    is_bearish_reason = any(x in reason.lower() for x in ["bajista", "sobrecompra", "resistencia", "bearish", "short", "negativo", "superior"])
+                    
+                    if signal_type == SignalType.LONG:
+                        if is_bullish_reason and not is_bearish_reason:
+                             # Evitar duplicados
+                             r_str = f"[{tf_name}] {reason}"
+                             if r_str not in all_reasons:
+                                 all_reasons.append(r_str)
+                    elif signal_type == SignalType.SHORT:
+                        if is_bearish_reason and not is_bullish_reason:
+                             r_str = f"[{tf_name}] {reason}"
+                             if r_str not in all_reasons:
+                                 all_reasons.append(r_str)
+
+            # Si no hay razones específicas (raro), poner genérica
+            if not all_reasons:
+                all_reasons.append(f"Tendencia {target_direction} confirmada en múltiples timeframes")
+
             # Limitar a las 5 razones más importantes
             all_reasons = all_reasons[:5]
             

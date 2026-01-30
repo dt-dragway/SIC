@@ -8,64 +8,26 @@ Endpoints para el Agente IA profesional que:
 - Ejecuta automáticamente con autorización
 """
 
+import asyncio
+import json
+from datetime import datetime
+from typing import List, Optional, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
-from typing import List, Optional, Dict
-from datetime import datetime
-from enum import Enum
-import asyncio
+from sqlalchemy.orm import Session
 
 from app.api.v1.auth import oauth2_scheme, verify_token
-from app.ml.trading_agent import get_trading_agent, TradingSignal
-from app.ml.indicators import (
-    calculate_rsi, calculate_macd, calculate_bollinger_bands,
-    calculate_atr, get_trend
-)
+# removed: from app.ml.trading_agent import get_trading_agent, TradingSignal (old)
+from app.ml.signal_generator import get_signal_generator
 from app.infrastructure.binance.client import get_binance_client
-from sqlalchemy.orm import Session
 from app.infrastructure.database.session import get_db
 from app.infrastructure.database import models
-import json
 
+# Import trading agent needed for other endpoints (performance/learning)
+from app.ml.trading_agent import get_trading_agent
 
 router = APIRouter()
-
-
-# === Schemas ===
-
-class SignalResponse(BaseModel):
-    symbol: str
-    direction: str
-    confidence: float
-    strength: str
-    entry_price: float
-    stop_loss: float
-    take_profit: float
-    risk_reward: float
-    patterns_detected: List[str]
-    indicators_used: List[str]
-    reasoning: List[str]
-    top_trader_consensus: Optional[Dict]
-    timestamp: datetime
-    expires_at: datetime
-    auto_execute_approved: bool
-
-
-class TradeResultInput(BaseModel):
-    trade_id: str
-    symbol: str
-    side: str
-    entry_price: float
-    exit_price: float
-    pnl: float
-    signals_used: List[str]
-    patterns_detected: List[str]
-
-
-class ApproveAutoExecute(BaseModel):
-    symbol: str
-    direction: str
-    approve: bool
 
 
 # === WebSocket Manager ===
@@ -97,33 +59,48 @@ manager = ConnectionManager()
 
 def get_full_analysis(symbol: str) -> Optional[Dict]:
     """
-    Obtener análisis completo de un símbolo usando el Agente IA.
+    Obtener análisis completo usando el motor de señales profesional (MTF).
     """
-    binance = get_binance_client()
-    agent = get_trading_agent()
+    generator = get_signal_generator()
     
-    # Obtener datos
-    candles = binance.get_klines(symbol, "1h", limit=100)
-    if not candles or len(candles) < 50:
+    # Análisis Multi-Timeframe (4h -> 1h -> 15m)
+    signal = generator.analyze(symbol)
+    
+    if not signal:
         return None
+        
+    # Adaptar estructura para compatibilidad con endpoints existentes
+    # Convertir diccionario a objeto o mantener dict según lo que espera el router
     
-    closes = [c["close"] for c in candles]
-    highs = [c["high"] for c in candles]
-    lows = [c["low"] for c in candles]
+    # Nota: El router espera un objeto con atributos (signal.direction), 
+    # pero ProSignalGenerator devuelve un dict. Vamos a crear una clase simple wrapper.
     
-    # Calcular indicadores
-    indicators = {
-        "rsi": calculate_rsi(closes, 14),
-        "macd": calculate_macd(closes),
-        "bollinger": calculate_bollinger_bands(closes, 20),
-        "atr": calculate_atr(highs, lows, closes, 14),
-        "trend": get_trend(closes, 10, 50)
-    }
-    
-    # Generar señal con el agente
-    signal = agent.analyze(symbol, candles, indicators)
-    
-    return signal
+    class SignalWrapper:
+        def __init__(self, data):
+            self.symbol = data["symbol"]
+            self.direction = data["type"]
+            self.confidence = data["confidence"]
+            self.strength = "STRONG" if "S" in data.get("tier", "") else "MODERATE" if "A" in data.get("tier", "") else "WEAK"
+            self.entry_price = data["entry_price"]
+            self.stop_loss = data["stop_loss"]
+            self.take_profit = data["take_profit"]
+            self.risk_reward = data["risk_reward"]
+            
+            # Extraer patrones del reasoning o de la data si existiera
+            self.patterns_detected = [r for r in data["reasoning"] if "📊" in r]
+            self.indicators_used = ["Multi-Timeframe Analysis", "RSI Divergence", "Heikin Ashi Candles"]
+            self.reasoning = data["reasoning"]
+            self.top_trader_consensus = {"bullish": 0, "bearish": 0} # Placeholder
+            self.timestamp = data["timestamp"]
+            self.expires_at = data["expires_at"]
+            self.auto_execute_approved = False
+            
+            # Datos extra para el frontend Pro
+            self.tier = data.get("tier", "B")
+            self.tier_emoji = data.get("tier_emoji", "📈")
+            self.aligned_timeframes = data.get("aligned_timeframes", "N/A")
+
+    return SignalWrapper(signal)
 
 
 # === Endpoints ===
