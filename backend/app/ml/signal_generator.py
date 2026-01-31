@@ -300,13 +300,22 @@ class ProSignalGenerator:
                     "symbol": symbol,
                     "type": "HOLD",
                     "tier": SignalTier.C_TIER.value,
+                    "tier_emoji": "😴",
                     "confidence": 0,
                     "reason": "Sin alineación de timeframes",
                     "timeframes": {
                         "4h": tf_4h["direction"],
                         "1h": tf_1h["direction"],
                         "15m": tf_15m["direction"]
-                    }
+                    },
+                    "aligned_timeframes": f"{bullish_count if bullish_count > bearish_count else bearish_count}/3",
+                    "entry_price": 0,
+                    "stop_loss": 0,
+                    "take_profit": 0,
+                    "risk_reward": 0,
+                    "reasoning": [f"Conflicto: 4h={tf_4h['direction']}, 1h={tf_1h['direction']}"],
+                    "timestamp": datetime.utcnow(),
+                    "expires_at": datetime.utcnow() + timedelta(hours=1)
                 }
             
             # Calcular score ponderado

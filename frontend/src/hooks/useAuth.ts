@@ -60,6 +60,48 @@ export function useAuth() {
         }
     };
 
+    // Logout function definition specifically for internal use in useEffect
+    const performLogout = () => {
+        localStorage.removeItem('token');
+        setState({ user: null, loading: false, isAuthenticated: false, token: null });
+        router.push('/login');
+    };
+
+    // Inactivity Timer Logic
+    useEffect(() => {
+        if (!state.isAuthenticated) return;
+
+        const INACTIVITY_LIMIT = 60 * 60 * 1000; // 1 hour in ms
+        let inactivityTimer: NodeJS.Timeout;
+
+        const resetTimer = () => {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                console.log('⏰ Sesión cerrada por inactividad (1h)');
+                performLogout();
+            }, INACTIVITY_LIMIT);
+        };
+
+        // Events to detect activity
+        const events = ['mousemove', 'keydown', 'click', 'scroll'];
+
+        // Initial start
+        resetTimer();
+
+        // Attach listeners
+        events.forEach(event => {
+            window.addEventListener(event, resetTimer);
+        });
+
+        // Cleanup
+        return () => {
+            if (inactivityTimer) clearTimeout(inactivityTimer);
+            events.forEach(event => {
+                window.removeEventListener(event, resetTimer);
+            });
+        };
+    }, [state.isAuthenticated]);
+
     const login = async (email: string, password: string) => {
         try {
             const formData = new URLSearchParams();
@@ -115,6 +157,44 @@ export function useAuth() {
         setState({ user: null, loading: false, isAuthenticated: false, token: null });
         router.push('/login');
     };
+
+    // Inactivity Timer (1 Hour)
+    useEffect(() => {
+        if (!state.isAuthenticated) return;
+
+        let timeoutId: any;
+        const TIMEOUT_DURATION = 3600000; // 1 hour
+
+        const handleTimeout = () => {
+            if (localStorage.getItem('token')) {
+                // console.log('Session timed out due to inactivity');
+                logout();
+            }
+        };
+
+        const resetTimer = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(handleTimeout, TIMEOUT_DURATION);
+        };
+
+        // Events to monitor activity
+        const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+
+        events.forEach(event => {
+            window.addEventListener(event, resetTimer);
+        });
+
+        // Initialize timer
+        resetTimer();
+
+        // Cleanup
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            events.forEach(event => {
+                window.removeEventListener(event, resetTimer);
+            });
+        };
+    }, [state.isAuthenticated]);
 
     return {
         ...state,

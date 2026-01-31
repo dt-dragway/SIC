@@ -27,7 +27,46 @@ from app.infrastructure.database import models
 # Import trading agent needed for other endpoints (performance/learning)
 from app.ml.trading_agent import get_trading_agent
 
+
 router = APIRouter()
+
+
+# === Schemas ===
+
+class SignalResponse(BaseModel):
+    symbol: str
+    direction: str
+    confidence: float
+    strength: str
+    entry_price: float
+    stop_loss: float
+    take_profit: float
+    risk_reward: float
+    patterns_detected: List[str]
+    indicators_used: List[str]
+    reasoning: List[str]
+    top_trader_consensus: Optional[Dict]
+    timestamp: datetime
+    expires_at: datetime
+    auto_execute_approved: bool
+
+
+class TradeResultInput(BaseModel):
+    trade_id: str
+    symbol: str
+    side: str
+    entry_price: float
+    exit_price: float
+    pnl: float
+    signals_used: List[str]
+    patterns_detected: List[str]
+
+
+class ApproveAutoExecute(BaseModel):
+    symbol: str
+    direction: str
+    approve: bool
+
 
 
 # === WebSocket Manager ===
@@ -77,22 +116,23 @@ def get_full_analysis(symbol: str) -> Optional[Dict]:
     
     class SignalWrapper:
         def __init__(self, data):
-            self.symbol = data["symbol"]
-            self.direction = data["type"]
-            self.confidence = data["confidence"]
+            self.symbol = data.get("symbol", "UNKNOWN")
+            self.direction = data.get("type", "NEUTRAL")
+            self.confidence = data.get("confidence", 0)
             self.strength = "STRONG" if "S" in data.get("tier", "") else "MODERATE" if "A" in data.get("tier", "") else "WEAK"
-            self.entry_price = data["entry_price"]
-            self.stop_loss = data["stop_loss"]
-            self.take_profit = data["take_profit"]
-            self.risk_reward = data["risk_reward"]
+            self.entry_price = data.get("entry_price", 0)
+            self.stop_loss = data.get("stop_loss", 0)
+            self.take_profit = data.get("take_profit", 0)
+            self.risk_reward = data.get("risk_reward", 0)
             
             # Extraer patrones del reasoning o de la data si existiera
-            self.patterns_detected = [r for r in data["reasoning"] if "📊" in r]
+            reasoning = data.get("reasoning", [])
+            self.patterns_detected = [r for r in reasoning if "📊" in r]
             self.indicators_used = ["Multi-Timeframe Analysis", "RSI Divergence", "Heikin Ashi Candles"]
-            self.reasoning = data["reasoning"]
+            self.reasoning = reasoning
             self.top_trader_consensus = {"bullish": 0, "bearish": 0} # Placeholder
-            self.timestamp = data["timestamp"]
-            self.expires_at = data["expires_at"]
+            self.timestamp = data.get("timestamp", datetime.utcnow())
+            self.expires_at = data.get("expires_at", datetime.utcnow())
             self.auto_execute_approved = False
             
             # Datos extra para el frontend Pro

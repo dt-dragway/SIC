@@ -26,7 +26,7 @@ interface WalletState {
 const WalletContext = createContext<WalletState | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, token } = useAuth();
+    const { isAuthenticated, token, logout } = useAuth();
     const [mode, setMode] = useState<Mode>('practice');
     const [isLoading, setIsLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -104,7 +104,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
             } else {
                 console.error(`Failed to fetch ${mode} wallet`, res.status);
                 if (res.status === 401) {
-                    // Token might be expired
+                    console.log("Sesión expirada en wallet fetch -> Logout");
+                    logout();
+                    return;
                 }
             }
         } catch (error) {

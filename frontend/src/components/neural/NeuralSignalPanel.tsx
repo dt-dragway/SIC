@@ -3,7 +3,7 @@
 import { ArrowUp, ArrowDown, Minus, TrendingUp, Zap, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
 import { useNeuralSignal, type NeuralSignal } from '../../hooks/useNeuralSignals'
 import LoadingSpinner from '../ui/LoadingSpinner'
-import { use Effect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface NeuralSignalPanelProps {
     symbol: string
@@ -71,6 +71,10 @@ export default function NeuralSignalPanel({ symbol, onExecute }: NeuralSignalPan
         )
     }
 
+    // Detectar si es señal Premium (S-Tier) basada en el texto
+    const isPremium = signal.explanation_es.includes('S-Tier') || signal.explanation_es.includes('Premium');
+    const isPro = signal.explanation_es.includes('A-Tier');
+
     // Colores según dirección
     const directionColors = {
         LONG: 'emerald',
@@ -84,13 +88,23 @@ export default function NeuralSignalPanel({ symbol, onExecute }: NeuralSignalPan
     const DirectionIcon = signal.direction === 'LONG' ? ArrowUp : signal.direction === 'SHORT' ? ArrowDown : Minus
 
     return (
-        <div className="bg-[#0a0a0f] rounded-lg border border-white/10 overflow-hidden">
+        <div className={`bg-[#0a0a0f] rounded-lg border overflow-hidden relative ${isPremium ? 'border-amber-400/50 shadow-lg shadow-amber-500/20' :
+            isPro ? 'border-purple-400/30' :
+                'border-white/10'
+            }`}>
+            {/* Efecto de brillo para Premium */}
+            {isPremium && (
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
+            )}
+
             {/* Header - Señal Principal */}
-            <div className={`bg-${color}-500/10 border-b border-${color}-500/20 p-4`}>
+            <div className={`bg-${color}-500/10 border-b border-${color}-500/20 p-4 relative`}>
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                        <Zap className={`h-5 w-5 text-${color}-400`} />
-                        <h3 className="font-semibold text-white">Neural Engine</h3>
+                        <Zap className={`h-5 w-5 ${isPremium ? 'text-amber-400 animate-pulse' : `text-${color}-400`}`} />
+                        <h3 className={`font-semibold ${isPremium ? 'text-amber-400' : 'text-white'}`}>
+                            {isPremium ? '💎 SEÑAL S-TIER' : isPro ? '⭐ SEÑAL A-TIER' : 'Neural Engine'}
+                        </h3>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                         <Clock className="h-3 w-3" />
@@ -106,8 +120,10 @@ export default function NeuralSignalPanel({ symbol, onExecute }: NeuralSignalPan
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm text-slate-400">Confianza: {signal.confidence.toFixed(1)}%</span>
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium bg-${color}-500/20 text-${color}-300`}>
-                                {signal.strength === 'STRONG' ? 'FUERTE' : signal.strength === 'MODERATE' ? 'MODERADA' : 'DÉBIL'}
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium 
+                                ${isPremium ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                                    `bg-${color}-500/20 text-${color}-300`}`}>
+                                {isPremium ? '🔥 PREMIUM' : signal.strength === 'STRONG' ? 'FUERTE' : signal.strength === 'MODERATE' ? 'MODERADA' : 'DÉBIL'}
                             </span>
                         </div>
                     </div>
@@ -116,7 +132,9 @@ export default function NeuralSignalPanel({ symbol, onExecute }: NeuralSignalPan
                 {/* Barra de confianza */}
                 <div className="mt-3 h-2 bg-white/5 rounded-full overflow-hidden">
                     <div
-                        className={`h-full bg-gradient-to-r from-${color}-500 to-${color}-400 transition-all`}
+                        className={`h-full transition-all ${isPremium ? 'bg-gradient-to-r from-amber-500 to-yellow-300' :
+                            `bg-gradient-to-r from-${color}-500 to-${color}-400`
+                            }`}
                         style={{ width: `${signal.confidence}%` }}
                     />
                 </div>

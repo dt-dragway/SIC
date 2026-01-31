@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X, TrendingUp, TrendingDown, Target, Shield, DollarSign } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/hooks/useAuth'
 
 interface SignalExecutionModalProps {
     isOpen: boolean
@@ -63,6 +64,8 @@ export default function SignalExecutionModal({
     const hasEnoughBalance = investmentAmount <= accountBalance
     const canSubmit = isAmountValid && hasEnoughBalance && quantity > 0
 
+    const { token, logout } = useAuth()
+
     const handleSubmit = async () => {
         if (!canSubmit) {
             if (!isAmountValid) toast.error('El monto mínimo es $5 USD')
@@ -73,7 +76,6 @@ export default function SignalExecutionModal({
         setLoading(true)
 
         try {
-            const token = localStorage.getItem('token')
             const endpoint = mode === 'practice' ? '/api/v1/practice/order' : '/api/v1/trading/order'
 
             const response = await fetch(endpoint, {
@@ -103,6 +105,11 @@ export default function SignalExecutionModal({
                 if (onOrderSubmit) onOrderSubmit()
                 onClose()
             } else {
+                if (response.status === 401) {
+                    toast.error('Sesión expirada. Redirigiendo al login...')
+                    logout()
+                    return
+                }
                 toast.error(data.detail || 'Error al ejecutar orden')
             }
         } catch (error) {

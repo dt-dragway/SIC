@@ -12,7 +12,7 @@ from app.api.v1.trading import router as trading_router
 from app.api.v1.practice import router as practice_router
 from app.api.v1.p2p import router as p2p_router
 from app.api.v1.signals import router as signals_router
-from app.api.v1.ml import router as ml_router
+# from app.api.v1.ml import router as ml_router
 from app.api.v1.knowledge import router as knowledge_router
 from app.api.v1.onchain import router as onchain_router
 from app.api.v1.derivatives import router as derivatives_router
@@ -34,7 +34,7 @@ router.include_router(advanced_trading_router, prefix="/trading", tags=["📈 Tr
 router.include_router(practice_router, prefix="/practice", tags=["🎮 Práctica"])
 router.include_router(p2p_router, prefix="/p2p", tags=["💱 P2P VES"])
 router.include_router(signals_router, prefix="/signals", tags=["🎯 Señales IA"])
-router.include_router(ml_router, prefix="/ml", tags=["🧠 Machine Learning"])
+# router.include_router(ml_router, prefix="/ml", tags=["🧠 Machine Learning"])
 router.include_router(knowledge_router, prefix="/knowledge", tags=["📚 Base Conocimientos"])
 router.include_router(onchain_router, prefix="/onchain", tags=["🐋 On-Chain Analysis"])
 router.include_router(derivatives_router, prefix="/derivatives", tags=["📊 Derivatives & Delta Neutral"])

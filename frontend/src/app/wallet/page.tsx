@@ -7,6 +7,7 @@ import { useWallet } from '@/context/WalletContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { RefreshCw, Eye, EyeOff, Wallet, TrendingUp, ArrowUpRight, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
+import CryptoIcon from '@/components/ui/CryptoIcon';
 
 export default function WalletPage() {
     const { isAuthenticated, loading: authLoading } = useAuth();
@@ -135,9 +136,7 @@ export default function WalletPage() {
                                     <tr key={asset.asset} className="hover:bg-white/[0.02] transition-colors group">
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs ring-1 ring-indigo-500/30">
-                                                    {asset.asset[0]}
-                                                </div>
+                                                <CryptoIcon symbol={asset.asset} size={32} />
                                                 <span className="font-bold text-white">{asset.asset}</span>
                                             </div>
                                         </td>

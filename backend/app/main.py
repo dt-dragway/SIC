@@ -47,10 +47,11 @@ async def lifespan(app: FastAPI):
     try:
         from app.infrastructure.database.session import SessionLocal
         from app.infrastructure.database.models import User, VirtualWallet
-        from passlib.context import CryptContext
+        # from passlib.context import CryptContext  # REMOVED: Broken with new bcrypt
+        from app.api.v1.auth import hash_password # FIXED: Use uniform hashing function
         import json
         
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") # REMOVED
         db = SessionLocal()
         
         try:
@@ -61,9 +62,8 @@ async def lifespan(app: FastAPI):
                 # Crear usuario admin
                 admin = User(
                     email=settings.admin_email,
-                    hashed_password=pwd_context.hash(settings.admin_password),
-                    is_active=True,
-                    is_verified=True
+                    password_hash=hash_password(settings.admin_password),
+                    name="Administrator" # FIXED: Required field
                 )
                 db.add(admin)
                 db.commit()
@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
                 logger.success(f"👤 Usuario admin creado: {settings.admin_email}")
             else:
                 # Actualizar contraseña si cambió
-                admin.hashed_password = pwd_context.hash(settings.admin_password)
+                admin.password_hash = hash_password(settings.admin_password) # FIXED
                 db.commit()
                 logger.info(f"👤 Usuario admin existente: {settings.admin_email}")
             

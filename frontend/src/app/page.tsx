@@ -337,24 +337,7 @@ export default function Home() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                    <Link href="/trading" className="glass-card p-4 text-center hover:border-emerald-500/30 transition-all group bg-white/[0.02]">
-                        <span className="text-2xl grayscale group-hover:grayscale-0 transition-all">📈</span>
-                        <p className="mt-2 font-medium text-slate-300 group-hover:text-white">Trading</p>
-                    </Link>
-                    <Link href="/p2p" className="glass-card p-4 text-center hover:border-emerald-500/30 transition-all group bg-white/[0.02]">
-                        <span className="text-2xl grayscale group-hover:grayscale-0 transition-all">💱</span>
-                        <p className="mt-2 font-medium text-slate-300 group-hover:text-white">P2P VES</p>
-                    </Link>
-                    <Link href="/signals" className="glass-card p-4 text-center hover:border-emerald-500/30 transition-all group bg-white/[0.02]">
-                        <span className="text-2xl grayscale group-hover:grayscale-0 transition-all">🎯</span>
-                        <p className="mt-2 font-medium text-slate-300 group-hover:text-white">Señales</p>
-                    </Link>
-                    <Link href="/wallet" className="glass-card p-4 text-center hover:border-emerald-500/30 transition-all group bg-white/[0.02]">
-                        <span className="text-2xl grayscale group-hover:grayscale-0 transition-all">💰</span>
-                        <p className="mt-2 font-medium text-slate-300 group-hover:text-white">Billetera</p>
-                    </Link>
-                </div>
+                {/* Quick Actions Removed */}
             </div>
 
             {/* Modal de Ejecución de Señales */}
