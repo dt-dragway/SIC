@@ -123,10 +123,12 @@ export default function PendingOrdersPanel({ mode, refreshTrigger }: PendingOrde
                                 </span>
                             </td>
                             <td className="px-4 py-2 text-right font-mono text-slate-200">
-                                ${order.price?.toLocaleString() || order.stop_price?.toLocaleString() || 'MKT'}
+                                ${order.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 }) ||
+                                    order.stop_price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 }) ||
+                                    'MKT'}
                             </td>
                             <td className="px-4 py-2 text-right font-mono text-slate-400">
-                                {order.quantity}
+                                {order.quantity.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                             </td>
                             <td className="px-4 py-2 text-center">
                                 <button

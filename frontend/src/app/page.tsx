@@ -37,7 +37,7 @@ interface Signal {
 export default function Home() {
     const router = useRouter()
     const { isAuthenticated, loading: authLoading, token } = useAuth()
-    const { mode, setMode, totalUsd, balances, isLoading: walletLoading } = useWallet() // Use Global Wallet
+    const { mode, setMode, totalUsd, balances, isLoading: walletLoading, refreshWallet } = useWallet() // Added refreshWallet
 
     const [signals, setSignals] = useState<Signal[]>([])
     const [dataLoading, setDataLoading] = useState(true)
@@ -70,73 +70,65 @@ export default function Home() {
         }
     }, [authLoading, isAuthenticated, router])
 
-    // Data Fetching
+    // Reusable Data Fetching
+    const fetchDashboardData = async () => {
+        if (!token) return;
+
+        try {
+            // No set dataLoading(true) here to avoid flashing UI on silent refresh
+
+            // Stats endpoint depends on mode
+            const statsEndpoint = mode === 'practice'
+                ? '/api/v1/practice/stats'
+                : '/api/v1/trading/stats';
+
+            const [signalsRes, statsRes] = await Promise.all([
+                fetch('/api/v1/signals/scan', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).catch(() => null),
+                fetch(statsEndpoint, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).catch(() => null)
+            ]);
+
+            // Process Signals
+            if (signalsRes?.ok) {
+                const data = await signalsRes.json();
+                const topSignals = data.signals ? data.signals.slice(0, 5) : [];
+                setSignals(topSignals);
+            }
+
+            // Process Stats
+            if (statsRes?.ok) {
+                const statsData = await statsRes.json();
+                setStats(statsData);
+            }
+        } catch (error) {
+            console.error("Error fetching dashboard data", error);
+        } finally {
+            setDataLoading(false);
+        }
+    };
+
+    // Initial Load & Polling
     useEffect(() => {
         if (authLoading || !isAuthenticated || !token) return;
 
-        const fetchData = async () => {
-            try {
-                setDataLoading(true);
+        setDataLoading(true);
+        fetchDashboardData();
 
-                // Reset stats para el nuevo modo (evita datos mezclados)
-                setStats({
-                    total_trades: 0,
-                    winning_trades: 0,
-                    losing_trades: 0,
-                    win_rate: 0,
-                    total_pnl: 0,
-                    roi_percent: 0,
-                    current_value: 0,
-                    initial_capital: 100
-                });
-
-                // === CARGAR DATA EN PARALELO (más rápido) ===
-                const statsEndpoint = mode === 'practice'
-                    ? '/api/v1/practice/stats'
-                    : '/api/v1/trading/stats';
-
-                const [signalsRes, statsRes] = await Promise.all([
-                    fetch('/api/v1/signals/scan', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }).catch(() => null),
-                    fetch(statsEndpoint, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }).catch(() => null)
-                ]);
-
-                // Procesar señales
-                if (signalsRes?.ok) {
-                    const data = await signalsRes.json();
-                    const topSignals = data.signals ? data.signals.slice(0, 5) : [];
-                    setSignals(topSignals);
-                } else {
-                    setSignals([]);
-                }
-
-                // Procesar stats
-                if (statsRes?.ok) {
-                    const statsData = await statsRes.json();
-                    setStats(statsData);
-                }
-            } catch (error) {
-                console.error("Error fetching dashboard data", error);
-                setSignals([]); // Clear signals on error
-            } finally {
-                setDataLoading(false);
-            }
-        };
-
-        fetchData();
-        const interval = setInterval(fetchData, 10000); // Sane interval (10 seconds)
-
+        const interval = setInterval(fetchDashboardData, 10000);
         return () => clearInterval(interval);
     }, [authLoading, isAuthenticated, token, mode]);
 
-    // Manual refresh for stats
-    const refreshData = async () => {
+    // Manual refresh handler
+    const handleRefresh = async () => {
         setDataLoading(true);
-        // ... Reutilizamos la lógica si fuera necesario, pero fetchData ya está en el scope del useEffect
-        // Para simplificar, forzaremos un trigger del efecto si es necesario o llamamos a una función externa
+        await Promise.all([
+            refreshWallet(),
+            fetchDashboardData()
+        ]);
+        setDataLoading(false);
     };
 
     // Solo mostrar pantalla de carga durante autenticación inicial
@@ -372,14 +364,14 @@ export default function Home() {
                         return selectedSignal.symbol.replace('USDT', '')
                     })()}
                     mode={mode === 'practice' ? 'practice' : 'real'}
-                    onOrderSubmit={() => {
+                    onOrderSubmit={async () => {
                         // Remover la señal ejecutada de la lista visualmente
                         if (selectedSignal) {
                             setSignals(prev => prev.filter(s => s.symbol !== selectedSignal.symbol))
                         }
                         setIsOrderModalOpen(false)
-                        // Trigger de recarga inmediata de fondos y stats
-                        window.location.reload() // Forma más segura de refrescar TODO el estado global
+                        // Trigger de recarga inmediata de fondos y stats SIN recargar página
+                        await handleRefresh()
                     }}
                 />
             )}

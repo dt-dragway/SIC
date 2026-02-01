@@ -293,10 +293,21 @@ export default function TradingPagePro() {
                                                         {trade.side}
                                                     </span>
                                                 </td>
-                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">${trade.price.toLocaleString()}</td>
-                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">{trade.quantity}</td>
-                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">${(trade.total || trade.price * trade.quantity).toLocaleString()}</td>
-                                                <td className="py-2 px-4 text-center"><CheckCircle2 className="h-3 w-3 text-emerald-500 mx-auto" /></td>
+                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">
+                                                    ${trade.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+                                                </td>
+                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">
+                                                    {trade.quantity.toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                                                </td>
+                                                <td className="py-2 px-4 text-right font-mono text-xs text-slate-300">
+                                                    ${(trade.total || trade.price * trade.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </td>
+                                                <td className="py-2 px-4 text-center">
+                                                    <div className="flex items-center justify-center gap-1 text-emerald-400">
+                                                        <CheckCircle2 className="h-3 w-3" />
+                                                        <span className="text-[10px] font-medium">Completado</span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))
                                     )}
