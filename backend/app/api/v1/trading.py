@@ -219,20 +219,47 @@ async def get_real_trading_stats(token: str = Depends(oauth2_scheme)):
         initial_capital = max(100, current_value - total_pnl)  # Estimación
         roi_percent = ((current_value - initial_capital) / initial_capital * 100) if initial_capital > 0 else 0
         
+        # Calcular nivel de experiencia (Replicando lógica de práctica)
+        def calculate_level(total_trades: int, total_pnl: float, win_rate: float) -> dict:
+            # XP base por trade
+            base_xp = total_trades * 50
+            # XP por rentabilidad (1 XP por cada $10 de profit, pero no negativo)
+            pnl_xp = max(0, int(total_pnl / 10))
+            # Bonus XP por winrate sostenido (si > 50%)
+            win_rate_bonus = int(total_trades * win_rate) if win_rate > 50 else 0
+            
+            total_xp = base_xp + pnl_xp + win_rate_bonus
+            
+            # Nivel formula: XP = Level^2 * 100
+            import math
+            level = int(math.sqrt(total_xp / 100)) + 1
+            next_level_xp_req = (level ** 2) * 100
+            
+            return {
+                "level": level,
+                "xp": total_xp,
+                "next_level_xp": next_level_xp_req
+            }
+
+        level_stats = calculate_level(total_trades, total_pnl, win_rate)
+
         return {
             "total_trades": total_trades,
             "winning_trades": len(winning),
             "losing_trades": len(losing),
             "win_rate": round(win_rate, 1),
             "total_pnl": round(total_pnl, 2),
-            "unrealized_pnl": 0,  # Se calcularía comparando posiciones abiertas
+            "unrealized_pnl": 0,
             "roi_percent": round(roi_percent, 2),
             "initial_capital": round(initial_capital, 2),
             "current_value": round(current_value, 2),
             "best_trade": round(max(pnls), 2) if pnls else None,
             "worst_trade": round(min(pnls), 2) if pnls else None,
             "avg_trade": round(sum(pnls) / len(pnls), 2) if pnls else None,
-            "mode": "real"
+            "mode": "real",
+            "level": level_stats["level"],
+            "xp": level_stats["xp"],
+            "next_level_xp": level_stats["next_level_xp"]
         }
         
     except Exception as e:

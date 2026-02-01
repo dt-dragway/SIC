@@ -174,12 +174,10 @@ export default function TradingPagePro() {
                         </span>
                     </div>
 
-                    {/* AI Stats (only in practice mode) */}
-                    {mode === 'practice' && (
-                        <div className="hidden md:flex">
-                            <AIStatusBar />
-                        </div>
-                    )}
+                    {/* AI Stats (Visible in both modes) */}
+                    <div className="hidden md:flex">
+                        <AIStatusBar mode={mode} />
+                    </div>
 
                     {/* Mode Toggle - Compact */}
                     <div className="bg-white/5 p-1 rounded-lg border border-white/10 flex">

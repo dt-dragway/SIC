@@ -12,7 +12,11 @@ interface AIStats {
     total_trades: number
 }
 
-export default function AIStatusBar() {
+interface AIStatusBarProps {
+    mode?: 'practice' | 'real'
+}
+
+export default function AIStatusBar({ mode = 'practice' }: AIStatusBarProps) {
     const [stats, setStats] = useState<AIStats | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -22,7 +26,11 @@ export default function AIStatusBar() {
                 const token = localStorage.getItem('token')
                 if (!token) return
 
-                const response = await fetch('/api/v1/practice/stats', {
+                const endpoint = mode === 'practice'
+                    ? '/api/v1/practice/stats'
+                    : '/api/v1/trading/stats'
+
+                const response = await fetch(endpoint, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -49,7 +57,7 @@ export default function AIStatusBar() {
         fetchStats()
         const interval = setInterval(fetchStats, 30000) // Update every 30s
         return () => clearInterval(interval)
-    }, [])
+    }, [mode])
 
     if (loading || !stats) {
         return (
@@ -88,8 +96,8 @@ export default function AIStatusBar() {
 
             {/* PNL */}
             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border ${stats.total_pnl >= 0
-                    ? 'bg-emerald-500/10 border-emerald-500/20'
-                    : 'bg-rose-500/10 border-rose-500/20'
+                ? 'bg-emerald-500/10 border-emerald-500/20'
+                : 'bg-rose-500/10 border-rose-500/20'
                 }`}>
                 <TrendingUp className={`h-3.5 w-3.5 ${stats.total_pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`} />
                 <span className={`text-xs font-medium ${stats.total_pnl >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
