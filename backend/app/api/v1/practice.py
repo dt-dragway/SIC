@@ -528,6 +528,7 @@ async def execute_virtual_order(
     wallet.balances = json.dumps(balances)
     
     # Guardar el trade en historial
+    # Guardar el trade en historial
     new_trade = VirtualTradeModel(
         wallet_id=wallet.id,
         symbol=symbol,
@@ -537,8 +538,52 @@ async def execute_virtual_order(
         reason=f"SL: {order.stop_loss}, TP: {order.take_profit}" if order.stop_loss else None,
         quantity=order.quantity,
         price=execution_price,
-        pnl=0  # Se calculará al cerrar la posición
+        pnl=0  # Se calculará abajo si es venta
     )
+    
+    # === AI LEARNING INTEGRATION ===
+    if order.side.upper() == "SELL":
+        # Calcular P&L Realizado buscando el trade de compra correspondiente
+        # Simplificación FIFO: Buscamos el último BUY de este símbolo
+        last_buy = db.query(VirtualTradeModel).filter(
+            VirtualTradeModel.wallet_id == wallet.id,
+            VirtualTradeModel.symbol == symbol,
+            VirtualTradeModel.side == "BUY"
+        ).order_by(VirtualTradeModel.created_at.desc()).first()
+        
+        if last_buy:
+            entry_price = last_buy.price
+            pnl_amount = (execution_price - entry_price) * order.quantity
+            new_trade.pnl = pnl_amount
+            
+            # Notificar al Agente para que aprenda
+            try:
+                from app.ml.trading_agent import get_trading_agent
+                agent = get_trading_agent()
+                
+                # Intentar recuperar metadatos de señal si existen
+                signals_used = ["MANUAL"]
+                patterns_detected = []
+                
+                # Si el BUY tenía estrategia AI, intentar deducir (mejorar en v2 con ID de señal)
+                if last_buy.strategy == "AI_SIGNAL":
+                    signals_used = ["AI_SIGNAL", "RSI", "MACD"] # Placeholder
+                
+                agent.record_result(
+                    trade_id=f"VIRTUAL_{new_trade.id}_{datetime.utcnow().timestamp()}",
+                    symbol=symbol,
+                    side="LONG", # Asumimos LONG para práctica spot
+                    entry_price=entry_price,
+                    exit_price=execution_price,
+                    pnl=pnl_amount,
+                    signals_used=signals_used,
+                    patterns_detected=patterns_detected,
+                    db_session=db
+                )
+                logger.info(f"🧠 AI aprendió del trade virtual {symbol}: PnL ${pnl_amount:.2f}")
+            except Exception as e:
+                logger.error(f"⚠️ Error en aprendizaje AI: {e}")
+            
     db.add(new_trade)
     db.commit()
     db.refresh(new_trade)

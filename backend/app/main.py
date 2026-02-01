@@ -115,6 +115,16 @@ async def lifespan(app: FastAPI):
     
     # === SHUTDOWN ===
     logger.info("🛑 Cerrando SIC Ultra...")
+    
+    # Guardar memoria del agente IA (Persistencia)
+    try:
+        from app.ml.trading_agent import get_trading_agent
+        agent = get_trading_agent()
+        agent.memory.save()
+        logger.success("✅ Memoria de IA guardada en disco")
+    except Exception as e:
+        logger.error(f"❌ Error guardando memoria de IA: {e}")
+        
     logger.info("👋 SIC Ultra cerrado")
 
 

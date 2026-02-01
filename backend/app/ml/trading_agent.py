@@ -62,8 +62,17 @@ class AgentMemory:
             try:
                 with open(self.memory_file, 'r') as f:
                     return json.load(f)
-            except:
-                pass
+            except Exception as e:
+                logger.error(f"❌ Error cargando memoria del agente: {e}")
+                # Intentar cargar backup si existe
+                backup_path = f"{self.memory_file}.bak"
+                if os.path.exists(backup_path):
+                    try:
+                        with open(backup_path, 'r') as f:
+                            logger.info("⚠️ Restaurando memoria desde backup...")
+                            return json.load(f)
+                    except:
+                        pass
         
         return {
             "created_at": datetime.utcnow().isoformat(),
@@ -90,22 +99,19 @@ class AgentMemory:
         }
     
     def save(self):
-        """Guardar memoria a archivo con file locking"""
+        """Guardar memoria a archivo con backup atómico"""
         try:
-            import fcntl  # Unix/Linux file locking
-            with open(self.memory_file, 'w') as f:
-                # Adquirir lock exclusivo para escritura
-                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                try:
-                    json.dump(self.data, f, indent=2, default=str)
-                finally:
-                    # Liberar lock
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-        except ImportError:
-            # En Windows, fcntl no está disponible, usar método simple
-            logger.warning("File locking no disponible en este sistema")
+            # 1. Crear backup del actual si existe
+            if os.path.exists(self.memory_file):
+                import shutil
+                shutil.copy2(self.memory_file, f"{self.memory_file}.bak")
+            
+            # 2. Guardar nuevo estado
             with open(self.memory_file, 'w') as f:
                 json.dump(self.data, f, indent=2, default=str)
+                
+        except Exception as e:
+            logger.error(f"❌ Error guardando memoria del agente: {e}")
     
     def sync_to_database(self, db_session, trade_id: str, symbol: str, side: str, 
                          entry_price: float, exit_price: float, pnl: float,

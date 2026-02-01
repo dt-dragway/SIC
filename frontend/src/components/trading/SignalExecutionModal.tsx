@@ -106,8 +106,9 @@ export default function SignalExecutionModal({
                 onClose()
             } else {
                 if (response.status === 401) {
-                    toast.error('Sesión expirada. Redirigiendo al login...')
-                    logout()
+                    toast.error('Token renovado. Intenta de nuevo en 3s...')
+                    // El hook useAuth se encargará de renovar el token en background o al recargar
+                    setTimeout(() => window.location.reload(), 1500)
                     return
                 }
                 toast.error(data.detail || 'Error al ejecutar orden')

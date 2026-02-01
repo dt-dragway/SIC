@@ -223,38 +223,43 @@ async def login(
         # O retornamos un error específico "2FA_REQUIRED"
         pass # Implementación futura de flujo 2FA estricto
 
-    # Crear tokens
-    user_data = {"sub": user.email, "user_id": user.id}
-    access_token = create_access_token(user_data)
-    refresh_token = create_refresh_token(user_data, remember_me=True) 
-    
-    # Establecer cookie de acceso (HttpOnly)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=False, # True en producción con HTTPS
-        samesite="lax",
-        max_age=settings.access_token_expire_minutes * 60
-    )
+    try:
+        # Crear tokens
+        user_data = {"sub": user.email, "user_id": user.id}
+        access_token = create_access_token(user_data)
+        refresh_token = create_refresh_token(user_data, remember_me=True) 
+        
+        # Establecer cookie de acceso (HttpOnly)
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=False, # True en producción con HTTPS
+            samesite="lax",
+            max_age=settings.access_token_expire_minutes * 60
+        )
 
-    # Establecer cookie de dispositivo confiable (30 días)
-    trusted_token = create_trusted_device_token(user_id=user.id)
-    response.set_cookie(
-        key="trusted_device",
-        value=trusted_token,
-        httponly=True,
-        secure=False, # True en producción
-        samesite="lax",
-        max_age=60 * 60 * 24 * settings.trusted_device_expire_days
-    )
-    
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-        "expires_in": settings.access_token_expire_minutes * 60
-    }
+        # Establecer cookie de dispositivo confiable (30 días)
+        trusted_token = create_trusted_device_token(user_id=user.id)
+        response.set_cookie(
+            key="trusted_device",
+            value=trusted_token,
+            httponly=True,
+            secure=False, # True en producción
+            samesite="lax",
+            max_age=60 * 60 * 24 * settings.trusted_device_expire_days
+        )
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": settings.access_token_expire_minutes * 60
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error en login: {str(e)}")
 
 
 @router.post("/logout")

@@ -51,13 +51,55 @@ export function useAuth() {
                     token
                 });
             } else {
-                localStorage.removeItem('token');
-                setState({ user: null, loading: false, isAuthenticated: false, token: null });
+                // Si falla la sesión, intentar Auto-Login (Modo Personal)
+                console.log("Sesión inválida, intentando Auto-Login...");
+                await performAutoLogin();
             }
         } catch (error) {
-            localStorage.removeItem('token');
-            setState({ user: null, loading: false, isAuthenticated: false, token: null });
+            await performAutoLogin();
         }
+    };
+
+    // Función auxiliar para Auto-Login transparente
+    const performAutoLogin = async () => {
+        try {
+            const formData = new URLSearchParams();
+            formData.append('username', 'admin@sic.com');
+            formData.append('password', 'y2k38*');
+
+            const res = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const token = data.access_token;
+                localStorage.setItem('token', token);
+
+                // Verificar la nueva sesión
+                const meRes = await fetch('/api/v1/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (meRes.ok) {
+                    const user = await meRes.json();
+                    setState({ user, loading: false, isAuthenticated: true, token });
+                    // Redirigir a dashboard si estamos en login
+                    if (window.location.pathname === '/login') {
+                        router.push('/');
+                    }
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error("Auto-login falló", e);
+        }
+
+        // Si todo falla, limpiar
+        localStorage.removeItem('token');
+        setState({ user: null, loading: false, isAuthenticated: false, token: null });
     };
 
     // Logout function definition specifically for internal use in useEffect

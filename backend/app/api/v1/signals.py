@@ -236,15 +236,29 @@ async def analyze_symbol(
     }
 
 
+# Simple Cache para evitar sobrecargar Binance y el CPU
+_scan_cache = {
+    "data": None,
+    "timestamp": None
+}
+CACHE_TTL_SECONDS = 60
+
 @router.get("/scan")
 async def scan_market(token: str = Depends(oauth2_scheme)):
     """
     🔍 Escanear el mercado con el Agente IA.
     
     Analiza los principales pares y retorna solo señales activas.
+    Usa un cache de 60 segundos para evitar sobrecarga.
     """
     verify_token(token)
     
+    now = datetime.utcnow()
+    global _scan_cache
+    
+    if _scan_cache["data"] and _scan_cache["timestamp"] and (now - _scan_cache["timestamp"]).total_seconds() < CACHE_TTL_SECONDS:
+        return _scan_cache["data"]
+
     symbols = [
         # Top Market Cap
         "BTCUSDT",    # Bitcoin
@@ -288,11 +302,17 @@ async def scan_market(token: str = Depends(oauth2_scheme)):
     # Ordenar por confianza
     signals.sort(key=lambda x: x["confidence"], reverse=True)
     
-    return {
+    result = {
         "count": len(signals),
         "signals": signals,
         "timestamp": datetime.utcnow()
     }
+    
+    # Actualizar cache
+    _scan_cache["data"] = result
+    _scan_cache["timestamp"] = now
+    
+    return result
 
 
 

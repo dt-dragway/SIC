@@ -127,10 +127,17 @@ export default function Home() {
         };
 
         fetchData();
-        const interval = setInterval(fetchData, 120000); // Update every 2 minutes
+        const interval = setInterval(fetchData, 10000); // Sane interval (10 seconds)
 
         return () => clearInterval(interval);
-    }, [authLoading, isAuthenticated, token, mode]); // Añadido mode como dependencia
+    }, [authLoading, isAuthenticated, token, mode]);
+
+    // Manual refresh for stats
+    const refreshData = async () => {
+        setDataLoading(true);
+        // ... Reutilizamos la lógica si fuera necesario, pero fetchData ya está en el scope del useEffect
+        // Para simplificar, forzaremos un trigger del efecto si es necesario o llamamos a una función externa
+    };
 
     // Solo mostrar pantalla de carga durante autenticación inicial
     // El wallet se recarga en background sin bloquear la UI
@@ -296,7 +303,7 @@ export default function Home() {
                                                 ? 'bg-emerald-500/20 text-emerald-400'
                                                 : 'bg-rose-500/20 text-rose-400'
                                                 }`}>
-                                                {signal.type}
+                                                {signal.type === 'LONG' ? 'COMPRAR (LONG)' : 'VENDER (SHORT)'}
                                             </span>
                                         </div>
 
@@ -349,7 +356,13 @@ export default function Home() {
                     accountBalance={mode === 'practice' ? totalUsd : (balances.find(b => b.asset === 'USDT')?.total || 0)}
                     mode={mode === 'practice' ? 'practice' : 'real'}
                     onOrderSubmit={() => {
+                        // Remover la señal ejecutada de la lista visualmente
+                        if (selectedSignal) {
+                            setSignals(prev => prev.filter(s => s.symbol !== selectedSignal.symbol))
+                        }
                         setIsOrderModalOpen(false)
+                        // Trigger de recarga inmediata de fondos y stats
+                        window.location.reload() // Forma más segura de refrescar TODO el estado global
                     }}
                 />
             )}

@@ -126,10 +126,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!mounted || !isAuthenticated) return;
 
-        const intervalTime = mode === 'practice' ? 10000 : 30000;
+        const intervalTime = mode === 'practice' ? 2000 : 30000; // 2s para práctica, 30s para real
         const interval = setInterval(() => refreshWallet(true), intervalTime);
         return () => clearInterval(interval);
-    }, [mode, isAuthenticated, mounted]);
+    }, [mode, isAuthenticated, mounted, refreshWallet]);
 
     return (
         <WalletContext.Provider value={{

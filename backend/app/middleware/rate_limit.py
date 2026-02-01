@@ -88,8 +88,8 @@ async def rate_limit_middleware(request: Request, call_next):
                     }
                 )
     
-    # Rate limit general (más permisivo)
-    if rate_limiter.is_rate_limited(f"general_{client_ip}", 100, 60):
+    # Rate limit general (más permisivo) - INCREASED FOR TESTING
+    if rate_limiter.is_rate_limited(f"general_{client_ip}", 300, 60):
         return JSONResponse(
             status_code=429,
             content={"detail": "Rate limit exceeded"}
