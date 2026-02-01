@@ -691,6 +691,7 @@ async def reset_virtual_wallet(
     
     # Reset balances
     wallet.balances = json.dumps({"USDT": 100.0})
+    wallet.initial_capital = 100.0  # Reset capital reference
     wallet.reset_at = datetime.utcnow()
     
     # Delete trades
