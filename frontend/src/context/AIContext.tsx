@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 interface AIAnalysis {
     symbol: string;  // Símbolo de la cripto analizada (BTC, ETH, etc.)
-    signal: 'BUY' | 'SELL' | 'HOLD';
+    signal: 'BUY' | 'SELL' | 'HOLD' | 'LONG' | 'SHORT';
     confidence: number;
     reasoning: string[];
     lstm_prediction: number;

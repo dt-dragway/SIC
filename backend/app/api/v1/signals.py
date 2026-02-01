@@ -284,9 +284,10 @@ async def scan_market(token: str = Depends(oauth2_scheme)):
     
     for symbol in symbols:
         signal = get_full_analysis(symbol)
-        if signal:
+        if signal and signal.direction != "HOLD":
             signals.append({
                 "symbol": signal.symbol,
+                "type": signal.direction, # Frontend expects 'type'
                 "direction": signal.direction,
                 "confidence": signal.confidence,
                 "strength": signal.strength,

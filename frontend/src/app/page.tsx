@@ -354,6 +354,23 @@ export default function Home() {
                     onClose={() => setIsOrderModalOpen(false)}
                     signal={selectedSignal}
                     accountBalance={mode === 'practice' ? totalUsd : (balances.find(b => b.asset === 'USDT')?.total || 0)}
+                    availableBalance={(() => {
+                        if (selectedSignal.type === 'LONG') {
+                            // Buying, show USDT
+                            return mode === 'practice'
+                                ? (balances.find(b => b.asset === 'USDT')?.total || 0)
+                                : (balances.find(b => b.asset === 'USDT')?.total || 0)
+                        } else {
+                            // Selling (Shorting), show Crypto Balance
+                            // Assuming symbol like 'BTCUSDT' -> 'BTC'
+                            const baseAsset = selectedSignal.symbol.replace('USDT', '')
+                            return balances.find(b => b.asset === baseAsset)?.total || 0
+                        }
+                    })()}
+                    balanceAsset={(() => {
+                        if (selectedSignal.type === 'LONG') return 'USDT'
+                        return selectedSignal.symbol.replace('USDT', '')
+                    })()}
                     mode={mode === 'practice' ? 'practice' : 'real'}
                     onOrderSubmit={() => {
                         // Remover la señal ejecutada de la lista visualmente

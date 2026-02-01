@@ -1,9 +1,9 @@
-"""
-Hook personalizado para acceder a señales del Neural Engine
-
-Proporciona acceso a señales de trading con explicaciones en español
-y actualización automática cada 30 segundos.
-"""
+/**
+ * Hook personalizado para acceder a señales del Neural Engine
+ * 
+ * Proporciona acceso a señales de trading con explicaciones en español
+ * y actualización automática cada 30 segundos.
+ */
 
 import { useState, useEffect, useCallback } from 'react'
 
@@ -169,14 +169,14 @@ export function useAllNeuralSignals(onlyStrong: boolean = false) {
             if (!token) return
 
             const response = await fetch(
-                `/api/v1/neural/neural-signals/all?only_strong=${only Strong}`,
+                `/api/v1/neural/neural-signals/all?only_strong=${onlyStrong}`,
                 {
                     headers: {
-                        'Authorization': `Bearer ${ token } `
+                        'Authorization': `Bearer ${token}`
                     }
                 }
             )
-            
+
             if (response.ok) {
                 const data = await response.json()
                 setSignals(data.signals)
@@ -192,14 +192,14 @@ export function useAllNeuralSignals(onlyStrong: boolean = false) {
             setLoading(false)
         }
     }, [onlyStrong])
-    
+
     useEffect(() => {
         fetchAll()
-        
+
         // Auto-refresh cada minuto
         const interval = setInterval(fetchAll, 60000)
         return () => clearInterval(interval)
     }, [fetchAll])
-    
+
     return { signals, stats, loading, refresh: fetchAll }
 }

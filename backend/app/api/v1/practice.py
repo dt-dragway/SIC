@@ -415,19 +415,19 @@ async def deposit_all_cryptos(
     balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
     binance = get_binance_client()
     
-    # Cryptos principales con $50 cada una
-    cryptos = ["BTC", "ETH", "SOL", "XRP", "ADA", "DOT", "DOGE", "LINK"]
+    # Cryptos principales con $20 cada una (Solicitud usuario)
+    cryptos = ["BTC", "ETH", "SOL", "XRP", "ADA", "DOT", "DOGE", "LINK", "BNB", "MATIC"]
     deposited = {}
     
     for crypto in cryptos:
         try:
             price = binance.get_price(f"{crypto}USDT")
-            amount = 50.0 / price  # $50 equivalente
+            amount = 20.0 / price  # $20 equivalente
             current = float(balances.get(crypto, 0))
             balances[crypto] = round(current + amount, 8)
             deposited[crypto] = {
                 "amount": round(amount, 8),
-                "usd_value": 50.0,
+                "usd_value": 20.0,
                 "price": price
             }
         except Exception as e:

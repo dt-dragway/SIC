@@ -16,7 +16,9 @@ interface SignalExecutionModalProps {
         take_profit: number
         confidence: number
     }
-    accountBalance: number
+    accountBalance: number // Used for investment limit check (USD value)
+    availableBalance: number // Actual available amount of the asset (e.g. 0.005 BTC)
+    balanceAsset: string // "USDT", "BTC", etc.
     mode: 'practice' | 'real'
     onOrderSubmit?: () => void
 }
@@ -26,6 +28,8 @@ export default function SignalExecutionModal({
     onClose,
     signal,
     accountBalance,
+    availableBalance,
+    balanceAsset,
     mode,
     onOrderSubmit
 }: SignalExecutionModalProps) {
@@ -61,7 +65,12 @@ export default function SignalExecutionModal({
 
     // Validaciones
     const isAmountValid = investmentAmount >= 5
-    const hasEnoughBalance = investmentAmount <= accountBalance
+    // Validation:
+    // If Buying (Long): investmentAmount (USD) <= availableBalance (USDT)
+    // If Selling (Short): quantity (Crypto) <= availableBalance (Crypto)
+    const hasEnoughBalance = isLong
+        ? investmentAmount <= availableBalance
+        : quantity <= availableBalance
     const canSubmit = isAmountValid && hasEnoughBalance && quantity > 0
 
     const { token, logout } = useAuth()
@@ -231,7 +240,10 @@ export default function SignalExecutionModal({
                         {/* Información del Monto */}
                         <div className="flex justify-between text-xs text-slate-500 mt-2">
                             <span>Mínimo: $5.00</span>
-                            <span>Disponible: ${accountBalance.toFixed(2)}</span>
+                            <span>Mínimo: $5.00</span>
+                            <span className="font-mono text-emerald-400">
+                                Disp: {availableBalance.toLocaleString(undefined, { maximumFractionDigits: 6 })} {balanceAsset}
+                            </span>
                         </div>
 
                         {/* Errores */}
