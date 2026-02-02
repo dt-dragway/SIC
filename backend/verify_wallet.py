@@ -22,12 +22,17 @@ try:
     
     # 2. Get Practice Wallet
     headers = {"Authorization": f"Bearer {token}"}
+    import time
+
+    start_time = time.time()
     print("Fetching practice wallet...")
     resp = requests.get(f"{base_url}/practice/wallet", headers=headers)
-    
+    end_time = time.time()
+
     print(f"Status: {resp.status_code}")
+    print(f"Latency: {(end_time - start_time):.4f} seconds")
     print("Response:")
     print(json.dumps(resp.json(), indent=2))
-    
 except Exception as e:
     print(f"Error: {e}")
+

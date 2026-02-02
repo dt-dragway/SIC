@@ -38,6 +38,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     // Track mount state for client-side only operations
     useEffect(() => {
         setMounted(true);
+        // Load cached wallet data if available
+        const cachedUsd = localStorage.getItem('sic_wallet_usd');
+        const cachedBalances = localStorage.getItem('sic_wallet_balances');
+
+        if (cachedUsd) setTotalUsd(parseFloat(cachedUsd));
+        if (cachedBalances) {
+            try {
+                setBalances(JSON.parse(cachedBalances));
+            } catch (e) {
+                console.error("Error parsing cached balances", e);
+            }
+        }
     }, []);
 
     // Load persisted mode (only on client)
@@ -80,27 +92,35 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
             if (res.ok) {
                 const data = await res.json();
+                let newUsd = 0;
+                let newBalances: Balance[] = [];
 
                 if (mode === 'practice') {
                     // Practice API response structure
-                    setTotalUsd(data.total_usd || 0);
+                    newUsd = data.total_usd || 0;
 
                     // Map practice balances to unified structure
-                    const formattedBalances = (data.balances || []).map((b: any) => ({
+                    newBalances = (data.balances || []).map((b: any) => ({
                         asset: b.asset,
                         total: b.amount || 0,
                         usd_value: b.usd_value || 0,
                         free: b.amount || 0,
                         locked: 0
                     }));
-                    setBalances(formattedBalances);
 
                 } else {
                     // Real API returns { total_usd, balances: [...] }
-                    setTotalUsd(data.total_usd || 0);
-                    const fetchedBalances: Balance[] = data.balances || [];
-                    setBalances(fetchedBalances);
+                    newUsd = data.total_usd || 0;
+                    newBalances = data.balances || [];
                 }
+
+                setTotalUsd(newUsd);
+                setBalances(newBalances);
+
+                // Cache the fresh data
+                localStorage.setItem('sic_wallet_usd', newUsd.toString());
+                localStorage.setItem('sic_wallet_balances', JSON.stringify(newBalances));
+
             } else {
                 console.error(`Failed to fetch ${mode} wallet`, res.status);
                 if (res.status === 401) {

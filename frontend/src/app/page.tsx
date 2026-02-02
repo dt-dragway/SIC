@@ -111,12 +111,14 @@ export default function Home() {
                 const data = await signalsRes.json();
                 const topSignals = data.signals ? data.signals.slice(0, 5) : [];
                 setSignals(topSignals);
+                localStorage.setItem(`sic_dashboard_signals_${mode}`, JSON.stringify(topSignals));
             }
 
             // Process Stats
             if (statsRes?.ok) {
                 const statsData = await statsRes.json();
                 setStats(statsData);
+                localStorage.setItem(`sic_dashboard_stats_${mode}`, JSON.stringify(statsData));
             }
         } catch (error) {
             console.error("Error fetching dashboard data", error);
@@ -125,11 +127,27 @@ export default function Home() {
         }
     };
 
+    // Load Cache on Mount
+    useEffect(() => {
+        const cachedSignals = localStorage.getItem(`sic_dashboard_signals_${mode}`);
+        const cachedStats = localStorage.getItem(`sic_dashboard_stats_${mode}`);
+
+        if (cachedSignals) {
+            try { setSignals(JSON.parse(cachedSignals)); } catch (e) { }
+        }
+        if (cachedStats) {
+            try { setStats(JSON.parse(cachedStats)); } catch (e) { }
+        }
+    }, [mode]);
+
     // Initial Load & Polling
     useEffect(() => {
         if (authLoading || !isAuthenticated || !token) return;
 
-        setDataLoading(true);
+        // Only show loader if we have NO data (first visit)
+        const hasCache = localStorage.getItem(`sic_dashboard_stats_${mode}`);
+        if (!hasCache) setDataLoading(true);
+
         Promise.all([
             fetchDashboardData(),
             refreshWallet()
