@@ -56,7 +56,10 @@ export function useKnowledge() {
                 body: formData
             });
 
-            if (!res.ok) throw new Error("Error al subir archivo");
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Error al subir archivo (${res.status})`);
+            }
 
             await fetchStats(); // Actualizar stats
             return true;

@@ -45,8 +45,8 @@ export default function KnowledgePage() {
             await uploadBook(file, selectedCategory)
             setUploadStatus('✅ ¡Libro procesado correctamente!')
             setTimeout(() => setUploadStatus(null), 3000)
-        } catch (error) {
-            setUploadStatus('❌ Error al subir libro')
+        } catch (error: any) {
+            setUploadStatus(`❌ ${error.message || 'Error desconocido'}`)
         }
     }
 

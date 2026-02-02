@@ -12,6 +12,7 @@ import { useWallet } from '../context/WalletContext' // Import Context
 import InstitutionalAssistant from '../components/ai/InstitutionalAssistant'
 import AINeuroEngine from '../components/ai/AINeuroEngine'
 import SignalExecutionModal from '../components/trading/SignalExecutionModal' // Import Modal
+import { X } from 'lucide-react'
 
 const CandlestickChart = dynamic(
     () => import('../components/charts/CandlestickChart').then(mod => mod.CandlestickChart),
@@ -61,6 +62,10 @@ export default function Home() {
     const handleExecuteSignal = (signal: Signal) => {
         setSelectedSignal(signal)
         setIsOrderModalOpen(true)
+    }
+
+    const handleDismissSignal = (index: number) => {
+        setSignals(prev => prev.filter((_, i) => i !== index))
     }
 
     // Estado para el símbolo seleccionado
@@ -347,12 +352,24 @@ export default function Home() {
                                     >
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="font-bold tracking-tight">{signal.symbol}</span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${signal.type === 'LONG'
-                                                ? 'bg-emerald-500/20 text-emerald-400'
-                                                : 'bg-rose-500/20 text-rose-400'
-                                                }`}>
-                                                {signal.type === 'LONG' ? 'COMPRAR (LONG)' : 'VENDER (SHORT)'}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${signal.type === 'LONG'
+                                                    ? 'bg-emerald-500/20 text-emerald-400'
+                                                    : 'bg-rose-500/20 text-rose-400'
+                                                    }`}>
+                                                    {signal.type === 'LONG' ? 'COMPRAR (LONG)' : 'VENDER (SHORT)'}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleDismissSignal(i)
+                                                    }}
+                                                    className="p-1 text-slate-500 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                                                    title="Descartar señal"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div className="text-sm space-y-1.5 text-slate-400">

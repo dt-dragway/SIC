@@ -31,73 +31,64 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
 
-    // Unified State
-    // Unified State with Lazy Initialization
-    const [totalUsd, setTotalUsd] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const cached = localStorage.getItem('sic_wallet_usd');
-            return cached ? parseFloat(cached) : 0.00;
-        }
-        return 0.00;
-    });
+    // --- State for Practice Mode ---
+    const [practiceTotalUsd, setPracticeTotalUsd] = useState(0);
+    const [practiceBalances, setPracticeBalances] = useState<Balance[]>([]);
 
-    const [balances, setBalances] = useState<Balance[]>(() => {
-        if (typeof window !== 'undefined') {
-            const cached = localStorage.getItem('sic_wallet_balances');
-            try {
-                return cached ? JSON.parse(cached) : [];
-            } catch (e) {
-                console.error("Error parsing cached balances", e);
-                return [];
-            }
-        }
-        return [];
-    });
+    // --- State for Real Mode ---
+    const [realTotalUsd, setRealTotalUsd] = useState(0);
+    const [realBalances, setRealBalances] = useState<Balance[]>([]);
 
-    // Track mount state for client-side only operations
+    // Lazy initialization from LocalStorage
     useEffect(() => {
+        const loadCache = () => {
+            const cachedPractice = localStorage.getItem('sic_wallet_practice');
+            const cachedReal = localStorage.getItem('sic_wallet_real');
+
+            if (cachedPractice) {
+                try {
+                    const parsed = JSON.parse(cachedPractice);
+                    setPracticeTotalUsd(parsed.totalUsd || 0);
+                    setPracticeBalances(parsed.balances || []);
+                } catch (e) { console.error("Error parsing practice cache", e); }
+            }
+
+            if (cachedReal) {
+                try {
+                    const parsed = JSON.parse(cachedReal);
+                    setRealTotalUsd(parsed.totalUsd || 0);
+                    setRealBalances(parsed.balances || []);
+                } catch (e) { console.error("Error parsing real cache", e); }
+            }
+        };
+        loadCache();
         setMounted(true);
     }, []);
 
-    // Load persisted mode (only on client)
+    // Load persisted mode
     useEffect(() => {
         if (!mounted) return;
         const savedMode = localStorage.getItem('sic_mode') as Mode;
         if (savedMode) setMode(savedMode);
     }, [mounted]);
 
-    // Persist mode change
     const handleSetMode = (newMode: Mode) => {
         setMode(newMode);
-        if (mounted) {
-            localStorage.setItem('sic_mode', newMode);
-        }
-        // No limpiamos los saldos aquí - esperamos a que lleguen los nuevos datos
-        // Esto evita el flash de "$0.00" mientras carga
+        if (mounted) localStorage.setItem('sic_mode', newMode);
+        // The UI will immediately switch to using the other state variables
     };
 
     const refreshWallet = useCallback(async (silent: boolean = false) => {
-        // If auth is still loading, DO NOT clear the cache. Keep showing last known balance.
         if (authLoading) return;
-
-        if (!isAuthenticated || !token) {
-            setBalances([]);
-            setTotalUsd(0);
-            return;
-        }
+        if (!isAuthenticated || !token) return;
 
         if (!silent) setIsLoading(true);
 
         try {
-            // Determinar endpoint según el modo
-            const endpoint = mode === 'practice'
-                ? '/api/v1/practice/wallet'
-                : '/api/v1/wallet'; // CORREGIDO: era /api/v1/wallet/balance
+            const endpoint = mode === 'practice' ? '/api/v1/practice/wallet' : '/api/v1/wallet';
 
             const res = await fetch(endpoint, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.ok) {
@@ -106,10 +97,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                 let newBalances: Balance[] = [];
 
                 if (mode === 'practice') {
-                    // Practice API response structure
                     newUsd = data.total_usd || 0;
-
-                    // Map practice balances to unified structure
                     newBalances = (data.balances || []).map((b: any) => ({
                         asset: b.asset,
                         total: b.amount || 0,
@@ -118,55 +106,55 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
                         locked: 0
                     }));
 
+                    // Update Practice State
+                    setPracticeTotalUsd(newUsd);
+                    setPracticeBalances(newBalances);
+                    localStorage.setItem('sic_wallet_practice', JSON.stringify({ totalUsd: newUsd, balances: newBalances }));
+
                 } else {
-                    // Real API returns { total_usd, balances: [...] }
                     newUsd = data.total_usd || 0;
                     newBalances = data.balances || [];
+
+                    // Update Real State
+                    setRealTotalUsd(newUsd);
+                    setRealBalances(newBalances);
+                    localStorage.setItem('sic_wallet_real', JSON.stringify({ totalUsd: newUsd, balances: newBalances }));
                 }
-
-                setTotalUsd(newUsd);
-                setBalances(newBalances);
-
-                // Cache the fresh data
-                localStorage.setItem('sic_wallet_usd', newUsd.toString());
-                localStorage.setItem('sic_wallet_balances', JSON.stringify(newBalances));
 
             } else {
-                console.error(`Failed to fetch ${mode} wallet`, res.status);
-                if (res.status === 401) {
-                    console.log("Sesión expirada en wallet fetch -> Logout");
-                    logout();
-                    return;
-                }
+                if (res.status === 401) logout();
             }
         } catch (error) {
             console.error("Error fetching wallet", error);
         } finally {
             if (!silent) setIsLoading(false);
         }
-    }, [mode, token, isAuthenticated, authLoading]);
+    }, [mode, token, isAuthenticated, authLoading, logout]);
 
-    // Auto-refresh when mode or auth changes (only after mount)
+    // Auto-refresh when mode changes
     useEffect(() => {
         if (!mounted) return;
         refreshWallet();
-    }, [mode, isAuthenticated, token, mounted, authLoading]);
+    }, [mode, isAuthenticated, mounted]);
 
-    // Polling (every 10s for practice, 30s for real) - SILENT
+    // Polling
     useEffect(() => {
         if (!mounted || !isAuthenticated) return;
-
-        const intervalTime = mode === 'practice' ? 2000 : 30000; // 2s para práctica, 30s para real
+        const intervalTime = mode === 'practice' ? 5000 : 30000;
         const interval = setInterval(() => refreshWallet(true), intervalTime);
         return () => clearInterval(interval);
     }, [mode, isAuthenticated, mounted, refreshWallet]);
+
+    // Derived state for consumers
+    const activeTotalUsd = mode === 'practice' ? practiceTotalUsd : realTotalUsd;
+    const activeBalances = mode === 'practice' ? practiceBalances : realBalances;
 
     return (
         <WalletContext.Provider value={{
             mode,
             isLoading,
-            totalUsd,
-            balances,
+            totalUsd: activeTotalUsd,
+            balances: activeBalances,
             setMode: handleSetMode,
             refreshWallet: () => refreshWallet(false),
             refreshBalances: () => refreshWallet(false)
