@@ -71,34 +71,50 @@ async def upload_book(
             detail=f"Formato no soportado. Usa: {allowed_extensions}"
         )
     
-    # Guardar archivo
-    file_path = os.path.join(BOOKS_DIR, file.filename)
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Procesar y añadir a base de conocimientos
-    kb = get_knowledge_base()
-    
-    if not kb.is_ready:
-        raise HTTPException(
-            status_code=503,
-            detail="Base de conocimientos no inicializada. Verifica ChromaDB."
+    try:
+        from loguru import logger
+        logger.info(f"📚 Intentando subir libro: {file.filename}")
+
+        # Guardar archivo
+        file_path = os.path.join(BOOKS_DIR, file.filename)
+        logger.info(f"📂 Guardando en: {file_path}")
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        logger.info("✅ Archivo guardado correctamente")
+
+        # Procesar y añadir a base de conocimientos
+        logger.info("🧠 Obteniendo KnowledgeBase...")
+        kb = get_knowledge_base()
+        
+        if not kb.is_ready:
+            logger.error("❌ KnowledgeBase no está lista (is_ready=False)")
+            raise HTTPException(
+                status_code=503,
+                detail="Base de conocimientos no inicializada. Verifica ChromaDB."
+            )
+        
+        logger.info("⚙️ Procesando documento en ChromaDB...")
+        result = kb.add_document(
+            file_path=file_path,
+            title=title or os.path.splitext(file.filename)[0],
+            category=category
         )
-    
-    result = kb.add_document(
-        file_path=file_path,
-        title=title or os.path.splitext(file.filename)[0],
-        category=category
-    )
-    
-    if "error" in result:
-        raise HTTPException(status_code=500, detail=result["error"])
-    
-    return {
-        "message": f"📚 Libro '{result['title']}' añadido exitosamente",
-        **result
-    }
+        
+        if "error" in result:
+            logger.error(f"❌ Error en add_document: {result['error']}")
+            raise HTTPException(status_code=500, detail=result["error"])
+        
+        logger.success(f"🎉 Libro procesado exitosamente: {result['title']}")
+        return {
+            "message": f"📚 Libro '{result['title']}' añadido exitosamente",
+            **result
+        }
+
+    except Exception as e:
+        logger.exception(f"❌ CRITICAL ERROR en upload_book: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 
 @router.post("/search")
