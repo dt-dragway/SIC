@@ -7,10 +7,32 @@
   "total_pnl": 10.0,
   "best_trade": 10.0,
   "worst_trade": 10.0,
-  "patterns_learned": {},
+  "patterns_learned": {
+    "BULLISH_ENGULFING": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    }
+  },
   "strategy_performance": {},
   "market_insights": [],
-  "evolution_history": [],
+  "evolution_history": [
+    {
+      "timestamp": "2026-02-01T17:24:10.042236",
+      "trade_id": "VERIFY_SYNC_001",
+      "pnl": 10.0,
+      "win_rate": 100.0,
+      "strategy_weights": {
+        "rsi": 1.0,
+        "macd": 1.0,
+        "bollinger": 1.0,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    }
+  ],
   "current_strategy_weights": {
     "rsi": 1.0,
     "macd": 1.0,

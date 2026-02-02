@@ -130,7 +130,10 @@ export default function Home() {
         if (authLoading || !isAuthenticated || !token) return;
 
         setDataLoading(true);
-        fetchDashboardData();
+        Promise.all([
+            fetchDashboardData(),
+            refreshWallet()
+        ]);
 
         const interval = setInterval(fetchDashboardData, 10000);
         return () => clearInterval(interval);

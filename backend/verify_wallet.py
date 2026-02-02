@@ -1,13 +1,13 @@
 
 import requests
 import json
-from app.config import settings
+# from app.config import settings
 
 # 1. Login to get token
 base_url = "http://localhost:8000/api/v1"
 login_data = {
-    "username": settings.admin_email,
-    "password": settings.admin_password
+    "username": "admin@sic.com", 
+    "password": "y2k38*" # Found in .env
 }
 
 print(f"Logging in as {login_data['username']}...")
