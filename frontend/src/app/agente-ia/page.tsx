@@ -61,6 +61,17 @@ export default function AgentIAPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        // Load cache first
+        const cachedProgress = localStorage.getItem('sic_ai_progress');
+        if (cachedProgress) {
+            try {
+                setProgress(JSON.parse(cachedProgress));
+                setLoading(false); // Show cached content immediately
+            } catch (e) {
+                console.error("Error parsing cached AI progress", e);
+            }
+        }
+
         fetchProgress();
         const interval = setInterval(fetchProgress, 10000); // Actualizar cada 10s
         return () => clearInterval(interval);
@@ -87,6 +98,7 @@ export default function AgentIAPage() {
 
             const data = await response.json();
             setProgress(data);
+            localStorage.setItem('sic_ai_progress', JSON.stringify(data));
             setError('');
         } catch (err) {
             setError('Error al conectar con el servidor');
@@ -231,8 +243,8 @@ export default function AgentIAPage() {
                             {progress.win_rate.winning_trades} ganados • {progress.win_rate.losing_trades} perdidos
                         </p>
                         <span className={`inline-block mt-2 px-2 py-1 text-[10px] rounded-full font-bold uppercase ${progress.win_rate.color === 'green' ? 'bg-emerald-500/20 text-emerald-400' :
-                                progress.win_rate.color === 'yellow' ? 'bg-amber-500/20 text-amber-400' :
-                                    'bg-rose-500/20 text-rose-400'
+                            progress.win_rate.color === 'yellow' ? 'bg-amber-500/20 text-amber-400' :
+                                'bg-rose-500/20 text-rose-400'
                             }`}>
                             {progress.win_rate.status}
                         </span>

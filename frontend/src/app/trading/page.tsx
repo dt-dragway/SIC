@@ -75,7 +75,9 @@ export default function TradingPagePro() {
 
     // Fetch trade history
     const fetchHistory = async () => {
-        setTradesLoading(true)
+
+        // Don't set loading true if we already have data (silent update)
+        if (trades.length === 0) setTradesLoading(true)
         try {
             const token = localStorage.getItem('token')
             if (!token) return
@@ -107,6 +109,7 @@ export default function TradingPagePro() {
                     status: t.status || 'FILLED'
                 }))
                 setTrades(mappedTrades.slice(0, 20)) // Last 20 trades
+                localStorage.setItem(`sic_trading_history_${mode}`, JSON.stringify(mappedTrades.slice(0, 20)))
             }
         } catch (error) {
             console.error('Error fetching history:', error)
@@ -117,6 +120,19 @@ export default function TradingPagePro() {
 
     useEffect(() => {
         if (isAuthenticated) {
+            // Load cache first
+            const cachedHistory = localStorage.getItem(`sic_trading_history_${mode}`)
+            if (cachedHistory) {
+                try {
+                    setTrades(JSON.parse(cachedHistory))
+                } catch (e) {
+                    console.error('Error parsing cached history', e)
+                }
+            } else {
+                // Only show loading if no cache
+                setTradesLoading(true)
+            }
+
             fetchHistory()
         }
     }, [mode, isAuthenticated])

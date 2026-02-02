@@ -65,7 +65,11 @@ class Settings(BaseSettings):
     admin_password: str = "admin123"  # Cambiar en .env
     
     class Config:
-        env_file = "../.env"
+        import os
+        # Usar ruta absoluta para evitar problemas con espacios o cwd
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # backend/app -> backend
+        root_dir = os.path.dirname(base_dir) # backend -> SIC
+        env_file = os.path.join(root_dir, ".env")
         env_file_encoding = "utf-8"
         case_sensitive = False
 

@@ -222,7 +222,7 @@ export default function Home() {
                             </div>
                             <p className="text-slate-400 text-sm font-medium">Balance Total</p>
                         </div>
-                        <p className="text-3xl font-bold text-white tracking-tight">
+                        <p className="text-3xl font-bold text-white tracking-tight" suppressHydrationWarning>
                             ${totalUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                         </p>
                         <div className="mt-3 flex items-center gap-2">

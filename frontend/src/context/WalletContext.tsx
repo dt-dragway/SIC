@@ -32,24 +32,31 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     // Unified State
-    const [totalUsd, setTotalUsd] = useState(0.00);
-    const [balances, setBalances] = useState<Balance[]>([]);
+    // Unified State with Lazy Initialization
+    const [totalUsd, setTotalUsd] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const cached = localStorage.getItem('sic_wallet_usd');
+            return cached ? parseFloat(cached) : 0.00;
+        }
+        return 0.00;
+    });
+
+    const [balances, setBalances] = useState<Balance[]>(() => {
+        if (typeof window !== 'undefined') {
+            const cached = localStorage.getItem('sic_wallet_balances');
+            try {
+                return cached ? JSON.parse(cached) : [];
+            } catch (e) {
+                console.error("Error parsing cached balances", e);
+                return [];
+            }
+        }
+        return [];
+    });
 
     // Track mount state for client-side only operations
     useEffect(() => {
         setMounted(true);
-        // Load cached wallet data if available
-        const cachedUsd = localStorage.getItem('sic_wallet_usd');
-        const cachedBalances = localStorage.getItem('sic_wallet_balances');
-
-        if (cachedUsd) setTotalUsd(parseFloat(cachedUsd));
-        if (cachedBalances) {
-            try {
-                setBalances(JSON.parse(cachedBalances));
-            } catch (e) {
-                console.error("Error parsing cached balances", e);
-            }
-        }
     }, []);
 
     // Load persisted mode (only on client)

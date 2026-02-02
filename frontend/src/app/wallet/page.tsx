@@ -66,7 +66,7 @@ export default function WalletPage() {
                                 </button>
                             </div>
 
-                            <div className="text-5xl font-bold text-white font-mono tracking-tight mb-6">
+                            <div className="text-5xl font-bold text-white font-mono tracking-tight mb-6" suppressHydrationWarning>
                                 {hideBalance ? '••••••' : `$${(totalUsd ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`}
                                 <span className="text-lg text-slate-500 ml-2 font-sans font-normal">USD</span>
                             </div>
