@@ -63,6 +63,21 @@ export default function Home() {
         setIsOrderModalOpen(true)
     }
 
+    // Estado para el símbolo seleccionado
+    const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT')
+
+    const AVAILABLE_SYMBOLS = [
+        { symbol: 'BTCUSDT', label: 'BTC', icon: '₿', color: 'text-orange-500' },
+        { symbol: 'ETHUSDT', label: 'ETH', icon: 'Ξ', color: 'text-purple-500' },
+        { symbol: 'BNBUSDT', label: 'BNB', icon: 'BNB', color: 'text-yellow-500' },
+        { symbol: 'SOLUSDT', label: 'SOL', icon: '◎', color: 'text-cyan-500' },
+        { symbol: 'XRPUSDT', label: 'XRP', icon: '✕', color: 'text-blue-500' }
+    ]
+
+    const currentSymbolData = AVAILABLE_SYMBOLS.find(s => s.symbol === selectedSymbol) || AVAILABLE_SYMBOLS[0]
+
+
+
     // Auth Guard
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -244,19 +259,39 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* AI Neural Engine Widget */}
+
                 <div className="mb-8">
-                    <AIWidget symbol="BTCUSDT" />
+                    <AIWidget symbol={selectedSymbol} />
                 </div>
 
                 {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Chart Section */}
                     <div className="lg:col-span-2 glass-card p-6 border border-white/5 bg-white/[0.02]">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold flex items-center gap-2">
-                                <span className="text-orange-500">₿</span> BTCUSDT
-                            </h2>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                            <div className="flex items-center gap-4">
+                                <h2 className="text-lg font-semibold flex items-center gap-2">
+                                    <span className={currentSymbolData.color}>{currentSymbolData.icon}</span>
+                                    {selectedSymbol}
+                                </h2>
+
+                                {/* Symbol Selector */}
+                                <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                                    {AVAILABLE_SYMBOLS.map(sym => (
+                                        <button
+                                            key={sym.symbol}
+                                            onClick={() => setSelectedSymbol(sym.symbol)}
+                                            className={`px-3 py-1 text-xs rounded-md font-medium transition-all ${selectedSymbol === sym.symbol
+                                                ? 'bg-white/10 text-white shadow-sm border border-white/10'
+                                                : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                                                }`}
+                                        >
+                                            {sym.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="flex gap-2">
                                 {['1h', '4h', '1d'].map(tf => (
                                     <button
@@ -269,7 +304,7 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="bg-black/40 rounded-lg min-h-[400px] h-[400px] border border-white/5 overflow-hidden">
-                            <CandlestickChart symbol="BTCUSDT" />
+                            <CandlestickChart symbol={selectedSymbol} />
                         </div>
                     </div>
 

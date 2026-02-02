@@ -488,9 +488,9 @@ async def execute_virtual_order(
     total_amount = order.quantity * execution_price
     fee = total_amount * 0.001  # 0.1% fee
     
-    # Validar monto mínimo $5
-    if total_amount < 5:
-        raise HTTPException(status_code=400, detail="El monto mínimo de inversión es $5 USD")
+    # Validar monto mínimo $2
+    if total_amount < 2:
+        raise HTTPException(status_code=400, detail="El monto mínimo de inversión es $2 USD")
     
     if order.side.upper() == "BUY":
         # Verificar saldo USDT

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAIContext } from '@/context/AIContext';
 import {
     Brain,
@@ -14,6 +15,11 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
     const handleRefresh = () => {
         analyzeMarket(symbol);
     };
+
+    // Analyze market when symbol changes
+    useEffect(() => {
+        analyzeMarket(symbol);
+    }, [symbol]);
 
     // Colores dinámicos según señal
     const getSignalColor = (signal: string) => {

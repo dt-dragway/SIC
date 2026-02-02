@@ -41,8 +41,8 @@ export default function TradingPanel({ symbol, currentPrice, mode, usdtBalance, 
             return
         }
 
-        if (total < 5) {
-            toast.error('El monto mínimo de inversión es $5 USD')
+        if (total < 2) {
+            toast.error('El monto mínimo de inversión es $2 USD')
             return
         }
 
