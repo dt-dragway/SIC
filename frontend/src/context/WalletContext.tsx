@@ -26,7 +26,7 @@ interface WalletState {
 const WalletContext = createContext<WalletState | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, token, logout } = useAuth();
+    const { isAuthenticated, token, logout, loading: authLoading } = useAuth();
     const [mode, setMode] = useState<Mode>('practice');
     const [isLoading, setIsLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -77,6 +77,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     };
 
     const refreshWallet = useCallback(async (silent: boolean = false) => {
+        // If auth is still loading, DO NOT clear the cache. Keep showing last known balance.
+        if (authLoading) return;
+
         if (!isAuthenticated || !token) {
             setBalances([]);
             setTotalUsd(0);
@@ -141,13 +144,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         } finally {
             if (!silent) setIsLoading(false);
         }
-    }, [mode, token, isAuthenticated]);
+    }, [mode, token, isAuthenticated, authLoading]);
 
     // Auto-refresh when mode or auth changes (only after mount)
     useEffect(() => {
         if (!mounted) return;
         refreshWallet();
-    }, [mode, isAuthenticated, token, mounted]);
+    }, [mode, isAuthenticated, token, mounted, authLoading]);
 
     // Polling (every 10s for practice, 30s for real) - SILENT
     useEffect(() => {

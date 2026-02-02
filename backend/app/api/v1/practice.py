@@ -216,6 +216,14 @@ async def get_virtual_wallet(
         else:
             symbol = f"{asset}USDT"
             price = all_prices.get(symbol, 0)
+            
+            # Fallback if get_all_prices failed or symbol missing
+            if price == 0:
+                try:
+                    price = binance.get_price(symbol) or 0
+                except:
+                    price = 0
+            
             usd_value = amount * price
         
         total_usd += usd_value
