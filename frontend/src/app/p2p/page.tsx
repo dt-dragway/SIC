@@ -39,6 +39,7 @@ export default function P2PPage() {
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [cryptoType, setCryptoType] = useState('USDT')
     const [fiatType, setFiatType] = useState('VES')
+    const [amount, setAmount] = useState<string>('')
 
     const paymentMethods = ["Banesco", "Mercantil", "Pago Movil", "Provincial", "BNC", "Bancaribe"]
     const cryptos = ["USDT", "BTC", "ETH", "BNB", "FDUSD"]
@@ -50,7 +51,8 @@ export default function P2PPage() {
             if (!token) return
 
             const methodsParam = selectedMethods.length > 0 ? `&payment_methods=${selectedMethods.join(',')}` : ''
-            const endpoint = `/api/v1/p2p/${activeTab}?limit=50&crypto=${cryptoType}&fiat=${fiatType}${methodsParam}`
+            const amountParam = amount ? `&amount=${amount}` : ''
+            const endpoint = `/api/v1/p2p/${activeTab}?limit=50&crypto=${cryptoType}&fiat=${fiatType}${methodsParam}${amountParam}`
 
             const res = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -69,7 +71,7 @@ export default function P2PPage() {
         } finally {
             setLoading(false)
         }
-    }, [activeTab, selectedMethods, cryptoType, fiatType])
+    }, [activeTab, selectedMethods, cryptoType, fiatType, amount])
 
     const analyzeOffers = async (offersList: P2POffer[]) => {
         setIsAnalyzing(true)
@@ -202,6 +204,10 @@ export default function P2PPage() {
                                 <input
                                     type="text"
                                     placeholder="Buscar monto..."
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && fetchOffers()}
+                                    onBlur={() => fetchOffers()}
                                     className="bg-white/5 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all w-48"
                                 />
                             </div>

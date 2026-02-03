@@ -34,7 +34,8 @@ class BinanceP2PClient:
         trade_type: str = "BUY",
         page: int = 1,
         rows: int = 10,
-        pay_types: Optional[List[str]] = None
+        pay_types: Optional[List[str]] = None,
+        trans_amount: Optional[float] = None
     ) -> List[Dict]:
         """
         Obtener ofertas P2P de Binance.
@@ -46,6 +47,7 @@ class BinanceP2PClient:
             page: Número de página
             rows: Ofertas por página
             pay_types: Lista de métodos de pago (ej: ["BANK", "SPECIFIC_BANK"])
+            trans_amount: Monto específico a transaccionar (filtro de monto)
             
         Returns:
             Lista de ofertas con precio, límites, métodos de pago
@@ -57,6 +59,7 @@ class BinanceP2PClient:
             "page": page,
             "rows": rows,
             "payTypes": pay_types if pay_types else [],
+            "transAmount": trans_amount,
             "publisherType": None
         }
         
@@ -93,13 +96,13 @@ class BinanceP2PClient:
             logger.error(f"Error obteniendo ofertas P2P: {e}")
             return []
     
-    async def get_buy_offers(self, fiat: str = "VES", asset: str = "USDT", rows: int = 10, pay_types: Optional[List[str]] = None) -> List[Dict]:
+    async def get_buy_offers(self, fiat: str = "VES", asset: str = "USDT", rows: int = 10, pay_types: Optional[List[str]] = None, trans_amount: Optional[float] = None) -> List[Dict]:
         """Obtener ofertas para COMPRAR cripto (pagas fiat)"""
-        return await self.get_offers(fiat, asset, "BUY", rows=rows, pay_types=pay_types)
+        return await self.get_offers(fiat, asset, "BUY", rows=rows, pay_types=pay_types, trans_amount=trans_amount)
     
-    async def get_sell_offers(self, fiat: str = "VES", asset: str = "USDT", rows: int = 10, pay_types: Optional[List[str]] = None) -> List[Dict]:
+    async def get_sell_offers(self, fiat: str = "VES", asset: str = "USDT", rows: int = 10, pay_types: Optional[List[str]] = None, trans_amount: Optional[float] = None) -> List[Dict]:
         """Obtener ofertas para VENDER cripto (recibes fiat)"""
-        return await self.get_offers(fiat, asset, "SELL", rows=rows, pay_types=pay_types)
+        return await self.get_offers(fiat, asset, "SELL", rows=rows, pay_types=pay_types, trans_amount=trans_amount)
     
     async def get_market_summary(self, fiat: str = "VES", asset: str = "USDT") -> Dict:
         """

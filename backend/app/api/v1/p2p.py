@@ -124,6 +124,7 @@ async def get_buy_offers(
     fiat: str = "VES",
     asset: str = "USDT",
     limit: int = 50,
+    amount: Optional[float] = None, # Alias for transAmount
     payment_methods: Optional[str] = None, # Comma separated: "Banesco,Mercantil"
     token: str = Depends(oauth2_scheme)
 ):
@@ -132,6 +133,7 @@ async def get_buy_offers(
     
     Ordenadas por precio (más bajo primero).
     - **payment_methods**: Lista separada por comas (ej: "Banesco,Mercantil")
+    - **amount**: Monto específico a transaccionar (ej: 1000 VES)
     """
     verify_token(token)
     
@@ -140,7 +142,7 @@ async def get_buy_offers(
         pay_types = payment_methods.split(",")
     
     client = get_p2p_client()
-    offers = await client.get_buy_offers(fiat, asset, rows=limit, pay_types=pay_types)
+    offers = await client.get_buy_offers(fiat, asset, rows=limit, pay_types=pay_types, trans_amount=amount)
     
     # Ordenar por precio
     offers.sort(key=lambda x: x["price"])
@@ -160,6 +162,7 @@ async def get_sell_offers(
     fiat: str = "VES",
     asset: str = "USDT",
     limit: int = 50,
+    amount: Optional[float] = None,
     payment_methods: Optional[str] = None,
     token: str = Depends(oauth2_scheme)
 ):
@@ -175,7 +178,7 @@ async def get_sell_offers(
         pay_types = payment_methods.split(",")
     
     client = get_p2p_client()
-    offers = await client.get_sell_offers(fiat, asset, rows=limit, pay_types=pay_types)
+    offers = await client.get_sell_offers(fiat, asset, rows=limit, pay_types=pay_types, trans_amount=amount)
     
     # Ordenar por precio (más alto primero)
     offers.sort(key=lambda x: x["price"], reverse=True)
