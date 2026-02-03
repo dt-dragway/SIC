@@ -21,6 +21,7 @@ from loguru import logger
 import statistics
 
 from app.infrastructure.binance.p2p import BinanceP2PClient
+from app.ml.llm_connector import get_llm_manager
 
 
 class OpportunityType(str, Enum):
@@ -141,7 +142,37 @@ class P2POpportunityFinder:
     def __init__(self):
         self.p2p_client = BinanceP2PClient()
         self.trader_study = P2PTraderStudy()
+        self.llm_manager = get_llm_manager()
         self.historical_spreads = []
+
+    async def analyze_offer_context(self, best_offer: Dict, market_data: Dict) -> str:
+        """
+        Genera un razonamiento avanzado usando LLM para la mejor oferta.
+        """
+        if not self.llm_manager.is_available:
+             return f"La IA seleccionó a {best_offer.get('advertiser', 'N/A')} por su alta tasa de finalización ({best_offer.get('completion_rate', 0):.1f}%) y precio competitivo."
+
+        prompt = f"""
+        ANÁLISIS DE OPORTUNIDAD P2P (Arbitraje/Trading)
+        
+        Oferta Seleccionada:
+        - Comerciante: {best_offer.get('advertiser')}
+        - Precio: {best_offer.get('price')} {market_data.get('fiat', 'VES')}
+        - Límites: {best_offer.get('min_amount')} - {best_offer.get('max_amount')}
+        - Tasa completación: {best_offer.get('completion_rate')}%
+        - Órdenes mes: {best_offer.get('orders_count')}
+        
+        Contexto de Mercado:
+        - Mejor Precio Compra: {market_data.get('buy', {}).get('best', 0)}
+        - Mejor Precio Venta: {market_data.get('sell', {}).get('best', 0)}
+        - Spread actual: {market_data.get('spread', {}).get('percent', 0)}%
+        
+        Genera una razón corta (max 1 frase potente) y persuasiva de por qué esta es la mejor opción ahora mismo.
+        Usa emojis. Enfócate en la seguridad, rapidez o beneficio económico.
+        """
+        
+        response = await self.llm_manager._active_provider.analyze(prompt)
+        return response if response else "Oportunidad verificada por algoritmos de alta frecuencia."
     
     async def find_opportunities(
         self,

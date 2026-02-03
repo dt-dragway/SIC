@@ -76,7 +76,8 @@ export default function Home() {
         { symbol: 'ETHUSDT', label: 'ETH', icon: 'Ξ', color: 'text-purple-500' },
         { symbol: 'BNBUSDT', label: 'BNB', icon: 'BNB', color: 'text-yellow-500' },
         { symbol: 'SOLUSDT', label: 'SOL', icon: '◎', color: 'text-cyan-500' },
-        { symbol: 'XRPUSDT', label: 'XRP', icon: '✕', color: 'text-blue-500' }
+        { symbol: 'XRPUSDT', label: 'XRP', icon: '✕', color: 'text-blue-500' },
+        { symbol: 'UNIUSDT', label: 'UNI', icon: '🦄', color: 'text-pink-500' }
     ]
 
     const currentSymbolData = AVAILABLE_SYMBOLS.find(s => s.symbol === selectedSymbol) || AVAILABLE_SYMBOLS[0]

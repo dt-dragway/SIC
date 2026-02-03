@@ -11,6 +11,7 @@ from datetime import datetime
 
 from app.api.v1.auth import oauth2_scheme, verify_token
 from app.infrastructure.binance.p2p import get_p2p_client
+from app.ml.p2p_analyzer import get_opportunity_finder
 
 
 router = APIRouter()
@@ -241,38 +242,56 @@ async def analyze_p2p_offers(
     """
     verify_token(token)
     
+    
     if not offers:
         raise HTTPException(status_code=400, detail="No offers provided")
         
+    finder = get_opportunity_finder()
+    
+    # 1. Encontrar la mejor oferta usando lógica avanzada (scoremist)
     best_offer = None
     best_score = -1
     risky_offers = []
     
     for offer in offers:
-        # Puntuación simple (0-100)
-        # Normalizar tasa de finalización
+        # Normalizar datos para que coincidan con lo que espera el analyzer
+        offer_dict = offer.dict()
+        
+        # Lógica de scoring básica para filtrar primero
         completion_score = offer.completion_rate 
-        
-        # Penalizar pocas órdenes
         orders_score = min(100, (offer.orders_count or 0) / 10) 
-        
-        # Precio: (Esto es relativo, pero para el ejemplo usamos completion y orders)
-        # En una implementación real, compararíamos vs el mejor precio del mercado
-        
         total_score = (completion_score * 0.7) + (orders_score * 0.3)
         
-        # Detectar riesgos
         if offer.completion_rate < 80 or (offer.orders_count or 0) < 5:
             risky_offers.append(offer.advertiser)
         elif total_score > best_score:
             best_score = total_score
-            best_offer = offer
+            best_offer = offer_dict
+
+    if not best_offer:
+        return {
+            "best_offer": None,
+            "risky_advertisers": risky_offers,
+            "reason": "No se encontraron ofertas seguras para recomendar.",
+            "timestamp": datetime.utcnow()
+        }
+
+    # 2. Generar razonamiento con Inteligencia Artificial
+    # Simulamos datos de mercado mínimos para el contexto (se podrían enriquecer)
+    market_context = {
+        "fiat": "VES",
+        "buy": {"best": best_offer['price']},
+        "sell": {"best": best_offer['price']}, # Simplificado
+        "spread": {"percent": 0.5} # Estimado
+    }
+    
+    ai_reason = await finder.analyze_offer_context(best_offer, market_context)
             
     return {
         "best_offer": best_offer,
         "score": round(best_score, 1),
         "risky_advertisers": risky_offers,
-        "reason": f"La IA seleccionó a {best_offer.advertiser if best_offer else 'N/A'} por su alta tasa de finalización ({best_offer.completion_rate if best_offer else 0}%) y volumen de órdenes.",
+        "reason": ai_reason,
         "timestamp": datetime.utcnow()
     }
 

@@ -73,7 +73,7 @@ export default function SignalExecutionModal({
         : quantity <= availableBalance
     const canSubmit = isAmountValid && hasEnoughBalance && quantity > 0
 
-    const { token, logout } = useAuth()
+    const { token: authToken } = useAuth()
 
     const handleSubmit = async () => {
         if (!canSubmit) {
@@ -85,6 +85,15 @@ export default function SignalExecutionModal({
         setLoading(true)
 
         try {
+            // Get token directly from storage to avoid useAuth hook initialization race condition
+            const token = authToken || localStorage.getItem('token')
+
+            if (!token) {
+                toast.error('No hay sesión activa')
+                setLoading(false)
+                return
+            }
+
             const endpoint = mode === 'practice' ? '/api/v1/practice/order' : '/api/v1/trading/order'
 
             const response = await fetch(endpoint, {
@@ -115,9 +124,7 @@ export default function SignalExecutionModal({
                 onClose()
             } else {
                 if (response.status === 401) {
-                    toast.error('Token renovado. Intenta de nuevo en 3s...')
-                    // El hook useAuth se encargará de renovar el token en background o al recargar
-                    setTimeout(() => window.location.reload(), 1500)
+                    toast.error('Sesión expirada. Por favor, reingresa.')
                     return
                 }
                 toast.error(data.detail || 'Error al ejecutar orden')

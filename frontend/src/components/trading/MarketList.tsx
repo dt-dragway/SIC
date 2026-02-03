@@ -22,6 +22,7 @@ const SYMBOLS: Symbol[] = [
     { symbol: 'LTCUSDT', name: 'Litecoin' },
     { symbol: 'TRXUSDT', name: 'Tron' },
     { symbol: 'ATOMUSDT', name: 'Cosmos' },
+    { symbol: 'UNIUSDT', name: 'Uniswap' },
 ]
 
 interface MarketListProps {
