@@ -2,28 +2,12 @@
 
 import { useState } from 'react'
 
-interface Symbol {
-    symbol: string
-    name: string
-}
 
-const SYMBOLS: Symbol[] = [
-    { symbol: 'BTCUSDT', name: 'Bitcoin' },
-    { symbol: 'ETHUSDT', name: 'Ethereum' },
-    { symbol: 'BNBUSDT', name: 'BNB' },
-    { symbol: 'SOLUSDT', name: 'Solana' },
-    { symbol: 'XRPUSDT', name: 'XRP' },
-    { symbol: 'ADAUSDT', name: 'Cardano' },
-    { symbol: 'DOGEUSDT', name: 'Dogecoin' },
-    { symbol: 'DOTUSDT', name: 'Polkadot' },
-    { symbol: 'MATICUSDT', name: 'Polygon' },
-    { symbol: 'AVAXUSDT', name: 'Avalanche' },
-    { symbol: 'LINKUSDT', name: 'Chainlink' },
-    { symbol: 'LTCUSDT', name: 'Litecoin' },
-    { symbol: 'TRXUSDT', name: 'Tron' },
-    { symbol: 'ATOMUSDT', name: 'Cosmos' },
-    { symbol: 'UNIUSDT', name: 'Uniswap' },
-]
+
+import { AVAILABLE_SYMBOLS } from '../../lib/constants'
+
+// Adapter to match existing component logic directly
+
 
 interface MarketListProps {
     currentSymbol: string
@@ -33,7 +17,7 @@ interface MarketListProps {
 export default function MarketList({ currentSymbol, onSymbolChange }: MarketListProps) {
     return (
         <div className="grid grid-cols-2 gap-1 px-1 py-1">
-            {SYMBOLS.map(sym => (
+            {AVAILABLE_SYMBOLS.map(sym => (
                 <button
                     key={sym.symbol}
                     onClick={() => onSymbolChange(sym.symbol)}

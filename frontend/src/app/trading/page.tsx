@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useWallet } from '../../context/WalletContext'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import { GamepadIcon as Gamepad2, Swords, ArrowUp, ArrowDown, Clock, CheckCircle2 } from 'lucide-react'
+import { DEFAULT_SYMBOL } from '../../lib/constants'
 
 // Professional trading components
 import OrderBook from '../../components/trading/OrderBook'
@@ -35,7 +36,7 @@ export default function TradingPagePro() {
     const { isAuthenticated, loading: authLoading } = useAuth()
     const { mode, setMode, balances, refreshBalances } = useWallet()
 
-    const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT')
+    const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_SYMBOL)
     const [currentPrice, setCurrentPrice] = useState(0)
     const [priceChange24h, setPriceChange24h] = useState(0)
     const [trades, setTrades] = useState<Trade[]>([])

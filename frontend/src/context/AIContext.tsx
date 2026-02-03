@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { DEFAULT_SYMBOL } from '../lib/constants';
 
 interface AIAnalysis {
     symbol: string;  // Símbolo de la cripto analizada (BTC, ETH, etc.)
@@ -34,13 +35,29 @@ export function AIProvider({ children }: { children: ReactNode }) {
     const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<OllamaStatus | null>(null);
-    const [symbol, setSymbol] = useState('BTCUSDT'); // Global Symbol Focus
+    const [symbol, setSymbol] = useState(DEFAULT_SYMBOL); // Global Symbol Focus
     const [mounted, setMounted] = useState(false);
 
     // Track mount state for client-side only operations
     useEffect(() => {
         setMounted(true);
+        // Hydrate from localStorage
+        const cachedAnalysis = localStorage.getItem('sic_ai_analysis');
+        if (cachedAnalysis) {
+            try {
+                setAnalysis(JSON.parse(cachedAnalysis));
+            } catch (e) {
+                console.error("Failed to parse cached AI analysis");
+            }
+        }
     }, []);
+
+    // Persist analysis changes
+    useEffect(() => {
+        if (analysis) {
+            localStorage.setItem('sic_ai_analysis', JSON.stringify(analysis));
+        }
+    }, [analysis]);
 
     // Obtener estado de los modelos
     const checkStatus = async () => {

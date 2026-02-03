@@ -12,6 +12,7 @@ import { useWallet } from '../context/WalletContext' // Import Context
 import InstitutionalAssistant from '../components/ai/InstitutionalAssistant'
 import AINeuroEngine from '../components/ai/AINeuroEngine'
 import SignalExecutionModal from '../components/trading/SignalExecutionModal' // Import Modal
+import { AVAILABLE_SYMBOLS, DEFAULT_SYMBOL } from '../lib/constants'
 import { X } from 'lucide-react'
 
 const CandlestickChart = dynamic(
@@ -69,16 +70,9 @@ export default function Home() {
     }
 
     // Estado para el símbolo seleccionado
-    const [selectedSymbol, setSelectedSymbol] = useState('BTCUSDT')
+    const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_SYMBOL)
 
-    const AVAILABLE_SYMBOLS = [
-        { symbol: 'BTCUSDT', label: 'BTC', icon: '₿', color: 'text-orange-500' },
-        { symbol: 'ETHUSDT', label: 'ETH', icon: 'Ξ', color: 'text-purple-500' },
-        { symbol: 'BNBUSDT', label: 'BNB', icon: 'BNB', color: 'text-yellow-500' },
-        { symbol: 'SOLUSDT', label: 'SOL', icon: '◎', color: 'text-cyan-500' },
-        { symbol: 'XRPUSDT', label: 'XRP', icon: '✕', color: 'text-blue-500' },
-        { symbol: 'UNIUSDT', label: 'UNI', icon: '🦄', color: 'text-pink-500' }
-    ]
+
 
     const currentSymbolData = AVAILABLE_SYMBOLS.find(s => s.symbol === selectedSymbol) || AVAILABLE_SYMBOLS[0]
 
