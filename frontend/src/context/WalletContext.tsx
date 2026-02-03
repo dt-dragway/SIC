@@ -86,9 +86,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
         try {
             const endpoint = mode === 'practice' ? '/api/v1/practice/wallet' : '/api/v1/wallet';
+            const url = `${endpoint}?t=${new Date().getTime()}`;
 
-            const res = await fetch(endpoint, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
             });
 
             if (res.ok) {
