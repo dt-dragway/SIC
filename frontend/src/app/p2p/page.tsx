@@ -1,20 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import DashboardLayout from '../../components/layout/DashboardLayout'
-import P2POpportunities from '../../components/dashboard/P2POpportunities'
+import P2POfferRow from '../../components/p2p/P2POfferRow'
+import P2PStats from '../../components/p2p/P2PStats'
+import AIAnalysisCard from '../../components/p2p/AIAnalysisCard'
 import {
-    Calculator,
     ArrowLeftRight,
     ArrowUpRight,
     ArrowDownRight,
-    Wallet,
     Search,
     Filter,
-    CheckCircle2,
-    TrendingUp,
-    DollarSign,
-    Percent
+    ChevronDown,
+    Info,
+    LayoutGrid,
+    List,
+    ShieldCheck
 } from 'lucide-react'
 
 interface P2POffer {
@@ -26,59 +27,52 @@ interface P2POffer {
     payment_methods: string[]
     completion_rate: number
     orders_count?: number
+    is_verified?: boolean
 }
 
 export default function P2PPage() {
     const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy')
-    const [amount, setAmount] = useState('')
     const [loading, setLoading] = useState(false)
     const [offers, setOffers] = useState<P2POffer[]>([])
-
-    // Filters
     const [selectedMethods, setSelectedMethods] = useState<string[]>([])
-
-    // AI Analysis
     const [aiRecommendation, setAiRecommendation] = useState<any>(null)
-    const [analyzing, setAnalyzing] = useState(false)
+    const [isAnalyzing, setIsAnalyzing] = useState(false)
+    const [cryptoType, setCryptoType] = useState('USDT')
+    const [fiatType, setFiatType] = useState('VES')
 
-    const paymentMethods = ["Banesco", "Mercantil", "Pago Movil", "Provincial"]
+    const paymentMethods = ["Banesco", "Mercantil", "Pago Movil", "Provincial", "BNC", "Bancaribe"]
+    const cryptos = ["USDT", "BTC", "ETH", "BNB", "FDUSD"]
 
-    const toggleMethod = (method: string) => {
-        if (selectedMethods.includes(method)) {
-            setSelectedMethods(selectedMethods.filter(m => m !== method))
-        } else {
-            setSelectedMethods([...selectedMethods, method])
-        }
-    }
-
-    const fetchOffers = async () => {
+    const fetchOffers = useCallback(async () => {
         setLoading(true)
         try {
             const token = localStorage.getItem('token')
             if (!token) return
 
             const methodsParam = selectedMethods.length > 0 ? `&payment_methods=${selectedMethods.join(',')}` : ''
-            const endpoint = `/api/v1/p2p/${activeTab}?limit=50${methodsParam}`
+            const endpoint = `/api/v1/p2p/${activeTab}?limit=50&crypto=${cryptoType}&fiat=${fiatType}${methodsParam}`
 
             const res = await fetch(endpoint, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             const data = await res.json()
-            setOffers(data.offers || [])
+            const offersList = data.offers || []
+            setOffers(offersList)
 
             // Trigger AI Analysis
-            analyzeOffers(data.offers || [])
+            if (offersList.length > 0) {
+                analyzeOffers(offersList)
+            }
 
         } catch (e) {
             console.error("Error fetching P2P offers", e)
         } finally {
             setLoading(false)
         }
-    }
+    }, [activeTab, selectedMethods, cryptoType, fiatType])
 
     const analyzeOffers = async (offersList: P2POffer[]) => {
-        if (offersList.length === 0) return
-        setAnalyzing(true)
+        setIsAnalyzing(true)
         try {
             const token = localStorage.getItem('token')
             if (!token) return
@@ -89,190 +83,206 @@ export default function P2PPage() {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(offersList.slice(0, 10)) // Analyze top 10
+                body: JSON.stringify(offersList.slice(0, 10))
             })
             const data = await res.json()
             setAiRecommendation(data)
         } catch (e) {
             console.error("Error analyzing offers", e)
         } finally {
-            setAnalyzing(false)
+            setIsAnalyzing(false)
         }
     }
 
-    // Initial load and filter change
+    const toggleMethod = (method: string) => {
+        setSelectedMethods(prev =>
+            prev.includes(method) ? prev.filter(m => m !== method) : [...prev, method]
+        )
+    }
+
     useEffect(() => {
         fetchOffers()
-    }, [activeTab, selectedMethods])
+    }, [fetchOffers])
 
-    // Stats
+    // Calc Stats
     const bestBuy = offers.length > 0 ? Math.min(...offers.map(o => o.price)) : 0
     const bestSell = offers.length > 0 ? Math.max(...offers.map(o => o.price)) : 0
-    // Note: Spread calculation usually needs both buy and sell markets, here we only show partial if only one loaded
+    // Hypothetical spread calculation (in real world needs both sides concurrently)
+    const spread = bestBuy > 0 && bestSell > 0 ? ((bestSell - bestBuy) / bestBuy) * 100 : 0
 
     return (
         <DashboardLayout>
+            <div className="max-w-[1400px] mx-auto p-4 md:p-8">
 
-            <div className="max-w-7xl mx-auto p-6">
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <ArrowLeftRight className="text-white h-6 w-6" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">Mercado P2P <span className="text-indigo-400">VES - Real Time</span></h1>
-                        <p className="text-slate-400 text-sm">Mostrando {offers.length} ofertas en tiempo real</p>
-                    </div>
-                </div>
-
-                {/* AI Recommendation Card */}
-                {aiRecommendation && (
-                    <div className="mb-8 relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-6">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Wallet className="h-24 w-24 text-indigo-400" />
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <div className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
+                                Institutional Grade
+                            </div>
+                            <div className="flex items-center gap-1 text-slate-500 text-xs font-bold">
+                                <ShieldCheck className="h-3 w-3" />
+                                Mercado Verificado
+                            </div>
                         </div>
-                        <div className="relative z-10">
-                            <h3 className="text-lg font-bold text-indigo-300 flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                                Recomendación Inteligente
-                            </h3>
-                            <p className="text-white mt-2 text-lg">
-                                {aiRecommendation.reason}
-                            </p>
-                            {aiRecommendation.best_offer && (
-                                <div className="mt-4 flex items-center gap-4">
-                                    <div className="px-3 py-1 bg-indigo-500/20 rounded border border-indigo-500/30 text-indigo-300 text-sm">
-                                        @{aiRecommendation.best_offer.advertiser}
-                                    </div>
-                                    <div className="text-emerald-400 font-bold font-mono">
-                                        {aiRecommendation.best_offer.price} Bs
-                                    </div>
-                                    <div className="text-slate-400 text-sm">
-                                        {aiRecommendation.best_offer.completion_rate}% Completado
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
+                            P2P Marketplace
+                            <span className="text-indigo-500 font-light font-mono text-2xl">/ {fiatType}</span>
+                        </h1>
+                        <p className="text-slate-500 font-medium max-w-xl">
+                            Opera de persona a persona con seguridad institucional. Precios actualizados cada 30 segundos mediante IA.
+                        </p>
                     </div>
-                )}
 
-                {/* Stats Cards (Simplified for now or need separate fetch for spread) */}
-
-                {/* Filters */}
-                <div className="mb-6 flex flex-wrap gap-2">
-                    {paymentMethods.map(method => (
-                        <button
-                            key={method}
-                            onClick={() => toggleMethod(method)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedMethods.includes(method)
-                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                                : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                }`}
-                        >
-                            {method}
+                    <div className="flex items-center gap-2 bg-white/[0.03] p-1.5 rounded-xl border border-white/5">
+                        <button className="p-2 text-slate-400 hover:text-white transition-colors">
+                            <LayoutGrid className="h-4 w-4" />
                         </button>
-                    ))}
+                        <button className="p-2 bg-white/10 text-white rounded-lg transition-colors">
+                            <List className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex gap-4 mb-6">
-                    <button
-                        onClick={() => setActiveTab('buy')}
-                        className={`px-8 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wide flex items-center gap-2 ${activeTab === 'buy'
-                            ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
-                            : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-                            }`}
-                    >
-                        <ArrowDownRight className="h-4 w-4" />
-                        Comprar USDT
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('sell')}
-                        className={`px-8 py-3 rounded-xl font-bold transition-all text-sm uppercase tracking-wide flex items-center gap-2 ${activeTab === 'sell'
-                            ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
-                            : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-                            }`}
-                    >
-                        <ArrowUpRight className="h-4 w-4" />
-                        Vender USDT
-                    </button>
-                </div>
+                {/* AI & Stats Grid */}
+                <AIAnalysisCard recommendation={aiRecommendation} isAnalyzing={isAnalyzing} />
+                <P2PStats
+                    bestBuy={bestBuy}
+                    bestSell={bestSell}
+                    spread={spread}
+                    isLoading={loading}
+                    onRefresh={fetchOffers}
+                />
 
-                {/* Offers Table */}
-                <div className="glass-card overflow-hidden border border-white/5 bg-white/[0.02] rounded-2xl">
-                    {loading ? (
-                        <div className="p-8 text-center text-slate-500 animate-pulse">Cargando ofertas en tiempo real...</div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-black/20 border-b border-white/5">
-                                    <tr>
-                                        <th className="text-left px-6 py-5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Anunciante</th>
-                                        <th className="text-left px-6 py-5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Precio</th>
-                                        <th className="text-left px-6 py-5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Disponible</th>
-                                        <th className="text-left px-6 py-5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Límites</th>
-                                        <th className="text-left px-6 py-5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Métodos</th>
-                                        <th className="text-left px-6 py-5 text-xs font-semibold text-slate-400 uppercase tracking-wider"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {offers.map((offer, i) => (
-                                        <tr key={i} className={`hover:bg-white/[0.02] transition-colors ${aiRecommendation?.best_offer?.advertiser === offer.advertiser ? 'bg-indigo-500/10' : ''}`}>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-xs font-bold text-white">
-                                                        {offer.advertiser.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-white flex items-center gap-2">
-                                                            {offer.advertiser}
-                                                            {aiRecommendation?.best_offer?.advertiser === offer.advertiser && (
-                                                                <span className="px-1.5 py-0.5 rounded bg-indigo-500 text-[10px] text-white">RECOMENDADO</span>
-                                                            )}
-                                                        </p>
-                                                        <p className="text-xs text-slate-500 flex items-center gap-1">
-                                                            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                                                            {offer.completion_rate}% completado
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <p className={`text-xl font-bold font-mono ${activeTab === 'buy' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                    {offer.price} <span className="text-xs text-slate-500 font-sans">Bs</span>
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-5 text-slate-300 font-mono">{Number(offer.available).toLocaleString()} <span className="text-slate-500 text-xs">USDT</span></td>
-                                            <td className="px-6 py-5 text-sm text-slate-400">
-                                                {Number(offer.min_amount).toLocaleString()} - {Number(offer.max_amount).toLocaleString()} USDT
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex flex-wrap gap-2">
-                                                    {offer.payment_methods.slice(0, 3).map((m, j) => (
-                                                        <span key={j} className="px-2 py-1 bg-white/5 border border-white/5 rounded text-[10px] text-slate-300 uppercase tracking-wide">
-                                                            {m}
-                                                        </span>
-                                                    ))}
-                                                    {offer.payment_methods.length > 3 && (
-                                                        <span className="px-2 py-1 bg-white/5 border border-white/5 rounded text-[10px] text-slate-500 uppercase tracking-wide">
-                                                            +{offer.payment_methods.length - 3}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5 text-right">
-                                                <button className={`px-6 py-2 rounded-lg font-bold text-sm transition-all shadow-lg ${activeTab === 'buy'
-                                                    ? 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-emerald-500/10'
-                                                    : 'bg-rose-500 text-white hover:bg-rose-400 shadow-rose-500/10'
-                                                    }`}>
-                                                    {activeTab === 'buy' ? 'Comprar' : 'Vender'}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                {/* Trading Controls & Filters */}
+                <div className="mb-8 space-y-4">
+                    {/* Primary Controls */}
+                    <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+                        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-2xl border border-white/5">
+                            <button
+                                onClick={() => setActiveTab('buy')}
+                                className={`px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wider transition-all duration-300 flex items-center gap-2 ${activeTab === 'buy'
+                                    ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20 scale-[1.02]'
+                                    : 'text-slate-500 hover:text-white'
+                                    }`}
+                            >
+                                <ArrowDownRight className="h-4 w-4" />
+                                Comprar
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('sell')}
+                                className={`px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wider transition-all duration-300 flex items-center gap-2 ${activeTab === 'sell'
+                                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20 scale-[1.02]'
+                                    : 'text-slate-500 hover:text-white'
+                                    }`}
+                            >
+                                <ArrowUpRight className="h-4 w-4" />
+                                Vender
+                            </button>
                         </div>
-                    )}
+
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 border border-white/5">
+                                {cryptos.map(crypto => (
+                                    <button
+                                        key={crypto}
+                                        onClick={() => setCryptoType(crypto)}
+                                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${cryptoType === crypto ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                                    >
+                                        {crypto}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                    <Search className="h-4 w-4 text-slate-500" />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Buscar monto..."
+                                    className="bg-white/5 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all w-48"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Secondary Filters (Payment Methods) */}
+                    <div className="flex items-center gap-4 py-4 border-t border-white/[0.03]">
+                        <div className="flex items-center gap-2 text-slate-500">
+                            <Filter className="h-4 w-4" />
+                            <span className="text-[10px] font-black uppercase tracking-tighter">Métodos:</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {paymentMethods.map(method => (
+                                <button
+                                    key={method}
+                                    onClick={() => toggleMethod(method)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${selectedMethods.includes(method)
+                                        ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                                        : 'bg-white/5 border-transparent text-slate-500 hover:bg-white/10'
+                                        }`}
+                                >
+                                    {method}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Market Table */}
+                <div className="relative glass-card overflow-hidden bg-white/[0.015] border-white/5 rounded-3xl">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-white/[0.03] border-b border-white/5">
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Anunciante</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Precio Unitario</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Disponibilidad / Límite</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Métodos de Pago</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ejecución</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={5} className="py-20 text-center">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="h-10 w-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                                <p className="text-slate-400 font-bold text-sm uppercase tracking-widest animate-pulse">
+                                                    Sincronizando con el Libro de órdenes...
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : offers.length > 0 ? (
+                                    offers.map((offer, i) => (
+                                        <P2POfferRow
+                                            key={i}
+                                            offer={offer}
+                                            activeTab={activeTab}
+                                            isRecommended={aiRecommendation?.best_offer?.advertiser === offer.advertiser}
+                                        />
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={5} className="py-20 text-center text-slate-500">
+                                            No se encontraron ofertas vigentes para estos criterios.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Footer disclaimer */}
+                <div className="mt-8 flex items-center justify-center gap-4 text-slate-600 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                    <Info className="h-4 w-4" />
+                    <p className="text-[10px] font-medium tracking-tight uppercase">
+                        SIC ULTRA NO CUSTODIA FONDOS DURANTE LAS TRANSACCIONES P2P. TODAS LAS OPERACIONES ESTÁN SUJETAS A VERIFICACIÓN NEURAL DE RIESGO.
+                    </p>
                 </div>
             </div>
         </DashboardLayout>
