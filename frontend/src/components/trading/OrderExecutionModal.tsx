@@ -12,6 +12,8 @@ interface OrderExecutionModalProps {
     currentPrice: number
     symbol: string
     accountBalance: number
+    usdtBalance: number // New
+    assetBalance: number // New
     mode: 'practice' | 'real'
     onOrderSubmit?: () => void
     initialStopLoss?: number
@@ -26,6 +28,8 @@ export default function OrderExecutionModal({
     currentPrice,
     symbol,
     accountBalance,
+    usdtBalance,
+    assetBalance,
     mode,
     onOrderSubmit,
     initialStopLoss,
@@ -240,8 +244,9 @@ export default function OrderExecutionModal({
                                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-lg font-mono focus:outline-none focus:border-cyan-500/50 disabled:opacity-50"
                                 step="0.01"
                             />
-                            <p className="text-xs text-slate-500 mt-1">
-                                Precio actual: ${currentPrice.toLocaleString()} • Diferencia: {((entryPrice - currentPrice) / currentPrice * 100).toFixed(2)}%
+                            <p className="text-xs text-slate-500 mt-1 flex justify-between">
+                                <span>Precio actual: ${currentPrice.toLocaleString()}</span>
+                                <span className="font-mono text-emerald-400">Disp: ${usdtBalance.toFixed(2)} USDT</span>
                             </p>
                         </div>
 
@@ -299,6 +304,7 @@ export default function OrderExecutionModal({
                     <div className="flex items-center justify-between mb-3">
                         <div className="text-sm text-slate-400">
                             Cantidad: <span className="text-white font-mono font-bold">{quantity.toFixed(6)}</span> {symbol.replace('USDT', '')}
+                            <span className="ml-2 text-[10px] text-slate-500">(Disp: {assetBalance.toFixed(6)})</span>
                         </div>
                         <div className="text-sm text-slate-400">
                             Total: <span className="text-white font-mono font-bold">${(quantity * entryPrice).toFixed(2)}</span>

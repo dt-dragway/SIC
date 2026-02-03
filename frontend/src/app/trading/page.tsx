@@ -51,6 +51,8 @@ export default function TradingPagePro() {
     const [orderTab, setOrderTab] = useState<'history' | 'pending'>('history')
 
     const usdtBalance = balances.find(b => b.asset === 'USDT')?.total || 0
+    const asset = selectedSymbol.replace('USDT', '')
+    const assetBalance = balances.find(b => b.asset === asset)?.total || 0
     const totalBalance = balances.reduce((sum, b) => sum + (b.usd_value || 0), 0)
 
     // Fetch current price
@@ -248,6 +250,7 @@ export default function TradingPagePro() {
                                 currentPrice={currentPrice}
                                 mode={mode}
                                 usdtBalance={usdtBalance}
+                                assetBalance={assetBalance}
                                 onOrderSuccess={handleOrderSuccess}
                             />
                         </div>
@@ -343,6 +346,8 @@ export default function TradingPagePro() {
                 currentPrice={currentPrice}
                 symbol={selectedSymbol}
                 accountBalance={totalBalance}
+                usdtBalance={usdtBalance}
+                assetBalance={assetBalance}
                 mode={mode}
                 onOrderSubmit={handleModalSubmit}
             />
