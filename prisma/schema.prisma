@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model agent_trades {
+  id                Int       @id @default(autoincrement())
+  trade_id          String    @unique(map: "ix_agent_trades_trade_id") @db.VarChar(50)
+  symbol            String    @db.VarChar(20)
+  side              String    @db.VarChar(10)
+  entry_price       Float
+  exit_price        Float
+  pnl               Float
+  signals_used      String?
+  patterns_detected String?
+  created_at        DateTime? @db.Timestamp(6)
+
+  @@index([id], map: "ix_agent_trades_id")
+}
+
+model alerts {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  type         String    @db.VarChar(50)
+  symbol       String?   @db.VarChar(20)
+  condition    String?   @db.VarChar(20)
+  target_value Float?
+  is_active    Boolean?
+  triggered_at DateTime? @db.Timestamp(6)
+  created_at   DateTime? @db.Timestamp(6)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model p2p_rates {
+  id              Int       @id @default(autoincrement())
+  avg_buy_price   Float
+  avg_sell_price  Float
+  best_buy_price  Float
+  best_sell_price Float
+  spread_percent  Float
+  offers_count    Int?
+  volume          Float?
+  recorded_at     DateTime? @db.Timestamp(6)
+
+  @@index([recorded_at], map: "ix_p2p_rates_recorded_at")
+}
+
+model signals {
+  id           Int       @id @default(autoincrement())
+  symbol       String    @db.VarChar(20)
+  type         String    @db.VarChar(10)
+  strength     String    @db.VarChar(20)
+  confidence   Float
+  entry_price  Float
+  take_profit  Float
+  stop_loss    Float
+  risk_reward  Float
+  reasoning    String?
+  ml_data      String?
+  raw_response String?
+  result       String?   @db.VarChar(20)
+  actual_pnl   Float?
+  created_at   DateTime? @db.Timestamp(6)
+  expires_at   DateTime  @db.Timestamp(6)
+  closed_at    DateTime? @db.Timestamp(6)
+
+  @@index([id], map: "ix_signals_id")
+}
+
+model transactions {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  symbol     String    @db.VarChar(20)
+  side       String    @db.VarChar(10)
+  type       String    @db.VarChar(20)
+  quantity   Float
+  price      Float
+  total      Float
+  order_id   String?   @db.VarChar(50)
+  status     String?   @db.VarChar(20)
+  created_at DateTime? @db.Timestamp(6)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([id], map: "ix_transactions_id")
+}
+
+model trusted_devices {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  device_id  String    @unique @db.VarChar(64)
+  user_agent String?   @db.VarChar(500)
+  ip_address String?   @db.VarChar(45)
+  created_at DateTime? @db.Timestamp(6)
+  expires_at DateTime  @db.Timestamp(6)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id              Int               @id @default(autoincrement())
+  email           String            @unique(map: "ix_users_email") @db.VarChar(255)
+  name            String            @db.VarChar(100)
+  password_hash   String            @db.VarChar(255)
+  totp_secret     String?           @db.VarChar(32)
+  has_2fa         Boolean?
+  created_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?         @db.Timestamp(6)
+  last_login      DateTime?         @db.Timestamp(6)
+  alerts          alerts[]
+  transactions    transactions[]
+  trusted_devices trusted_devices[]
+  virtual_wallets virtual_wallets?
+
+  @@index([id], map: "ix_users_id")
+}
+
+model virtual_trades {
+  id              Int             @id @default(autoincrement())
+  wallet_id       Int
+  symbol          String          @db.VarChar(20)
+  side            String          @db.VarChar(10)
+  type            String?         @db.VarChar(20)
+  strategy        String?         @db.VarChar(50)
+  reason          String?
+  quantity        Float
+  price           Float
+  pnl             Float?
+  created_at      DateTime?       @db.Timestamp(6)
+  virtual_wallets virtual_wallets @relation(fields: [wallet_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([id], map: "ix_virtual_trades_id")
+}
+
+model virtual_wallets {
+  id              Int              @id @default(autoincrement())
+  user_id         Int              @unique
+  initial_capital Float?
+  balances        String?
+  created_at      DateTime?        @db.Timestamp(6)
+  reset_at        DateTime?        @db.Timestamp(6)
+  virtual_trades  virtual_trades[]
+  users           users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
