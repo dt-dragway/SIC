@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
     LayoutDashboard,
+    LayoutGrid,
     Wallet,
     TrendingUp,
     ArrowRightLeft,
@@ -13,8 +14,10 @@ import {
     Brain,
     BookOpen,
     User,
+    Zap,
     Monitor,
     BarChart3,
+    Newspaper,
     Droplet,
     Bot,
     Scale
@@ -33,10 +36,15 @@ export default function Sidebar() {
         { href: '/', label: 'Inicio', icon: LayoutDashboard },
         { href: '/wallet', label: 'Billetera', icon: Wallet },
         { href: '/trading', label: 'Trading', icon: TrendingUp },
-        { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },
+        { href: '/execution', label: 'Smart Execution', icon: Zap },
+        { href: '/terminal', label: 'Terminal Pro', icon: Monitor },
+        { href: '/heatmap', label: 'Heatmap Hub', icon: LayoutGrid },
+        { href: '/derivatives', label: 'Delta Neutral', icon: BarChart3 },
+        { href: '/sentiment', label: 'Sentiment Hub', icon: Newspaper },
+        { href: '/automation', label: 'Automation', icon: Bot },
+        { href: '/risk', label: 'Riesgo & Macro', icon: Scale },
         { href: '/agente-ia', label: 'Agente IA', icon: Brain },
-        { href: '/knowledge', label: 'Biblioteca', icon: BookOpen },
-        { href: '/profile', label: 'Mi Perfil', icon: User },
+        { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },
     ];
 
     const isActive = (path: string) => pathname === path;

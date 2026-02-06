@@ -44,6 +44,10 @@ class InstitutionalAgent:
             "risk": {
                 "kelly_criterion": "/risk/kelly-criterion",
                 "macro_correlation": "/risk/macro-correlation"
+            },
+            "sentiment": {
+                "market": "/sentiment/market",
+                "fear_greed": "/sentiment/fear-greed"
             }
         }
     
@@ -61,7 +65,8 @@ class InstitutionalAgent:
             "derivatives": ["delta", "neutral", "basis", "hedge", "cobertura", "sin riesgo"],
             "defi": ["impermanent", "pérdida", "liquidity", "liquidez", "pool", "contrato"],
             "automation": ["backtest", "estrategia", "prueba", "simular", "histórico"],
-            "risk": ["kelly", "riesgo", "risk", "cuánto invertir", "position size", "correlación"]
+            "risk": ["kelly", "riesgo", "risk", "cuánto invertir", "position size", "correlación"],
+            "sentiment": ["noticia", "sentimiento", "news", "sentiment", "narrativa", "fud", "codicia", "miedo"]
         }
         
         # Detectar herramientas necesarias
@@ -77,6 +82,8 @@ class InstitutionalAgent:
                 tools_to_use.append("risk")
             if "onchain" not in tools_to_use:
                 tools_to_use.append("onchain")
+            if "sentiment" not in tools_to_use:
+                tools_to_use.append("sentiment")
         
         return tools_to_use
     
@@ -170,6 +177,10 @@ class InstitutionalAgent:
                 "macro_correlation": correlation
             }
         
+        if "sentiment" in tools_selected:
+            sentiment = await self._call_tool(f"/sentiment/market?symbol={symbol}", token=token)
+            results["data"]["sentiment"] = sentiment
+        
         # Generar recomendación basada en resultados
         recommendation = self._generate_recommendation(results)
         results["recommendation"] = recommendation
@@ -239,6 +250,26 @@ class InstitutionalAgent:
                 recommendation["reasoning"].append(
                     f"⚖️ Kelly recomienda {recommended_pos:.1f}% del capital"
                 )
+        
+        # Análisis de sentimiento (Narrativas)
+        if "sentiment" in data:
+            sent = data["sentiment"]
+            score = sent.get("overall_score", 50)
+            if score > 60:
+                confidence_factors.append(10)
+                recommendation["reasoning"].append(f"📰 Sentimiento Alcista: {sent.get('label')} ({score:.0f} pts)")
+            elif score < 40:
+                confidence_factors.append(-10)
+                recommendation["reasoning"].append(f"📰 Sentimiento Bajista: {sent.get('label')} ({score:.0f} pts)")
+            
+            # Alertas basadas en noticias top
+            if sent.get("news"):
+                top_news = sent["news"][0]
+                if top_news.get("sentiment") == "bearish" and score < 40:
+                    recommendation["alerts"].append({
+                        "type": "FUD_DETECTED",
+                        "message": f"Narrativa de riesgo detectada: {top_news['title']}"
+                    })
         
         # Calcular confianza total
         total_confidence = 50 + sum(confidence_factors)

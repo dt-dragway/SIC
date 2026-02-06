@@ -23,6 +23,9 @@ from app.api.v1.ai_analysis import router as ai_analysis_router
 from app.api.v1.neural import router as neural_router
 from app.api.v1.market import router as market_router  # NUEVO
 from app.api.v1.advanced_trading import router as advanced_trading_router  # NUEVO
+from app.api.v1.sentiment import router as sentiment_router  # NUEVO
+from app.api.v1.advanced_execution import router as advanced_execution_router  # NUEVO
+from app.api.v1.liquidity import router as liquidity_router  # NUEVO
 
 router = APIRouter()
 
@@ -44,5 +47,8 @@ router.include_router(risk_router, prefix="/risk", tags=["⚖️ Risk Management
 router.include_router(ai_analysis_router, prefix="/ai", tags=["🧠 AI Institutional Agent"])
 router.include_router(neural_router, prefix="/neural", tags=["🕯️ Neural Engine - Señales Inteligentes"])
 router.include_router(market_router, prefix="/market", tags=["📊 Market Data & Order Flow"])  # NUEVO
+router.include_router(sentiment_router, prefix="/sentiment", tags=["📰 AI Sentiment Hub"])  # NUEVO
+router.include_router(advanced_execution_router, prefix="/execution", tags=["⚡ Smart Execution (TWAP/VWAP)"])  # NUEVO
+router.include_router(liquidity_router, prefix="/liquidity", tags=["🗺️ Liquidity & Heatmap"])  # NUEVO
 
 
