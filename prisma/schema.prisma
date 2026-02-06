@@ -145,3 +145,50 @@ model virtual_wallets {
   virtual_trades  virtual_trades[]
   users           users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
+
+model funding_rate_history {
+  id                Int       @id @default(autoincrement())
+  symbol            String    @db.VarChar(20)
+  funding_rate      Float
+  mark_price        Float
+  index_price       Float
+  open_interest     Float?
+  timestamp         DateTime? @db.Timestamp(6)
+  next_funding_time DateTime? @db.Timestamp(6)
+
+  @@index([symbol], map: "ix_funding_rate_history_symbol")
+  @@index([timestamp], map: "ix_funding_rate_history_timestamp")
+}
+
+model order_book_snapshots {
+  id            Int       @id @default(autoincrement())
+  symbol        String    @db.VarChar(20)
+  best_bid      Float
+  best_ask      Float
+  spread        Float
+  bids_json     String?
+  asks_json     String?
+  bid_volume_10 Float?
+  ask_volume_10 Float?
+  timestamp     DateTime? @db.Timestamp(6)
+
+  @@index([symbol], map: "ix_order_book_snapshots_symbol")
+  @@index([timestamp], map: "ix_order_book_snapshots_timestamp")
+}
+
+model whale_alerts {
+  id           Int       @id @default(autoincrement())
+  blockchain   String?   @db.VarChar(20)
+  tx_hash      String?   @unique @db.VarChar(128)
+  amount       Float
+  amount_usd   Float
+  from_address String?   @db.VarChar(128)
+  to_address   String?   @db.VarChar(128)
+  from_label   String?   @db.VarChar(100)
+  to_label     String?   @db.VarChar(100)
+  flow_type    String?   @db.VarChar(50)
+  sentiment    String?   @db.VarChar(20)
+  timestamp    DateTime? @db.Timestamp(6)
+
+  @@index([timestamp], map: "ix_whale_alerts_timestamp")
+}

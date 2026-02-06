@@ -10,6 +10,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.infrastructure.database.session import engine
 from app.infrastructure.database.models import Base
+# Import institutional models to register them with Base
+import app.infrastructure.database.institutional_models
 
 def init_db():
     print("🚀 Inicializando base de datos PostgreSQL...")

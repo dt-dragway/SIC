@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Activity, Brain, Target, Sparkles, TrendingUp, Award, AlertCircle } from 'lucide-react';
+import { Activity, Brain, Target, Sparkles, TrendingUp, Award, AlertCircle, MessageSquare } from 'lucide-react';
+import InstitutionalAIChat from '@/components/ai/InstitutionalAIChat';
 
 interface LearningProgress {
     experience: {
@@ -346,22 +347,40 @@ export default function AgentIAPage() {
                     </div>
                 </div>
 
-                {/* Patrones Aprendidos */}
-                {progress.patterns.list.length > 0 && (
-                    <div className="glass-card rounded-3xl border border-white/5 bg-black/20 p-6">
-                        <h3 className="text-lg font-bold text-white mb-4">Patrones Dominados</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {progress.patterns.list.map((pattern, index) => (
-                                <span
-                                    key={index}
-                                    className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30"
-                                >
-                                    {pattern}
-                                </span>
-                            ))}
-                        </div>
+                {/* AI Chat Section & Progress Details */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                        <InstitutionalAIChat />
                     </div>
-                )}
+
+                    <div className="space-y-6">
+                        {/* Patrones Aprendidos */}
+                        {progress.patterns.list.length > 0 && (
+                            <div className="glass-card rounded-3xl border border-white/5 bg-black/20 p-6 h-full">
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-purple-400" />
+                                    Patrones Dominados
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {progress.patterns.list.map((pattern, index) => (
+                                        <span
+                                            key={index}
+                                            className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30"
+                                        >
+                                            {pattern}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="mt-8 p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                                    <h4 className="text-xs font-bold text-violet-400 uppercase mb-2">Consejo de la IA</h4>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                                        He detectado un aumento en la efectividad del patrón <strong>{progress.patterns.list[0]}</strong> en temporalidades de 1h. Recuerda confirmar con RSI antes de ejecutar.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 {/* Footer */}
                 <div className="text-center text-xs text-slate-600">

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Bot, Play, TrendingUp, TrendingDown, Award, AlertTriangle } from 'lucide-react';
+import { Bot, Play, TrendingUp, TrendingDown, Award, AlertTriangle, LineChart } from 'lucide-react';
+import { PnLChart } from '@/components/charts/PnLChart';
 
 interface Trade {
     timestamp: string;
@@ -247,6 +248,15 @@ export default function AutomationPage() {
                                     </div>
                                 </div>
 
+                                {/* Equity Curve Chart */}
+                                <div className="glass-card p-6 rounded-3xl border border-white/5 bg-black/20">
+                                    <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                                        <LineChart size={16} className="text-emerald-400" />
+                                        Curva de Equidad (PnL Acumulado)
+                                    </h3>
+                                    <PnLChart trades={result.trades} />
+                                </div>
+
                                 {/* Trade History */}
                                 <div className="glass-card p-6 rounded-3xl border border-white/5 bg-black/20">
                                     <h3 className="text-sm font-bold text-white mb-4">Historial de Trades ({result.total_trades} total)</h3>
@@ -254,8 +264,8 @@ export default function AutomationPage() {
                                     <div className="max-h-96 overflow-y-auto space-y-2">
                                         {result.trades.map((trade, i) => (
                                             <div key={i} className={`p-3 rounded-lg border ${trade.type === 'BUY'
-                                                    ? 'bg-emerald-500/10 border-emerald-500/30'
-                                                    : 'bg-rose-500/10 border-rose-500/30'
+                                                ? 'bg-emerald-500/10 border-emerald-500/30'
+                                                : 'bg-rose-500/10 border-rose-500/30'
                                                 }`}>
                                                 <div className="flex justify-between items-center mb-1">
                                                     <span className={`text-xs font-bold uppercase ${trade.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'

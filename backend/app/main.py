@@ -109,6 +109,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠️ No se pudo crear usuario admin: {e}")
     
+    # Iniciar Escáner de Mercado Institucional
+    try:
+        from app.services.market_scanner import get_market_scanner
+        scanner = get_market_scanner()
+        await scanner.start()
+        logger.success("📡 Escáner de Mercado Institucional activado")
+    except Exception as e:
+        logger.error(f"❌ No se pudo iniciar el escáner de mercado: {e}")
+
     logger.success("✅ SIC Ultra iniciado correctamente")
     
     yield  # App running
@@ -125,6 +134,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"❌ Error guardando memoria de IA: {e}")
         
+    # Detener Escáner de Mercado
+    try:
+        from app.services.market_scanner import get_market_scanner
+        scanner = get_market_scanner()
+        await scanner.stop()
+    except:
+        pass
+
     logger.info("👋 SIC Ultra cerrado")
 
 

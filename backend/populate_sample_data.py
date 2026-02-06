@@ -66,6 +66,32 @@ def populate_data():
                 )
                 db.add(sig)
             print("   ✅ Señales generadas.")
+
+        # 3. Whale Alerts (Últimas 24h)
+        from app.infrastructure.database.institutional_models import WhaleAlert
+        if db.query(WhaleAlert).count() == 0:
+            print("   -> Generando alertas de ballenas...")
+            blockchains = ["BTC", "ETH", "SOL", "BNB"]
+            flow_types = ["exchange_inflow", "exchange_outflow", "whale_to_whale"]
+            
+            for _ in range(30):
+                blockchain = random.choice(blockchains)
+                flow = random.choice(flow_types)
+                sentiment = "bullish" if flow == "exchange_outflow" else "bearish" if flow == "exchange_inflow" else "neutral"
+                
+                whale = WhaleAlert(
+                    blockchain=blockchain,
+                    tx_hash=f"0x{random.getrandbits(256):064x}",
+                    amount=random.uniform(100, 1000),
+                    amount_usd=random.uniform(5000000, 50000000),
+                    from_label="Binance Hot Wallet" if flow == "exchange_outflow" else "Whale Wallet",
+                    to_label="Whale Wallet" if flow == "exchange_outflow" else "Binance Hot Wallet",
+                    flow_type=flow,
+                    sentiment=sentiment,
+                    timestamp=datetime.utcnow() - timedelta(minutes=random.randint(5, 1440))
+                )
+                db.add(whale)
+            print("   ✅ Whale Alerts generados.")
         
         db.commit()
         print("✨ Proceso completado exitosamente.")

@@ -223,15 +223,12 @@ export default function TerminalPage() {
                             </p>
                         </div>
 
-                        {/* Placeholder for future Whale Alerts / Charts */}
-                        <div className="glass-card p-8 rounded-3xl border border-white/5 border-dashed flex flex-col items-center justify-center text-center h-64">
-                            <div className="p-4 rounded-full bg-white/5 mb-4">
-                                <Activity size={32} className="text-slate-600" />
-                            </div>
-                            <h4 className="text-slate-300 font-bold">Gráfico de Profundidad Visual</h4>
-                            <p className="text-slate-500 text-sm mt-2 max-w-sm">
-                                Próximamente visualización de liquidez en tiempo real y rastreo de Ballenas (Whale Alert Analysis).
-                            </p>
+                        <div className="glass-card p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-indigo-500/5 to-purple-500/5">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <Activity size={20} className="text-cyan-400" />
+                                Rastreo de Ballenas (Live Whale Alert)
+                            </h3>
+                            <WhaleAlertWidget blockchain={symbol.replace('USDT', '')} />
                         </div>
                     </div>
 
