@@ -35,6 +35,7 @@ class User(Base):
     transactions = relationship("Transaction", back_populates="user")
     virtual_wallet = relationship("VirtualWallet", back_populates="user", uselist=False)
     alerts = relationship("Alert", back_populates="user")
+    journal_entries = relationship("JournalEntry", back_populates="user")
 
 
 class TrustedDevice(Base):
@@ -207,3 +208,53 @@ class AgentTrade(Base):
     __table_args__ = (
         {'comment': 'Trades del Agente IA para sincronización con agent_memory.json'}
     )
+
+
+class JournalEntry(Base):
+    """Diario de Trading Profesional"""
+    __tablename__ = "journal_entries"
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    symbol = Column(String(20), nullable=False)
+    side = Column(String(10)) # BUY, SELL
+    entry_price = Column(Float)
+    exit_price = Column(Float, nullable=True)
+    pnl = Column(Float, default=0.0)
+    
+    mood = Column(String(50)) # CALM, ANXIOUS, GREEDY, FRUSTRATED
+    strategy = Column(String(100)) # BREAKOUT, MEAN_REVERSION, etc.
+    
+    notes = Column(Text)
+    lessons = Column(Text)
+    rating = Column(Integer, default=3) # 1-5
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="journal_entries")
+
+
+class AlgorithmicOrder(Base):
+    """Órdenes avanzadas (TWAP/VWAP) persistentes"""
+    __tablename__ = "algorithmic_orders"
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    symbol = Column(String(20), nullable=False)
+    side = Column(String(10), nullable=False) # BUY, SELL
+    algo_type = Column(String(20), nullable=False) # TWAP, VWAP
+    
+    total_quantity = Column(Float, nullable=False)
+    executed_quantity = Column(Float, default=0.0)
+    
+    duration_minutes = Column(Integer, nullable=False)
+    status = Column(String(20), default="RUNNING") # RUNNING, COMPLETED, CANCELLED, FAILED
+    
+    # Datos de control técnico (JSON)
+    config_json = Column(Text, nullable=True) # Intervalos, etc.
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

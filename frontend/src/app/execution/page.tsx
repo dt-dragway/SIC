@@ -114,12 +114,12 @@ export default function ExecutionPage() {
                                 <select
                                     value={symbol}
                                     onChange={(e) => setSymbol(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-500/50"
+                                    className="w-full bg-[#12121a] border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-500/50 cursor-pointer"
                                 >
-                                    <option value="BTCUSDT">Bitcoin (BTC)</option>
-                                    <option value="ETHUSDT">Ethereum (ETH)</option>
-                                    <option value="SOLUSDT">Solana (SOL)</option>
-                                    <option value="BNBUSDT">Binance Coin (BNB)</option>
+                                    <option value="BTCUSDT" className="bg-[#12121a]">Bitcoin (BTC)</option>
+                                    <option value="ETHUSDT" className="bg-[#12121a]">Ethereum (ETH)</option>
+                                    <option value="SOLUSDT" className="bg-[#12121a]">Solana (SOL)</option>
+                                    <option value="BNBUSDT" className="bg-[#12121a]">Binance Coin (BNB)</option>
                                 </select>
                             </div>
 
@@ -130,7 +130,7 @@ export default function ExecutionPage() {
                                     value={quantity}
                                     onChange={(e) => setQuantity(e.target.value)}
                                     placeholder="0.00"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-yellow-500/50"
+                                    className="w-full bg-[#12121a] border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono focus:outline-none focus:border-yellow-500/50"
                                 />
                             </div>
 
@@ -139,11 +139,11 @@ export default function ExecutionPage() {
                                 <select
                                     value={algo}
                                     onChange={(e) => setAlgo(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-500/50"
+                                    className="w-full bg-[#12121a] border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-yellow-500/50 cursor-pointer"
                                 >
-                                    <option value="TWAP">TWAP (Pesado en Tiempo)</option>
-                                    <option value="VWAP">VWAP (Pesado en Volumen)</option>
-                                    <option value="狙撃 (SNIPER)">狙撃 Sniper (Oculto)</option>
+                                    <option value="TWAP" className="bg-[#12121a]">TWAP (Pesado en Tiempo)</option>
+                                    <option value="VWAP" className="bg-[#12121a]">VWAP (Pesado en Volumen)</option>
+                                    <option value="狙撃 (SNIPER)" className="bg-[#12121a]">狙撃 Sniper (Oculto)</option>
                                 </select>
                             </div>
 

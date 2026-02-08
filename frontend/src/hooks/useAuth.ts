@@ -60,46 +60,16 @@ export function useAuth() {
         }
     };
 
-    // Función auxiliar para Auto-Login transparente
+    // ⚠️ AUTO-LOGIN ELIMINADO POR SEGURIDAD
+    // Las credenciales hardcoded han sido removidas
+    // Los usuarios deben autenticarse manualmente
     const performAutoLogin = async () => {
-        try {
-            const formData = new URLSearchParams();
-            formData.append('username', 'admin@sic.com');
-            formData.append('password', 'y2k38*');
-
-            const res = await fetch('/api/v1/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                const token = data.access_token;
-                localStorage.setItem('token', token);
-
-                // Verificar la nueva sesión
-                const meRes = await fetch('/api/v1/auth/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (meRes.ok) {
-                    const user = await meRes.json();
-                    setState({ user, loading: false, isAuthenticated: true, token });
-                    // Redirigir a dashboard si estamos en login
-                    if (window.location.pathname === '/login') {
-                        router.push('/');
-                    }
-                    return;
-                }
-            }
-        } catch (e) {
-            console.error("Auto-login falló", e);
-        }
+        console.warn('⚠️ Auto-login desactivado por seguridad');
 
         // Si todo falla, limpiar
         localStorage.removeItem('token');
         setState({ user: null, loading: false, isAuthenticated: false, token: null });
+        return false;
     };
 
     // Logout function definition specifically for internal use in useEffect

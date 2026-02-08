@@ -41,6 +41,7 @@ export default function Sidebar() {
         { href: '/heatmap', label: 'Heatmap Hub', icon: LayoutGrid },
         { href: '/derivatives', label: 'Delta Neutral', icon: BarChart3 },
         { href: '/sentiment', label: 'Sentiment Hub', icon: Newspaper },
+        { href: '/journal', label: 'Trading Journal', icon: BookOpen },
         { href: '/automation', label: 'Automation', icon: Bot },
         { href: '/risk', label: 'Riesgo & Macro', icon: Scale },
         { href: '/agente-ia', label: 'Agente IA', icon: Brain },
@@ -117,8 +118,8 @@ export default function Sidebar() {
                         </div>
                     </div>
 
-                    {/* Navigation */}
-                    <nav className="flex-1 space-y-2">
+                    {/* Navigation - Scrollable Area */}
+                    <nav className="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
                         {links.map((link) => {
                             const Icon = link.icon;
                             const active = isActive(link.href);
@@ -142,14 +143,16 @@ export default function Sidebar() {
                         })}
                     </nav>
 
-                    {/* Logout */}
-                    <button
-                        onClick={() => logout()}
-                        className="flex items-center gap-3 px-4 py-3 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-colors mt-auto"
-                    >
-                        <LogOut size={20} />
-                        <span className="font-medium">Cerrar Sesión</span>
-                    </button>
+                    {/* Logout - Sticky at bottom */}
+                    <div className="pt-4 mt-4 border-t border-white/5">
+                        <button
+                            onClick={() => logout()}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-colors"
+                        >
+                            <LogOut size={20} />
+                            <span className="font-medium">Cerrar Sesión</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 

@@ -229,14 +229,18 @@ async def login(
         access_token = create_access_token(user_data)
         refresh_token = create_refresh_token(user_data, remember_me=True) 
         
-        # Establecer cookie de acceso (HttpOnly)
+        # Establecer cookie de acceso (HttpOnly y Segura)
+        is_production = not settings.debug
         response.set_cookie(
             key="access_token",
             value=access_token,
-            httponly=True,
-            secure=False, # True en producción con HTTPS
-            samesite="lax",
-            max_age=settings.access_token_expire_minutes * 60
+            httponly=True,  # Prevenir acceso desde JavaScript
+            secure=is_production,  # True en producción con HTTPS
+            samesite="strict",  # Máxima protección CSRF
+            max_age=settings.access_token_expire_minutes * 60,
+            path="/",  # Disponible en todo el dominio
+            # Atributos adicionales de seguridad
+            # domain=".tudominio.com"  # Limitar a dominio específico en producción
         )
 
         # Establecer cookie de dispositivo confiable (30 días)

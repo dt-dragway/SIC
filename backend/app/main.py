@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from loguru import logger
 import sys
+import asyncio
 
 from app.config import settings
 from app.api.v1 import router as api_v1_router
@@ -112,9 +113,15 @@ async def lifespan(app: FastAPI):
     # Iniciar Escáner de Mercado Institucional
     try:
         from app.services.market_scanner import get_market_scanner
+        from app.services.execution_engine import get_execution_engine
+        
         scanner = get_market_scanner()
-        await scanner.start()
-        logger.success("📡 Escáner de Mercado Institucional activado")
+        engine = get_execution_engine()
+        
+        asyncio.create_task(scanner.start())
+        asyncio.create_task(engine.recover_orders()) # NUEVO: Recuperar órdenes tras crash
+        
+        logger.success("📡 Escáner y Motor de Ejecución iniciados")
     except Exception as e:
         logger.error(f"❌ No se pudo iniciar el escáner de mercado: {e}")
 

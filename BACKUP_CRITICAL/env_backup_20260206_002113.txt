@@ -1,0 +1,31 @@
+# SIC Ultra - Environment Configuration Template
+# Copy this file to .env and fill with your actual values
+# NEVER commit .env to git!
+
+# === Database ===
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=admin2425
+POSTGRES_DB=sic_db
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5433
+
+# === Security ===
+SECRET_KEY=sic_ultra_super_secret_key_2026_dev
+JWT_SECRET_KEY=sic_ultra_jwt_secret_key_2026_dev
+
+# === Binance API (NEVER commit real keys!) ===
+BINANCE_API_KEY=YAvhRs6hAkLUWywC04roh6El7ieCNGLJ5ybqCEaCSxPY2aC4E3CqU4txtu3oZi71 
+BINANCE_API_SECRET=5DhdCYOX6ue0T5YMYLofppIYOUXBiJaqhzZbEn9H27lJf9Lvthe1qyALxuoN9VxH
+BINANCE_TESTNET=false
+
+# === AI/LLM APIs (optional) ===
+DEEPSEEK_API_KEY=sk-0e2fdbb8e6dd43aca404db153b675c3c
+OPENAI_API_KEY=
+
+# === Security Features ===
+# ENABLE_RATE_LIMIT=false  # Set to true in production
+
+# === Admin Account (Auto-created on startup) ===
+ADMIN_EMAIL=admin@sic.com
+ADMIN_PASSWORD=y2k38*
+DATABASE_URL="postgresql://postgres:admin2425@localhost:5433/sic_db"

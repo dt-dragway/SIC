@@ -1,6 +1,6 @@
 """
-SIC Ultra - Smart Execution Engine
-Algoritmos de ejecución institucional: TWAP, VWAP y Sniper.
+SIC Ultra - Persistent Execution Engine
+Versión mejorada con persistencia en BD y capacidad de recuperación.
 """
 
 import asyncio
@@ -11,15 +11,11 @@ import json
 
 from app.infrastructure.binance.client import get_binance_client
 from app.infrastructure.database.session import SessionLocal
+from app.infrastructure.database.models import AlgorithmicOrder
 
 class ExecutionEngine:
-    """
-    Motor de ejecución inteligente.
-    Gestiona órdenes grandes dividiéndolas en partes más pequeñas (slicing).
-    """
-    
     def __init__(self):
-        self.active_tasks = {} # id -> task
+        self.active_tasks = {} # order_id -> task
 
     async def execute_twap(
         self, 
@@ -27,70 +23,93 @@ class ExecutionEngine:
         side: str, 
         total_quantity: float, 
         duration_minutes: int, 
-        user_id: int
+        user_id_int: int,
+        order_db_id: Optional[int] = None
     ):
         """
-        TWAP (Time-Weighted Average Price)
-        Divide la orden total en partes iguales durante un tiempo determinado.
+        TWAP Persistente.
         """
-        logger.info(f"⚡ Iniciando TWAP: {side} {total_quantity} {symbol} durante {duration_minutes}m")
+        db = SessionLocal()
         
-        # Parámetros del algoritmo
-        num_intervals = max(5, duration_minutes) # Mínimo 5 intervalos
+        # Si no tiene ID de DB, creamos el registro
+        if order_db_id is None:
+            order = AlgorithmicOrder(
+                user_id=user_id_int,
+                symbol=symbol,
+                side=side,
+                algo_type="TWAP",
+                total_quantity=total_quantity,
+                duration_minutes=duration_minutes,
+                status="RUNNING"
+            )
+            db.add(order)
+            db.commit()
+            db.refresh(order)
+            order_db_id = order.id
+            logger.info(f"🆕 Nueva orden TWAP registrada en DB: ID {order_db_id}")
+
+        logger.info(f"⚡ Ejecutando TWAP ID {order_db_id}: {side} {total_quantity} {symbol}")
+        
+        num_intervals = max(5, duration_minutes)
         interval_seconds = (duration_minutes * 60) / num_intervals
         quantity_per_interval = total_quantity / num_intervals
         
         client = get_binance_client()
         executed_qty = 0.0
         
-        for i in range(num_intervals):
-            try:
-                # En producción, aquí se ejecutaría la orden real en Binance
-                # client.client.create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity_per_interval)
-                
+        try:
+            for i in range(num_intervals):
+                # En producción llamaríamos a client.create_order
                 # Simulación de ejecución
                 current_price = client.get_price(symbol)
-                logger.debug(f"TWAP [{i+1}/{num_intervals}]: Ejecutando {quantity_per_interval} {symbol} a {current_price}")
-                
                 executed_qty += quantity_per_interval
                 
-                # Esperar al siguiente intervalo
+                # Actualizar DB
+                db_order = db.query(AlgorithmicOrder).filter(AlgorithmicOrder.id == order_db_id).first()
+                if db_order:
+                    db_order.executed_quantity = executed_qty
+                    db_order.updated_at = datetime.utcnow()
+                    db.commit()
+                
+                logger.debug(f"TWAP [{order_db_id}] Progress: {executed_qty}/{total_quantity}")
                 await asyncio.sleep(interval_seconds)
-                
-            except Exception as e:
-                logger.error(f"Error en intervalo de TWAP {i}: {e}")
-                
-        logger.success(f"✅ TWAP Completado: {executed_qty}/{total_quantity} {symbol} ejecutados.")
 
-    async def execute_vwap(
-        self,
-        symbol: str,
-        side: str,
-        total_quantity: float,
-        duration_minutes: int,
-        user_id: int
-    ):
+            # Finalizar
+            db_order = db.query(AlgorithmicOrder).filter(AlgorithmicOrder.id == order_db_id).first()
+            if db_order:
+                db_order.status = "COMPLETED"
+                db.commit()
+            logger.success(f"✅ TWAP {order_db_id} completado con éxito.")
+
+        except Exception as e:
+            logger.error(f"❌ Error en TWAP {order_db_id}: {e}")
+            db_order = db.query(AlgorithmicOrder).filter(AlgorithmicOrder.id == order_db_id).first()
+            if db_order:
+                db_order.status = "FAILED"
+                db.commit()
+        finally:
+            db.close()
+
+    async def recover_orders(self):
         """
-        VWAP (Volume-Weighted Average Price) - Simplificado
-        Ejecuta más cantidad cuando hay más volumen histórico.
+        Recuperar órdenes que quedaron en RUNNING tras un reinicio.
         """
-        logger.info(f"⚡ Iniciando VWAP: {side} {total_quantity} {symbol} durante {duration_minutes}m")
-        
-        # En una implementación real, analizaríamos el perfil de volumen de las últimas 24h
-        # Aquí simulamos una campana de Gauss de ejecución (más volumen al inicio y fin)
-        
-        num_intervals = 10
-        await self.execute_twap(symbol, side, total_quantity, duration_minutes, user_id) # Placeholder robusto
+        logger.info("📡 Buscando órdenes algorítmicas para recuperar...")
+        db = SessionLocal()
+        try:
+            pending_orders = db.query(AlgorithmicOrder).filter(AlgorithmicOrder.status == "RUNNING").all()
+            for order in pending_orders:
+                logger.warning(f"🔄 Recuperando orden {order.id} ({order.symbol})")
+                # Reiniciar tarea en segundo plano
+                remaining_qty = order.total_quantity - order.executed_quantity
+                if remaining_qty > 0:
+                    asyncio.create_task(self.execute_twap(
+                        order.symbol, order.side, remaining_qty, 
+                        order.duration_minutes, order.user_id, order.id
+                    ))
+        finally:
+            db.close()
 
-    def stop_execution(self, task_id: str):
-        """Detener una ejecución en curso"""
-        if task_id in self.active_tasks:
-            self.active_tasks[task_id].cancel()
-            del self.active_tasks[task_id]
-            return True
-        return False
-
-# Instancia global
 execution_engine = ExecutionEngine()
 
 def get_execution_engine() -> ExecutionEngine:

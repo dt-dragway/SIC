@@ -208,7 +208,7 @@ export default function P2PPage() {
                                     onChange={(e) => setAmount(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && fetchOffers()}
                                     onBlur={() => fetchOffers()}
-                                    className="bg-white/5 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all w-48"
+                                    className="bg-[#12121a] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all w-48 shadow-inner"
                                 />
                             </div>
                         </div>

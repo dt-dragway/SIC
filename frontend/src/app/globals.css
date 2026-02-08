@@ -45,6 +45,23 @@ body {
   background: #2d2d4a;
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* Glassmorphism Card */
 .glass-card {
   background: rgba(18, 18, 26, 0.8);
@@ -54,15 +71,33 @@ body {
 }
 
 /* Price Colors */
-.text-green { color: var(--sic-green); }
-.text-red { color: var(--sic-red); }
-.bg-green { background-color: var(--sic-green); }
-.bg-red { background-color: var(--sic-red); }
+.text-green {
+  color: var(--sic-green);
+}
+
+.text-red {
+  color: var(--sic-red);
+}
+
+.bg-green {
+  background-color: var(--sic-green);
+}
+
+.bg-red {
+  background-color: var(--sic-red);
+}
 
 /* Animations */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 157, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.6); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.6);
+  }
 }
 
 .signal-strong {
@@ -99,4 +134,24 @@ body {
 .btn-secondary:hover {
   border-color: var(--sic-green);
   color: var(--sic-green);
+}
+
+/* Base Select & Option Styling for Dark Mode */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+option {
+  background-color: #12121a;
+  color: white;
+  padding: 10px;
+}
+
+select:focus {
+  outline: none;
+  border-color: rgba(0, 255, 157, 0.5);
 }
