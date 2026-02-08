@@ -335,7 +335,23 @@ class AutoExecutionService:
                 patterns_detected=patterns_detected
             )
             
+            # Añadir marcador al gráfico
+            from app.services.trade_markers import get_trade_marker_manager
+            marker_manager = get_trade_marker_manager()
+            
+            marker_trade_id = marker_manager.add_trade_marker(
+                symbol=symbol,
+                side=side,
+                entry_price=entry_price,
+                stop_loss=signal_data['signal'].get('stop_loss', entry_price * 0.98),
+                take_profit=signal_data['signal'].get('take_profit', entry_price * 1.05),
+                quantity=quantity,
+                confidence=signal_data['signal'].get('confidence'),
+                tier=signal_data['signal'].get('tier')
+            )
+            
             logger.info(f"🧚 Trade registrado para aprendizaje IA: {trade_id}")
+            logger.info(f"📊 Marcador añadido al gráfico: {marker_trade_id}")
             
         except Exception as e:
             logger.error(f"❌ Error registrando trade para aprendizaje: {e}")
