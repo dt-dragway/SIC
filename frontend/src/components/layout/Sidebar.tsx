@@ -20,7 +20,8 @@ import {
     Newspaper,
     Droplet,
     Bot,
-    Scale
+    Scale,
+    Target
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';

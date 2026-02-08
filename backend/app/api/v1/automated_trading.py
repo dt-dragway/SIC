@@ -3,11 +3,11 @@ SIC Ultra - Automated Trading API
 Endpoints para controlar trading automático con IA.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timedelta
 from loguru import logger
 
 from app.infrastructure.database.session import get_db
@@ -23,7 +23,7 @@ class AutomationSettings(BaseModel):
     max_position_size: float = Field(50.0, ge=1.0, le=1000.0, description="Tamaño máximo de posición (USD)")
     min_signal_confidence: int = Field(70, ge=50, le=100, description="Confianza mínima de señal (%)")
     allowed_tiers: List[str] = Field(default=['S', 'A'], description="Tiers de señal permitidos")
-    risk_level: str = Field('moderate', regex='^(conservative|moderate|aggressive)$', description="Nivel de riesgo")
+    risk_level: str = Field('moderate', pattern='^(conservative|moderate|aggressive)$', description="Nivel de riesgo")
     pause_on_high_volatility: bool = Field(True, description="Pausar en alta volatilidad")
     check_interval_seconds: int = Field(30, ge=10, le=300, description="Intervalo de revisión (segundos)")
     practice_mode_only: bool = Field(True, description="Usar solo modo práctica")
@@ -306,7 +306,7 @@ async def get_automation_performance(
 
 @router.post("/test-signal", response_model=Dict[str, Any])
 async def test_signal_generation(
-    symbol: str = Field(..., description="Símbolo a probar"),
+    symbol: str = Query(..., description="Símbolo a probar"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

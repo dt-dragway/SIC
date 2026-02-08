@@ -17,13 +17,13 @@ from app.services.trade_markers import get_trade_marker_manager
 # Schemas
 class TradeMarkerRequest(BaseModel):
     symbol: str = Field(..., description="Símbolo del trade")
-    side: str = Field(..., regex="^(LONG|SHORT)$", description="Lado del trade")
+    side: str = Field(..., pattern="^(LONG|SHORT)$", description="Lado del trade")
     entry_price: float = Field(..., gt=0, description="Precio de entrada")
     stop_loss: float = Field(..., gt=0, description="Stop loss")
     take_profit: float = Field(..., gt=0, description="Take profit")
     quantity: float = Field(..., gt=0, description="Cantidad")
     confidence: Optional[float] = Field(None, ge=0, le=100, description="Confianza de la señal")
-    tier: Optional[str] = Field(None, regex="^(S|A|B|C)$", description="Tier de la señal")
+    tier: Optional[str] = Field(None, pattern="^(S|A|B|C)$", description="Tier de la señal")
 
 
 class TradeMarkerResponse(BaseModel):
@@ -46,7 +46,7 @@ class TradeMarkerResponse(BaseModel):
 class CloseTradeRequest(BaseModel):
     exit_price: float = Field(..., gt=0, description="Precio de salida")
     pnl: float = Field(..., description="P&L del trade")
-    exit_reason: str = Field("MANUAL", regex="^(MANUAL|STOP_LOSS|TAKE_PROFIT)$", description="Motivo de cierre")
+    exit_reason: str = Field("MANUAL", pattern="^(MANUAL|STOP_LOSS|TAKE_PROFIT)$", description="Motivo de cierre")
 
 
 router = APIRouter()

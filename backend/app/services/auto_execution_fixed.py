@@ -130,7 +130,6 @@ class AutoExecutionService:
     
     def __init__(self):
         self.signal_queue = SignalQueue()
-        # self.signal_generator se inicializará cuando se necesite
         self.execution_engine = get_execution_engine()
         self.running = False
         self.execution_task: Optional[asyncio.Task] = None
@@ -380,7 +379,7 @@ class AutoExecutionService:
         pass
         
     async def _get_automation_symbols(self) -> List[str]:
-        """Retorna símbolos configurados para automatización."""
+        """Retorna símbolos configurados para automación."""
         # TODO: Obtener desde configuración de usuario
         return ['BTCUSDT', 'ETHUSDT']
         
@@ -418,7 +417,7 @@ class AutoExecutionService:
             return True
             
         return False
-    
+        
     def _check_daily_loss_limit(self) -> bool:
         """Verifica si se alcanzó límite de pérdidas diario."""
         # TODO: Implementar verificación de pérdidas diarias

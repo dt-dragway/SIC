@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
+import { Badge } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -33,6 +33,7 @@ interface TradeMarker {
   exit_time?: string;
   confidence?: number;
   tier?: string;
+  time?: string; // Para compatibilidad con el uso actual
 }
 
 interface ChartData {
@@ -281,7 +282,7 @@ export default function TradeMarkersPage() {
                               TP: ${trade.take_profit.toFixed(2)}
                             </div>
                             <div className="text-gray-500 text-xs mt-1">
-                              {new Date(trade.time).toLocaleString()}
+                              {trade.time ? new Date(trade.time).toLocaleString() : 'N/A'}
                             </div>
                           </div>
                         </div>
