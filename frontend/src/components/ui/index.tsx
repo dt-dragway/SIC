@@ -1,3 +1,5 @@
+"use client";
+
 /*
 SOLUCIÓN RÁPIDA - Componentes UI Básicos
 Componentes UI esenciales para que el frontend compile
@@ -38,11 +40,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-});
+  });
 Button.displayName = 'Button';
 
 // Card Component
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => (
@@ -140,7 +142,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         {...props}
       />
     );
-});
+  });
 Badge.displayName = 'Badge';
 
 // Switch Component
@@ -176,7 +178,7 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
         />
       </label>
     );
-});
+  });
 Switch.displayName = 'Switch';
 
 // Slider Component
@@ -215,7 +217,7 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         {...props}
       />
     );
-});
+  });
 Slider.displayName = 'Slider';
 
 // Alert Component
@@ -240,7 +242,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         {...props}
       />
     );
-});
+  });
 Alert.displayName = 'Alert';
 
 const AlertDescription = React.forwardRef<
@@ -260,7 +262,7 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultValue?: string;
 }
 
-interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
@@ -273,12 +275,12 @@ interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
 const TabsContext = React.createContext<{
   value: string;
   onValueChange: (value: string) => void;
-}>({ value: '', onValueChange: () => {} });
+}>({ value: '', onValueChange: () => { } });
 
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   ({ defaultValue, className, children, ...props }, ref) => {
     const [value, setValue] = React.useState(defaultValue || '');
-    
+
     return (
       <TabsContext.Provider value={{ value, onValueChange: setValue }}>
         <div ref={ref} className={cn("w-full", className)} {...props}>
@@ -286,7 +288,7 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
         </div>
       </TabsContext.Provider>
     );
-});
+  });
 Tabs.displayName = 'Tabs';
 
 const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
@@ -307,7 +309,7 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
   ({ value, className, ...props }, ref) => {
     const { value: contextValue, onValueChange } = React.useContext(TabsContext);
     const isActive = contextValue === value;
-    
+
     return (
       <button
         ref={ref}
@@ -322,16 +324,16 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         {...props}
       />
     );
-});
+  });
 TabsTrigger.displayName = 'TabsTrigger';
 
 const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
   ({ value, className, ...props }, ref) => {
     const { value: contextValue } = React.useContext(TabsContext);
     const isActive = contextValue === value;
-    
+
     if (!isActive) return null;
-    
+
     return (
       <div
         ref={ref}
@@ -342,7 +344,7 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
         {...props}
       />
     );
-});
+  });
 TabsContent.displayName = 'TabsContent';
 
 export {

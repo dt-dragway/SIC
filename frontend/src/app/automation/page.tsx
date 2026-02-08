@@ -111,7 +111,7 @@ export default function AutomationPage() {
                                 <select
                                     value={strategy}
                                     onChange={(e) => setStrategy(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm"
+                                    className="w-full px-3 py-2 rounded-lg bg-[#12121a] border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50"
                                 >
                                     <option value="SIMPLE_MA_CROSS">MA Cross</option>
                                     <option value="RSI_MEAN_REVERSION">RSI Mean Reversion</option>
@@ -126,7 +126,7 @@ export default function AutomationPage() {
                                             type="number"
                                             value={fastMA}
                                             onChange={(e) => setFastMA(e.target.value)}
-                                            className="w-full px-2 py-1 rounded bg-white/5 border border-white/10 text-white text-sm font-mono"
+                                            className="w-full px-2 py-1 rounded bg-[#12121a] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-blue-500/50"
                                         />
                                     </div>
                                     <div>
@@ -135,7 +135,7 @@ export default function AutomationPage() {
                                             type="number"
                                             value={slowMA}
                                             onChange={(e) => setSlowMA(e.target.value)}
-                                            className="w-full px-2 py-1 rounded bg-white/5 border border-white/10 text-white text-sm font-mono"
+                                            className="w-full px-2 py-1 rounded bg-[#12121a] border border-white/10 text-white text-sm font-mono focus:outline-none focus:border-blue-500/50"
                                         />
                                     </div>
                                 </div>

@@ -12,6 +12,11 @@
       "total": 1,
       "wins": 1,
       "losses": 0
+    },
+    "bullish_engulfing": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
     }
   },
   "strategy_performance": {},
@@ -25,6 +30,21 @@
       "strategy_weights": {
         "rsi": 1.0,
         "macd": 1.0,
+        "bollinger": 1.0,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-02-08T03:27:34.122957",
+      "trade_id": "test_123",
+      "pnl": 1000,
+      "win_rate": 100.0,
+      "strategy_weights": {
+        "rsi": 1.1,
+        "macd": 1.1,
         "bollinger": 1.0,
         "trend": 1.0,
         "volume": 1.0,

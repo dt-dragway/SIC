@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'sonner'
+import { AuthProvider } from '../context/AuthContext'
 import { WalletProvider } from '../context/WalletContext'
 import { AIProvider } from '../context/AIContext'
 
@@ -23,28 +24,30 @@ export default function RootLayout({
     return (
         <html lang="es">
             <body className={`${inter.variable} ${jetbrains.variable} antialiased`} suppressHydrationWarning>
-                <AIProvider>
-                    <WalletProvider>
-                        {children}
-                        <GlobalBrainModal />
-                        <Toaster
-                            richColors
-                            position="top-right"
-                            theme="dark"
-                            closeButton
-                            toastOptions={{
-                                style: {
-                                    background: 'rgba(11, 14, 20, 0.85)',
-                                    backdropFilter: 'blur(12px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                                    color: '#e2e8f0',
-                                    borderRadius: '12px'
-                                },
-                                className: 'font-sans'
-                            }}
-                        />
-                    </WalletProvider>
-                </AIProvider>
+                <AuthProvider>
+                    <AIProvider>
+                        <WalletProvider>
+                            {children}
+                            <GlobalBrainModal />
+                            <Toaster
+                                richColors
+                                position="top-right"
+                                theme="dark"
+                                closeButton
+                                toastOptions={{
+                                    style: {
+                                        background: 'rgba(11, 14, 20, 0.85)',
+                                        backdropFilter: 'blur(12px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                                        color: '#e2e8f0',
+                                        borderRadius: '12px'
+                                    },
+                                    className: 'font-sans'
+                                }}
+                            />
+                        </WalletProvider>
+                    </AIProvider>
+                </AuthProvider>
             </body>
         </html>
     )
