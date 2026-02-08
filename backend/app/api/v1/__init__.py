@@ -27,6 +27,7 @@ from app.api.v1.sentiment import router as sentiment_router  # NUEVO
 from app.api.v1.advanced_execution import router as advanced_execution_router  # NUEVO
 from app.api.v1.liquidity import router as liquidity_router  # NUEVO
 from app.api.v1.journal import router as journal_router  # NUEVO
+from app.api.v1.automated_trading import router as automated_trading_router  # NUEVO
 
 router = APIRouter()
 
@@ -52,5 +53,6 @@ router.include_router(sentiment_router, prefix="/sentiment", tags=["📰 AI Sent
 router.include_router(advanced_execution_router, prefix="/execution", tags=["⚡ Smart Execution (TWAP/VWAP)"])  # NUEVO
 router.include_router(liquidity_router, prefix="/liquidity", tags=["🗺️ Liquidity & Heatmap"])  # NUEVO
 router.include_router(journal_router, prefix="/journal", tags=["📓 Professional Trading Journal"])  # NUEVO
+router.include_router(automated_trading_router, prefix="/automated-trading", tags=["🤖 Trading Automatizado con IA"])  # NUEVO
 
 

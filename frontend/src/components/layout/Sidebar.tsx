@@ -43,6 +43,7 @@ export default function Sidebar() {
         { href: '/sentiment', label: 'Sentiment Hub', icon: Newspaper },
         { href: '/journal', label: 'Trading Journal', icon: BookOpen },
         { href: '/automation', label: 'Automation', icon: Bot },
+        { href: '/automated-trading', label: 'Trading IA Auto', icon: Brain },
         { href: '/risk', label: 'Riesgo & Macro', icon: Scale },
         { href: '/agente-ia', label: 'Agente IA', icon: Brain },
         { href: '/p2p', label: 'P2P VES', icon: ArrowRightLeft },

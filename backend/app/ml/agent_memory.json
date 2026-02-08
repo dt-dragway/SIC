@@ -1,14 +1,19 @@
 {
   "created_at": "2026-02-01T16:00:00.000000",
   "version": "1.0",
-  "total_trades": 1,
-  "winning_trades": 1,
+  "total_trades": 2,
+  "winning_trades": 2,
   "losing_trades": 0,
-  "total_pnl": 10.0,
-  "best_trade": 10.0,
+  "total_pnl": 1010.0,
+  "best_trade": 1000,
   "worst_trade": 10.0,
   "patterns_learned": {
     "BULLISH_ENGULFING": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "bullish_engulfing": {
       "total": 1,
       "wins": 1,
       "losses": 0
@@ -31,11 +36,26 @@
         "support_resistance": 1.0,
         "top_trader_signals": 1.5
       }
+    },
+    {
+      "timestamp": "2026-02-08T03:27:34.122957",
+      "trade_id": "test_123",
+      "pnl": 1000,
+      "win_rate": 100.0,
+      "strategy_weights": {
+        "rsi": 1.1,
+        "macd": 1.1,
+        "bollinger": 1.0,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
     }
   ],
   "current_strategy_weights": {
-    "rsi": 1.0,
-    "macd": 1.0,
+    "rsi": 1.1,
+    "macd": 1.1,
     "bollinger": 1.0,
     "trend": 1.0,
     "volume": 1.0,
