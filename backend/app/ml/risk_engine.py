@@ -106,13 +106,15 @@ class DynamicKellyEngine:
         # Anti-Martingale: reducir tras pérdidas consecutivas
         anti_martingale_applied = False
         if consecutive_losses >= 3:
-            adjusted_kelly *= 0.25  # 75% reducción tras 3+ pérdidas
+            adjusted_kelly *= 0.25  # 75% reducción absoluta del capital permitido
+            max_risk_pct *= 0.25    # También reducir el techo máximo!
             anti_martingale_applied = True
         elif consecutive_losses >= 2:
-            adjusted_kelly *= 0.50  # 50% reducción tras 2 pérdidas
+            adjusted_kelly *= 0.50  # 50% reducción absoluta
+            max_risk_pct *= 0.50
             anti_martingale_applied = True
         
-        # Clamp: NUNCA más del max_risk_pct
+        # Clamp: NUNCA más del max_risk_pct dinámico ajustado
         final_fraction = max(0.001, min(adjusted_kelly, max_risk_pct))
         position_size = capital * final_fraction
         

@@ -358,33 +358,9 @@ class TopTraderAnalyzer:
     """
     
     def __init__(self):
-        # Datos simulados de top traders (en producción: API de Binance Leaderboard)
-        self.top_traders = [
-            {
-                "nickname": "CryptoMaster_01",
-                "roi_30d": 45.2,
-                "win_rate": 78.5,
-                "avg_trade_duration": "4h",
-                "favorite_pairs": ["BTCUSDT", "ETHUSDT"],
-                "current_position": None
-            },
-            {
-                "nickname": "WhaleHunter",
-                "roi_30d": 38.7,
-                "win_rate": 72.3,
-                "avg_trade_duration": "12h",
-                "favorite_pairs": ["BTCUSDT", "SOLUSDT", "BNBUSDT"],
-                "current_position": None
-            },
-            {
-                "nickname": "DeFiKing",
-                "roi_30d": 52.1,
-                "win_rate": 65.0,
-                "avg_trade_duration": "2h",
-                "favorite_pairs": ["ETHUSDT", "LINKUSDT"],
-                "current_position": None
-            }
-        ]
+        # Top traders se obtienen dinámicamente via Binance Futures API
+        # en get_consensus(). No se almacenan datos hardcodeados.
+        self.top_traders = []  # Populated dynamically from Binance Leaderboard
     
     def get_consensus(self, symbol: str) -> Optional[Dict]:
         """
@@ -497,6 +473,16 @@ class LearningEngine:
             "pnl": pnl,
             "win_rate": self.memory.get_win_rate(),
             "strategy_weights": dict(self.memory.data["current_strategy_weights"])
+        })
+        
+        # Registrar en historial de trades (RLMF usa esto)
+        if "trade_results" not in self.memory.data:
+            self.memory.data["trade_results"] = []
+        self.memory.data["trade_results"].append({
+            "trade_id": trade_id,
+            "pnl": pnl,
+            "side": side,
+            "timestamp": datetime.utcnow().isoformat()
         })
         
         # Mantener solo últimos 1000 registros
@@ -629,7 +615,7 @@ class TradingAgentAI:
         4. Aplica pesos aprendidos
         5. Genera señal con confianza calibrada
         """
-        if len(candles) < 50:
+        if len(candles) < 20:
             return None
         
         closes = [c["close"] for c in candles]
@@ -737,7 +723,7 @@ class TradingAgentAI:
         reasoning = [s[2] for s in signals]
         
         # Determinar dirección
-        min_threshold = 4.0  # Mínimo score para generar señal
+        min_threshold = 2.0  # Mínimo score para generar señal activado
         
         if long_score > short_score and long_score >= min_threshold:
             direction = "LONG"
@@ -746,6 +732,8 @@ class TradingAgentAI:
             direction = "SHORT"
             score = short_score
         else:
+            # En modo testing/baja convicción, forzamos un log para depurar
+            logger.debug(f"Hold Forzado: LS={long_score} SS={short_score} Min={min_threshold}")
             return None  # HOLD - no hay señal clara
         
         # === 5. Calcular Niveles (con Regime-Aware Multipliers) ===
@@ -999,13 +987,14 @@ class TradingAgentAI:
         
         # RLMF metrics
         trade_results = self.memory.data.get("trade_results", [])
+        stats["consecutive_losses"] = self.anti_martingale.get_consecutive_losses(trade_results) if trade_results else 0
+        
         if trade_results:
             returns = [t.get("pnl", 0) for t in trade_results[-500:]]
             is_win_list = [t.get("pnl", 0) > 0 for t in trade_results[-500:]]
             
             stats["sharpe_ratio"] = self.performance_metrics.sharpe_ratio(returns)
             stats["z_score"] = self.performance_metrics.z_score_streaks(is_win_list)
-            stats["consecutive_losses"] = self.anti_martingale.get_consecutive_losses(trade_results)
             stats["signal_approval_rate"] = self.signal_auditor.get_approval_rate()
             stats["regime_stability"] = self.regime_detector.get_regime_stability()
         

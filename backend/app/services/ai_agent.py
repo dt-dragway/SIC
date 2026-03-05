@@ -20,7 +20,7 @@ class InstitutionalAgent:
     """
     
     def __init__(self):
-        self.base_url = "http://localhost:8000/api/v1"
+        self.base_url = "http://localhost:8001/api/v1"
         self.available_tools = {
             "microstructure": {
                 "order_book": "/trading/depth/{symbol}",

@@ -62,7 +62,7 @@ echo "   (Presiona Ctrl+C para detener)"
 cd backend
 # Asegurar que el venv se usa
 if [ -f "venv/bin/uvicorn" ]; then
-    ./venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    ./venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 else
     echo "❌ Error: No se encuentra uvicorn en backend/venv/bin/"
     echo "Intenta instalar dependencias primero."

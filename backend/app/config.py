@@ -83,6 +83,7 @@ class Settings(BaseSettings):
     deepseek_api_key: str = ""  # https://platform.deepseek.com
     openai_api_key: str = ""    # https://platform.openai.com
     ollama_model: str = "llama3"  # Modelo local (gratis)
+    centibot_url: str = "http://localhost:7500/api/send"
     
     # === Admin Account (OBLIGATORIO desde .env) ===
     admin_email: str = Field(..., min_length=5)  # Obligatorio desde .env

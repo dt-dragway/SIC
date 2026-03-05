@@ -211,12 +211,40 @@ class AutoExecutionService:
         
         for symbol in symbols:
             try:
-                # Generar señal usando el sistema de señales profesional
+                # 1. Obtener pre-señal base del generador técnico
                 from app.ml.signal_generator import get_signal_generator
                 generator = get_signal_generator()
-                signal = generator.analyze(symbol)
+                base_signal = generator.analyze(symbol)
                 
-                if not signal:
+                if not base_signal:
+                    continue
+                    
+                # 2. Solicitar 'High-Confidence Institutional Analysis' al SmartPool
+                from app.ml.llm_connector import get_llm_manager
+                llm = get_llm_manager()
+                
+                indicators = base_signal.get('timeframes', {}).get('1h', {}).get('indicators', {})
+                patterns = [r for r in base_signal.get('reasoning', []) if '📊' in r]
+                
+                smartpool_analysis = await llm.analyze_market(
+                    symbol=symbol,
+                    current_price=base_signal.get('current_price', 0),
+                    indicators=indicators,
+                    patterns=patterns,
+                    recent_signals=[] 
+                )
+                
+                signal = base_signal.copy()
+                if smartpool_analysis:
+                    logger.info(f"🧠 SmartPool validó {symbol}: {smartpool_analysis.get('signal')} con {smartpool_analysis.get('confidence')}%")
+                    signal['action'] = smartpool_analysis.get('signal', base_signal.get('type'))
+                    signal['confidence'] = smartpool_analysis.get('confidence', base_signal.get('confidence', 0))
+                    signal['reasoning'].insert(0, f"🤖 SmartPool: {smartpool_analysis.get('reasoning')}")
+                else:
+                    signal['action'] = base_signal.get('type')
+                
+                # Descartar si el veredicto final es HOLD
+                if signal.get('action') == "HOLD":
                     continue
                     
                 # Verificar si ya está en cola

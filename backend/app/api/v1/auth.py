@@ -182,8 +182,9 @@ async def login(
     """
     Login con verificación en BD y soporte 2FA.
     """
-    # Buscar usuario
-    user = db.query(User).filter(User.email == form_data.username).first()
+    # Buscar usuario (case-insensitive)
+    from sqlalchemy import func
+    user = db.query(User).filter(func.lower(User.email) == func.lower(form_data.username)).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

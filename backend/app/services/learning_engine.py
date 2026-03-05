@@ -148,11 +148,31 @@ class LearningEngine:
         
         self.db.commit()
         
-        # Actualizar stats de la IA
         self._update_ai_stats(was_correct, prediction.predicted_confidence)
         
         result = "✅" if was_correct else "❌"
         logger.info(f"{result} Resultado: {predicted_dir} → {actual_direction} (PnL: {actual_pnl:.1f}%)")
+        
+        # Enviar feedback a SmartPool (CENTIBOT) en background
+        try:
+            import httpx
+            from app.config import settings
+            import threading
+            
+            url = getattr(settings, 'centibot_url', "http://localhost:7500/api/send")
+            # Mensaje para CENTIBOT
+            msg = f"[SAVE_MEMORY: El trade de {predicted_dir} resultó en {'+' if actual_pnl > 0 else ''}{actual_pnl:.2f}% PnL. Fue {'correcto' if was_correct else 'incorrecto'}. Evalúa el por qué en el próximo análisis institucional.]"
+            
+            def _send():
+                try:
+                    httpx.post(url, json={"text": msg}, timeout=10.0)
+                    logger.info("🧠 Feedback de aprendizaje enviado al SmartPool.")
+                except Exception as e:
+                    logger.warning(f"SmartPool inaccesible para feedback: {e}")
+                    
+            threading.Thread(target=_send, daemon=True).start()
+        except Exception as e:
+            logger.error(f"Error creando thread de feedback: {e}")
     
     def _evaluate_prediction(self, predicted: str, actual: str, pnl: float) -> bool:
         """Evaluar si la predicción fue correcta"""

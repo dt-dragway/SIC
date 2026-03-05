@@ -35,6 +35,39 @@ class LLMProvider(ABC):
         pass
 
 
+
+# === CENTIBOT SmartPool Provider ===
+
+class SmartPoolProvider(LLMProvider):
+    """
+    Conector para CENTIBOT SmartPool (Alto Nivel / Multimodelo)
+    """
+    
+    def __init__(self):
+        self.url = getattr(settings, 'centibot_url', "http://localhost:7500/api/send")
+        
+    def is_available(self) -> bool:
+        return True
+            
+    async def analyze(self, prompt: str) -> Optional[str]:
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    self.url,
+                    json={
+                        "text": f"Eres el SmartPool de análisis institucional. Analiza estos datos y da una señal clara:\n\n{prompt}\n\nResponde estrictamente con: SIGNAL: BUY/SELL/HOLD, CONFIDENCE: %, REASON: ..."
+                    }
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("status") == "ok":
+                        return data.get("response", "")
+                return None
+        except Exception as e:
+            logger.error(f"SmartPool connection error: {e}")
+            return None
+
+
 # === DeepSeek Provider ===
 
 class DeepSeekProvider(LLMProvider):
@@ -235,6 +268,7 @@ class LLMManager:
     
     def __init__(self):
         self.providers: List[LLMProvider] = [
+            SmartPoolProvider(),
             DeepSeekProvider(),
             OpenAIProvider(),
             OllamaProvider()
