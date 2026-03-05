@@ -110,6 +110,7 @@ export default function Home() {
             if (signalsRes?.ok) {
                 const data = await signalsRes.json();
                 const topSignals = data.signals ? data.signals.slice(0, 5) : [];
+
                 setSignals(topSignals);
                 localStorage.setItem(`sic_dashboard_signals_${mode}`, JSON.stringify(topSignals));
             }
@@ -297,7 +298,7 @@ export default function Home() {
                                 </h2>
 
                                 {/* Symbol Selector */}
-                                <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                                <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-white/5 overflow-x-auto whitespace-nowrap scrollbar-hide max-w-[200px] sm:max-w-md">
                                     {AVAILABLE_SYMBOLS.map(sym => (
                                         <button
                                             key={sym.symbol}
@@ -325,7 +326,10 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="bg-black/40 rounded-lg min-h-[400px] h-[400px] border border-white/5 overflow-hidden">
-                            <CandlestickChart symbol={selectedSymbol} />
+                            <CandlestickChart
+                                symbol={selectedSymbol}
+                                activeSignal={signals.find(s => s.symbol === selectedSymbol)}
+                            />
                         </div>
                     </div>
 

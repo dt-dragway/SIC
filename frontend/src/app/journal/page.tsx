@@ -48,6 +48,10 @@ export default function JournalPage() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
 
+    // AI Report State
+    const [aiReport, setAiReport] = useState<any>(null);
+    const [analyzing, setAnalyzing] = useState(false);
+
     // Form state
     const [symbol, setSymbol] = useState('BTCUSDT');
     const [side, setSide] = useState('BUY');
@@ -77,6 +81,26 @@ export default function JournalPage() {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const generateAIReport = async () => {
+        setAnalyzing(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/v1/journal/analyze', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setAiReport(data);
+            }
+        } catch (error) {
+            console.error("Error generating report:", error);
+        } finally {
+            setAnalyzing(false);
         }
     };
 
@@ -234,23 +258,76 @@ export default function JournalPage() {
 
                     {/* Stats Radar/Info */}
                     <div className="lg:col-span-1 space-y-6">
+
+                        {/* AI Coach Card */}
                         <div className="glass-card p-6 rounded-3xl border border-white/5 bg-black/20">
-                            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                                <Brain size={16} className="text-violet-400" />
-                                Brain Journal Insights
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-2xl bg-violet-500/5 border border-violet-500/10">
-                                    <p className="text-xs text-slate-400 mb-2">Tu mejor desempeño:</p>
-                                    <p className="text-sm font-bold text-white">Price Action en BTCUSDT</p>
-                                    <p className="text-[10px] text-emerald-400 mt-1">75% Win Rate</p>
-                                </div>
-                                <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10">
-                                    <p className="text-xs text-slate-400 mb-2">Punto de fricción:</p>
-                                    <p className="text-sm font-bold text-white">Mood: ANXIOUS</p>
-                                    <p className="text-[10px] text-rose-400 mt-1">-12% Performance hit</p>
-                                </div>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                    <Brain size={16} className="text-violet-400" />
+                                    AI Coach Insights
+                                </h3>
+                                <button
+                                    onClick={generateAIReport}
+                                    disabled={analyzing || entries.length < 3}
+                                    className={`text-[10px] px-3 py-1.5 rounded-lg border border-violet-500/20 
+                                    ${analyzing ? 'bg-violet-500/10 text-violet-400 animate-pulse' : 'bg-violet-600 hover:bg-violet-500 text-white transition-colors'}
+                                    disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {analyzing ? 'Analizando...' : 'Generar Reporte'}
+                                </button>
                             </div>
+
+                            {aiReport ? (
+                                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                                    {/* Tip */}
+                                    <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                                        <p className="text-[10px] text-violet-300 uppercase font-bold mb-1">💡 Consejo Semanal</p>
+                                        <p className="text-xs text-white leading-relaxed italic">"{aiReport.actionable_tip}"</p>
+                                    </div>
+
+                                    {/* Psychology */}
+                                    <div>
+                                        <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">🧠 Estado Mental</p>
+                                        <p className="text-xs text-slate-300">{aiReport.psychology}</p>
+                                    </div>
+
+                                    {/* Strengths */}
+                                    <div>
+                                        <p className="text-[10px] text-emerald-500/70 uppercase font-bold mb-1">✅ Fortalezas</p>
+                                        <ul className="space-y-1">
+                                            {aiReport.strengths.map((s: string, i: number) => (
+                                                <li key={i} className="text-xs text-slate-400 flex items-start gap-1.5">
+                                                    <span className="mt-0.5 w-1 h-1 rounded-full bg-emerald-500 shrink-0"></span>
+                                                    {s}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Weaknesses */}
+                                    <div>
+                                        <p className="text-[10px] text-rose-500/70 uppercase font-bold mb-1">⚠️ Fugas Detectadas</p>
+                                        <ul className="space-y-1">
+                                            {aiReport.weaknesses.map((w: string, i: number) => (
+                                                <li key={i} className="text-xs text-slate-400 flex items-start gap-1.5">
+                                                    <span className="mt-0.5 w-1 h-1 rounded-full bg-rose-500 shrink-0"></span>
+                                                    {w}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <p className="text-xs text-slate-500 mb-2">
+                                        {entries.length < 3
+                                            ? "Registra al menos 3 trades para activar la IA."
+                                            : "Solicita un análisis profundo de tu operativa."}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="glass-card p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-indigo-500/10 to-transparent">

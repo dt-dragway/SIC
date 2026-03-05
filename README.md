@@ -1,96 +1,104 @@
 # 🦅 SIC Ultra - Institutional Trading Terminal
 
-**La Estación de Trading Definitiva impulsada por IA, Microestructura y Análisis Institucional**
-
-![Status](https://img.shields.io/badge/Status-Ultra--Elite-emerald)
-![AI](https://img.shields.io/badge/AI-Neuro--Narrative--v2-blueviolet)
-![Backend](https://img.shields.io/badge/Backend-FastAPI%201.2-green)
-![Frontend](https://img.shields.io/badge/Frontend-Next.js%2014%20Premium-black)
-
-SIC Ultra no es solo un asistente de trading; es una **terminal de grado institucional** diseñada para traders profesionales. Combina modelos de Deep Learning, análisis de microestructura de mercado (Order Flow), rastreo on-chain de ballenas y ejecución algorítmica de bajo impacto.
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Ultra--Elite-emerald?style=for-the-badge&logo=opsgenie" alt="Status" />
+  <img src="https://img.shields.io/badge/AI-Neuro--Narrative--v2-blueviolet?style=for-the-badge&logo=openai" alt="AI" />
+  <img src="https://img.shields.io/badge/Backend-FastAPI%201.2-green?style=for-the-badge&logo=fastapi" alt="Backend" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js%2014-black?style=for-the-badge&logo=nextdotjs" alt="Frontend" />
+  <img src="https://img.shields.io/badge/Database-PostgreSQL%2016-blue?style=for-the-badge&logo=postgresql" alt="Database" />
+</p>
 
 ---
 
-## 🚀 Capacidades Profesionales (Elite Features)
+## 🌎 Language / Idioma
+[🇺🇸 English](#english-version) | [🇪🇸 Español](#version-espanol)
 
-### 🧠 Centro de Inteligencia Institucional (Agent IA)
-- **Análisis Omni-Consciente**: El Agente IA ahora razona usando datos de sentimiento, heatmap, microestructura y riesgo simultáneamente.
-*   **Aprendizaje RAG Dinámico**: El agente procesa tus libros PDF y documentos técnicos para adaptar su tesis de inversión a tu estilo personal.
+---
 
-### ⚡ Smart Execution Engine (Sigilo Institucional)
-*   **Algoritmos TWAP & VWAP**: Ejecuta órdenes grandes dividiéndolas en micro-operaciones (Smart Slicing) para evitar el slippage y ocultar tu intención al mercado.
-*   **Minimización de Impacto**: No actives los detectores de ballenas de otros traders; opera con la discreción de un fondo de inversión.
+<a name="english-version"></a>
+## 🇺🇸 English Version
+
+### 🚀 Overview
+**SIC Ultra** is not just a trading assistant; it is a **professional-grade institutional terminal**. It combines Deep Learning models, Market Microstructure analysis (Order Flow), On-Chain Whale Tracking, and low-impact Algorithmic Execution.
+
+### 🧠 Institutional Intelligence (AI Agent)
+- **Omni-Conscious Analysis**: The AI Agent reasons using sentiment data, heatmap, microstructure, and risk simultaneously.
+- **Dynamic RAG Learning**: The agent processes PDF books and technical documents to adapt its investment thesis to your personal style.
+
+### ⚡ Smart Execution Engine
+- **TWAP & VWAP Algorithms**: Executes large orders by splitting them into micro-trades (Smart Slicing) to avoid slippage and hide intent.
+- **Impact Minimization**: Operates with the discretion of a hedge fund.
 
 ### 🗺️ Market Heatmap & Sentiment Hub
-*   **Heatmap Dinámico**: Visualiza la fuerza relativa de los sectores (Layer 1, DeFi, Memes, AI) y detecta dónde está rotando el capital en tiempo real.
-*   **Sentiment Hub**: Escaneo masivo de noticias y redes sociales. El sistema detecta narrativas de FUD o Euforia antes de que lleguen al gráfico.
-*   **Fear & Greed Index**: Medidor de sentimiento consolidado para filtrar señales técnicas peligrosas.
+- **Dynamic Heatmap**: Visualize sector relative strength (Layer 1, DeFi, Memes, AI).
+- **Sentiment Hub**: Mass scanning of news and social networks to detect narratives before they hit the chart.
 
 ### 📓 Trading Journal & Performance Analytics
-*   **Auditoría Profesional**: Registro automático de trades con seguimiento de psicología (Mood Tracking) y estrategia.
-*   **KPIs de Fondos de Inversión**: Cálculo automático de **Profit Factor**, **Expectancy**, **Z-Score** y **Sharpe Ratio**.
-*   **Insights de IA**: La terminal te dice estadísticamente en qué activos y con qué estado de ánimo eres más rentable.
+- **Institutional KPIs**: Automatic calculation of **Profit Factor**, **Expectancy**, **Z-Score**, and **Sharpe Ratio**.
+- **AI Insights**: Statistical feedback on which assets and moods are most profitable for you.
 
-### 📡 Terminal Pro (Order Flow & On-Chain)
-*   **Microestructura**: Acceso a snapshots del libro de órdenes (Best Bid/Ask) y spreads históricos.
-*   **Whale Tracking**: Detección de flujos masivos on-chain hacia o desde exchanges para anticipar capitulaciones o rupturas.
-*   **Funding Rate Arbitrage**: Identifica brechas entre Spot y Futuros para estrategias Delta Neutral sin riesgo.
-
----
-
-## 🛠️ Stack de Ingeniería Avanzada
-
-| Componente | Tecnología |
-| :--- | :--- |
-| **Backend Core** | FastAPI (Python 3.12) con Arquitectura de Servicios |
-| **IA & Neuronal** | TensorFlow (LSTM), XGBoost, Ollama (Llama 3.2), LangChain |
-| **Base de Datos** | PostgreSQL 16 (Timescale Ready) + Redis Cache |
-| **Frontend UI** | Next.js 14 + Tailwind CSS (Diseño Glassmorphism Premium) |
-| **Análisis On-Chain** | Conectores directos a Binance API y Simulador de Blockchain |
-| **Gráficos** | TradingView Lightweight Charts para visualización institucional |
+### 🛠️ Advanced Tech Stack
+- **Backend Core**: FastAPI (Python 3.12).
+- **AI & Neural**: TensorFlow (LSTM), XGBoost, Ollama (Llama 3.2), LangChain.
+- **Database**: PostgreSQL 16 + Redis Cache.
+- **Frontend UI**: Next.js 14 + Tailwind CSS (Glassmorphism).
 
 ---
 
-## 📦 Instalación & Despliegue
+<a name="version-espanol"></a>
+## 🇪🇸 Versión en Español
 
-### Requisitos de un Entorno Profesional
-- Docker & Docker Compose (Recomendado)
-- Python 3.12 + Node.js 20+
-- API Keys de Binance (Spot & Futures)
-- Instancia de Ollama corriendo localmente o en servidor remoto
+### 🚀 Descripción General
+**SIC Ultra** es una **terminal de grado institucional** diseñada para traders profesionales. Combina modelos de Deep Learning, análisis de microestructura de mercado (Order Flow), rastreo on-chain de ballenas y ejecución algorítmica de bajo impacto.
 
-### Lanzamiento Rápido
+### 🧠 Centro de Inteligencia Institucional (Agente IA)
+- **Análisis Omni-Consciente**: El Agente IA razona usando datos de sentimiento, heatmap, microestructura y riesgo simultáneamente.
+- **Aprendizaje RAG Dinámico**: El agente procesa libros PDF y documentos técnicos para adaptar su tesis de inversión.
+
+### ⚡ Smart Execution Engine
+- **Algoritmos TWAP & VWAP**: Ejecuta órdenes grandes dividiéndolas en micro-operaciones (Smart Slicing) para evitar el slippage.
+- **Minimización de Impacto**: Opera con la discreción de un fondo de inversión.
+
+### 🗺️ Market Heatmap & Sentiment Hub
+- **Heatmap Dinámico**: Visualiza la fuerza relativa de los sectores (Layer 1, DeFi, Memes, AI).
+- **Sentiment Hub**: Escaneo masivo de noticias y redes sociales para detectar narrativas a tiempo.
+
+### 📓 Trading Journal & Analytics
+- **KPIs Profesionales**: Cálculo automático de **Profit Factor**, **Expectancy**, **Z-Score** y **Sharpe Ratio**.
+- **Insights de IA**: Te dice estadísticamente en qué activos y con qué estado de ánimo eres más rentable.
+
+---
+
+## 📦 Installation / Instalación
+
+### English
 ```bash
-# 1. Clonar el ecosistema
-git clone https://github.com/tu-usuario/sic-ultra.git && cd sic-ultra
-
-# 2. Configurar el Corazón (.env)
+git clone https://github.com/user/sic-ultra.git && cd sic-ultra
 cp .env.example .env
-# IMPORTANTE: Configura tus credenciales y llaves de IA
-
-# 3. Desplegar Infraestructura
 docker-compose up -d
+cd frontend && npm install && npm run dev
+```
 
-# 4. Iniciar Interfaz
+### Español
+```bash
+git clone https://github.com/usuario/sic-ultra.git && cd sic-ultra
+cp .env.example .env
+docker-compose up -d
 cd frontend && npm install && npm run dev
 ```
 
 ---
 
-## 🛡️ Gestión de Riesgo (Sistema de 7 Capas)
-1.  **Límite de Capital**: Nunca arriesga más del 2% del capital total por trade.
-2.  **Calculadora de Kelly**: Ajuste dinámico del tamaño de posición basado en probabilidad estadística.
-3.  **Hedge Automatizado**: Soporte para cálculos Delta Neutral y coberturas en futuros.
-4.  **Stop-Loss Dinámico**: Gestión inteligente de SL basándose en ATR y volatilidad.
-5.  **Validación Narrativa**: Filtro de "Miedo Extremo" para evitar entradas en caídas libres.
-6.  **Encriptación Bancaria**: AES-256 para almacenamiento de credenciales y JWT para sesiones.
-7.  **Firma de Dispositivo**: 2FA obligatorio y validación de IPs confiables.
+## 🛡️ Risk Management / Gestión de Riesgo
+1. **Capital Limit**: Max 2% risk per trade.
+2. **Kelly Criterion**: Dynamic position sizing based on probability.
+3. **Automated Hedge**: Support for Delta Neutral strategies.
+4. **Dynamic Stop-Loss**: ATR-based management.
 
 ---
 
-## 🤝 Contribución
+## 🤝 License / Licencia
+SIC Ultra is a proprietary high-security project.  
+© 2026 SIC Ultra. All rights reserved.
 
-SIC Ultra es un proyecto propietario de alta seguridad. 
-© 2026 SIC Ultra. Todos los derechos reservados.
-
-> *"La mejor forma de predecir el futuro financiero es programándolo."* 🦅🔥
+> *"The best way to predict the financial future is to program it."* 🦅🔥

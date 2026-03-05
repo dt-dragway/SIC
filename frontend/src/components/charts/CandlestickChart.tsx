@@ -1,10 +1,19 @@
 'use client'
 
-import { createChart, ColorType, IChartApi } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
 import React, { useEffect, useRef, useState } from 'react';
+
+interface Signal {
+    symbol: string;
+    type: string;
+    entry_price: number;
+    stop_loss: number;
+    take_profit: number;
+}
 
 interface ChartProps {
     symbol: string;
+    activeSignal?: Signal | null;
     colors?: {
         backgroundColor?: string;
         lineColor?: string;
@@ -16,6 +25,7 @@ interface ChartProps {
 
 export const CandlestickChart = ({
     symbol,
+    activeSignal,
     colors: {
         backgroundColor = 'transparent',
         lineColor = '#2962FF',
@@ -24,9 +34,13 @@ export const CandlestickChart = ({
 }: ChartProps) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
+    const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+    const priceLinesRef = useRef<any[]>([]); // Store references to price lines
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Initial Chart Setup & Data Fetching
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
@@ -66,18 +80,17 @@ export const CandlestickChart = ({
             wickUpColor: '#10B981',
             wickDownColor: '#F43F5E',
         });
+        seriesRef.current = candlestickSeries;
 
-        // Fetch Real Data from Binance
+        // Fetch Data
         const fetchData = async () => {
             try {
                 setLoading(true);
-                setError(null); // Clear previous errors
-                // Binance Public API
+                setError(null);
                 const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=200`);
                 if (!response.ok) throw new Error('Error fetching data');
                 const data = await response.json();
 
-                // Transform data: [time, open, high, low, close, volume, ...]
                 const candles = data.map((d: any) => ({
                     time: d[0] / 1000,
                     open: parseFloat(d[1]),
@@ -103,8 +116,58 @@ export const CandlestickChart = ({
         return () => {
             window.removeEventListener('resize', handleResize);
             chart.remove();
+            seriesRef.current = null;
         };
     }, [symbol, backgroundColor, textColor]);
+
+    // Manage Signal Lines (Entry, TP, SL)
+    useEffect(() => {
+        if (!seriesRef.current) return;
+
+        // 1. Remove existing lines
+        priceLinesRef.current.forEach(line => {
+            seriesRef.current?.removePriceLine(line);
+        });
+        priceLinesRef.current = [];
+
+        // 2. Add new lines if signal exists and matches symbol
+        if (activeSignal && activeSignal.symbol === symbol) {
+
+            // Entry Price
+            const entryLine = seriesRef.current.createPriceLine({
+                price: activeSignal.entry_price,
+                color: '#3B82F6', // Blue
+                lineWidth: 2,
+                lineStyle: 0, // Solid
+                axisLabelVisible: true,
+                title: 'ENTRY',
+            });
+            priceLinesRef.current.push(entryLine);
+
+            // Take Profit
+            const tpLine = seriesRef.current.createPriceLine({
+                price: activeSignal.take_profit,
+                color: '#10B981', // Emerald
+                lineWidth: 2,
+                lineStyle: 2, // Dashed
+                axisLabelVisible: true,
+                title: 'TP',
+            });
+            priceLinesRef.current.push(tpLine);
+
+            // Stop Loss
+            const slLine = seriesRef.current.createPriceLine({
+                price: activeSignal.stop_loss,
+                color: '#F43F5E', // Rose
+                lineWidth: 2,
+                lineStyle: 2, // Dashed
+                axisLabelVisible: true,
+                title: 'SL',
+            });
+            priceLinesRef.current.push(slLine);
+        }
+
+    }, [activeSignal, symbol, loading]);
 
     return (
         <div className="relative w-full h-full min-h-[500px]">

@@ -118,11 +118,15 @@ class LSTMPricePredictor:
         
         logger.info("🧠 Modelo LSTM creado (nuevo)")
     
-    def prepare_data(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
+    def prepare_data(self, df: pd.DataFrame, fit_scaler: bool = False) -> Tuple[np.ndarray, np.ndarray]:
         """
         Preparar datos para entrenamiento/predicción.
         
         Input DataFrame debe tener: close, high, low, volume, rsi, macd, atr
+        
+        Args:
+            fit_scaler: True SOLO durante training. False durante predict.
+                       Esto evita data leakage al no re-entrenar el scaler.
         """
         # Features a usar
         feature_cols = ['close', 'high', 'low', 'volume', 'rsi', 'macd', 'atr']
@@ -133,8 +137,11 @@ class LSTMPricePredictor:
         
         data = df[available_cols].values
         
-        # Normalizar
-        data_scaled = self.scaler.fit_transform(data)
+        # Normalizar — CRITICAL: fit_transform SOLO en training
+        if fit_scaler:
+            data_scaled = self.scaler.fit_transform(data)
+        else:
+            data_scaled = self.scaler.transform(data)
         
         # Crear secuencias
         X, y = [], []
@@ -152,7 +159,7 @@ class LSTMPricePredictor:
             logger.error("TensorFlow no disponible")
             return None
         
-        X, y = self.prepare_data(df)
+        X, y = self.prepare_data(df, fit_scaler=True)  # FIT scaler solo en training
         
         # Split train/validation
         X_train, X_val, y_train, y_val = train_test_split(

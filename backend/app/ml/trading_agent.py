@@ -24,6 +24,14 @@ import random
 from app.config import settings
 from app.ml.candlestick_analyzer import CandlestickAnalyzer, CandlestickPattern
 
+# RLMF Modules (Signal Intelligence Evolution)
+from app.ml.regime_detector import get_regime_detector, MarketRegime
+from app.ml.signal_auditor import get_signal_auditor
+from app.ml.post_trade_analyzer import get_post_trade_analyzer
+from app.ml.risk_engine import (
+    get_kelly_engine, FeeCalculator, AntiMartingaleGuard, PerformanceMetrics
+)
+
 
 # === Memory Storage ===
 
@@ -588,10 +596,22 @@ class TradingAgentAI:
         # NUEVO: Analizador de patrones de velas
         self.candlestick_analyzer = CandlestickAnalyzer(min_confidence=65.0)
         
-        logger.info("🤖 Agente IA Trading iniciado")
+        # === RLMF Modules (Signal Intelligence Evolution) ===
+        self.regime_detector = get_regime_detector()
+        self.signal_auditor = get_signal_auditor()
+        self.post_trade_analyzer = get_post_trade_analyzer()
+        self.kelly_engine = get_kelly_engine()
+        self.fee_calculator = FeeCalculator()
+        self.anti_martingale = AntiMartingaleGuard()
+        self.performance_metrics = PerformanceMetrics()
+        
+        logger.info("🤖 Agente IA Trading iniciado (RLMF Evolution Active)")
         logger.info(f"📊 Trades históricos: {self.memory.data['total_trades']}")
         logger.info(f"🏆 Win Rate: {self.memory.get_win_rate():.1f}%")
         logger.info(f"🕯️ Candlestick Analyzer: Activo (confianza mínima: 65%)")
+        logger.info(f"📊 Regime Detector: Activo")
+        logger.info(f"🛡️ Signal Auditor: Activo")
+        logger.info(f"📈 Post-Trade Analyzer: Activo")
     
     def analyze(
         self, 
@@ -728,17 +748,29 @@ class TradingAgentAI:
         else:
             return None  # HOLD - no hay señal clara
         
-        # === 5. Calcular Niveles ===
+        # === 5. Calcular Niveles (con Regime-Aware Multipliers) ===
         atr = indicators.get("atr", current_price * 0.02)
         if isinstance(atr, list) and atr:
             atr = atr[-1]
         
+        # RLMF: Detectar régimen y ajustar multiplicadores
+        regime_report = self.regime_detector.detect(candles, indicators)
+        regime_params = regime_report.params
+        sl_multiplier = regime_params.get("sl_atr_multiplier", 1.5)
+        tp_multiplier = regime_params.get("tp_atr_multiplier", 3.0)
+        
         if direction == "LONG":
-            stop_loss = current_price - (atr * 1.5)
-            take_profit = current_price + (atr * 3)
+            stop_loss = current_price - (atr * sl_multiplier)
+            take_profit = current_price + (atr * tp_multiplier)
         else:
-            stop_loss = current_price + (atr * 1.5)
-            take_profit = current_price - (atr * 3)
+            stop_loss = current_price + (atr * sl_multiplier)
+            take_profit = current_price - (atr * tp_multiplier)
+        
+        # RLMF: Verificar viabilidad de fees
+        fee_result = self.fee_calculator.adjust_targets(current_price, stop_loss, take_profit)
+        if not fee_result.viable:
+            reasoning.append(f"⚠️ Fees: {fee_result.reasoning}")
+            # No retornar None — dejamos que el auditor lo evalúe
         
         risk = abs(current_price - stop_loss)
         reward = abs(take_profit - current_price)
@@ -822,11 +854,47 @@ class TradingAgentAI:
             risk_reward=risk_reward
         )
         
-        # === 9. Análisis Multi-Timeframe (Placeholder - se implementará después) ===
+        # === 9. RLMF: Signal Quality Audit (Pre-Flight Check) ===
+        signal_data = {
+            "direction": direction,
+            "confidence": round(confidence, 1),
+            "entry_price": current_price,
+            "stop_loss": round(stop_loss, 2),
+            "take_profit": round(take_profit, 2),
+            "patterns_detected": patterns_detected,
+            "indicators_used": indicators_used
+        }
+        
+        # Obtener historial de trades para pattern check
+        trade_history = self.memory.data.get("trade_results", [])
+        
+        audit_report = self.signal_auditor.preflight_check(
+            signal=signal_data,
+            candles=candles,
+            indicators=indicators,
+            trade_history=trade_history
+        )
+        
+        # Si la señal no pasa el audit, no la emitimos
+        if not audit_report.passed:
+            logger.warning(
+                f"🛡️ Señal RECHAZADA por auditor: {symbol} {direction} | "
+                f"Score={audit_report.score:.1f}/100 | "
+                f"Razones: {', '.join(audit_report.reasons_to_reject[:3])}"
+            )
+            return None
+        
+        # Agregar info del audit al reasoning
+        reasoning.append(f"🛡️ Signal Audit: APROBADA (Score={audit_report.score:.1f}/100)")
+        reasoning.append(f"📊 Régimen: {audit_report.regime}")
+        if audit_report.reasons_to_accept:
+            reasoning.extend(audit_report.reasons_to_accept[:2])
+        
+        # === 10. Análisis Multi-Timeframe ===
         timeframe_analysis = {
-            "1h": direction,  # Por ahora solo analizamos 1h
-            # "4h": "NEUTRAL",  # TODO: implementar análisis de múltiples timeframes
-            # "1d": "NEUTRAL"
+            "1h": direction,
+            "regime": regime_report.regime.value,
+            "regime_confidence": regime_report.confidence
         }
         
         return TradingSignal(
@@ -866,19 +934,57 @@ class TradingAgentAI:
         exit_price: float,
         pnl: float,
         signals_used: List[str],
-        patterns_detected: List[str]
+        patterns_detected: List[str],
+        signal_price: float = None,
+        price_history_during_trade: List[float] = None,
+        entry_time: datetime = None,
+        exit_time: datetime = None
     ):
         """
         Registrar resultado del trade para que el agente aprenda.
+        Ahora incluye Post-Trade Analysis (RLMF).
         """
+        # 1. Aprendizaje base (original)
         self.learning.record_trade_result(
             trade_id, symbol, side, entry_price, exit_price,
             pnl, signals_used, patterns_detected
         )
+        
+        # 2. RLMF: Post-Trade Analysis
+        try:
+            fill_price = signal_price or entry_price
+            prices_during = price_history_during_trade or [entry_price, exit_price]
+            
+            deviation_report = self.post_trade_analyzer.analyze(
+                trade_id=trade_id,
+                symbol=symbol,
+                direction=side,
+                signal_price=fill_price,
+                fill_price=entry_price,
+                exit_price=exit_price,
+                pnl=pnl,
+                price_history_during_trade=prices_during,
+                signals_used=signals_used,
+                patterns_detected=patterns_detected,
+                entry_time=entry_time,
+                exit_time=exit_time
+            )
+            
+            # Aplicar ajustes de peso al learning engine
+            self.post_trade_analyzer.apply_adjustments(self.learning)
+            
+            logger.info(
+                f"📈 Post-Trade [{trade_id}]: {deviation_report.entry_quality} entry | "
+                f"{deviation_report.exit_quality} exit | Lesson: {deviation_report.lesson_learned[:80]}"
+            )
+        except Exception as e:
+            logger.error(f"Error en Post-Trade Analysis: {e}")
     
     def get_performance_stats(self) -> Dict:
-        """Obtener estadísticas de rendimiento del agente"""
-        return {
+        """Obtener estadísticas de rendimiento del agente (con RLMF metrics)"""
+        
+        # Métricas base
+        stats = {
             "total_trades": self.memory.data["total_trades"],
             "winning_trades": self.memory.data["winning_trades"],
             "losing_trades": self.memory.data["losing_trades"],
@@ -890,6 +996,24 @@ class TradingAgentAI:
             "strategy_weights": self.memory.data["current_strategy_weights"],
             "evolution_entries": len(self.memory.data["evolution_history"])
         }
+        
+        # RLMF metrics
+        trade_results = self.memory.data.get("trade_results", [])
+        if trade_results:
+            returns = [t.get("pnl", 0) for t in trade_results[-500:]]
+            is_win_list = [t.get("pnl", 0) > 0 for t in trade_results[-500:]]
+            
+            stats["sharpe_ratio"] = self.performance_metrics.sharpe_ratio(returns)
+            stats["z_score"] = self.performance_metrics.z_score_streaks(is_win_list)
+            stats["consecutive_losses"] = self.anti_martingale.get_consecutive_losses(trade_results)
+            stats["signal_approval_rate"] = self.signal_auditor.get_approval_rate()
+            stats["regime_stability"] = self.regime_detector.get_regime_stability()
+        
+        # Post-trade learning log
+        stats["daily_learning"] = self.post_trade_analyzer.get_daily_learning_log()
+        stats["parametric_adjustments"] = self.post_trade_analyzer.get_parametric_adjustments()
+        
+        return stats
     
     def get_learned_patterns(self) -> Dict:
         """Obtener patrones aprendidos con su precisión"""

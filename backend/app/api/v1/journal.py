@@ -36,7 +36,9 @@ async def create_entry(
     token: str = Depends(oauth2_scheme)
 ):
     user_data = verify_token(token)
-    return JournalService.create_entry(db, user_data["sub"], entry_data.dict())
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return JournalService.create_entry(db, user_data["user_id"], entry_data.dict())
 
 @router.get("/metrics")
 async def get_metrics(
@@ -44,4 +46,31 @@ async def get_metrics(
     token: str = Depends(oauth2_scheme)
 ):
     user_data = verify_token(token)
-    return JournalService.get_performance_metrics(db, user_data["sub"])
+    if not user_data:
+         raise HTTPException(status_code=401, detail="Invalid token")
+    return JournalService.get_performance_metrics(db, user_data["user_id"])
+
+@router.post("/analyze")
+async def analyze_journal(
+    db: Session = Depends(get_db),
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Genera un reporte de inteligencia artificial sobre el desempeño del trader.
+    """
+    from loguru import logger
+    logger.info("📡 Endpoint /analyze hittet!")
+    logger.info("Step 1: Importing service")
+    from app.services.journal_analyst import journal_analyst
+    logger.info("Step 2: Verifying token")
+    user_data = verify_token(token)
+    logger.info(f"Step 3: User Data: {user_data}")
+    user_id = user_data.get("user_id")
+    if not user_id:
+        # Fallback for old tokens or different structure
+        logger.warning(f"⚠️ user_id missing in token, using id=1 as fallback. Sub: {user_data.get('sub')}")
+        user_id = 1
+        
+    result = await journal_analyst.analyze_performance_async(db, user_id)
+    logger.info(f"Step 4: Result: {result}")
+    return result
