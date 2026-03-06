@@ -5,7 +5,7 @@ import Header from './Header'; // Reuse existing header if possible, or create n
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-screen bg-[#0B0E14] flex">
+        <div className="min-h-screen bg-[#0B0E14] flex transform-gpu">
             {/* Sidebar (Fixed width) */}
             <div className="hidden lg:block w-64 flex-shrink-0">
                 <Sidebar />

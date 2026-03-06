@@ -14,9 +14,9 @@ import json
 
 from sqlalchemy.orm import Session, joinedload
 from app.infrastructure.database.session import get_db
-from app.infrastructure.database.models import VirtualWallet as VirtualWalletModel, VirtualTrade as VirtualTradeModel
+from app.infrastructure.database.models import User, VirtualWallet as VirtualWalletModel, VirtualTrade as VirtualTradeModel
 
-from app.api.v1.auth import oauth2_scheme, verify_token
+from app.api.v1.auth import get_current_user, oauth2_scheme, verify_token
 from app.infrastructure.binance.client import get_binance_client
 from loguru import logger
 
@@ -183,18 +183,14 @@ def get_or_create_wallet(db: Session, user_id: int) -> VirtualWalletModel:
 
 @router.get("/wallet", response_model=VirtualWallet)
 async def get_virtual_wallet(
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Obtener balance de la wallet virtual (modo práctica).
     Retorna el balance actual y el historial del usuario.
     """
-    payload = verify_token(token)
-    if payload is None:
-        raise HTTPException(status_code=401, detail="Token inválido o expirado")
-    
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     wallet = get_or_create_wallet(db, user_id)
     
     # Parse balances
@@ -271,14 +267,13 @@ def require_valid_token(token: str) -> dict:
 
 @router.get("/stats", response_model=TradeStats)
 async def get_trade_stats(
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Obtener estadísticas de trading del modo práctica con ROI y métricas profesionales.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     trades = db.query(VirtualTradeModel).filter(VirtualTradeModel.wallet_id == wallet.id).all()
@@ -377,15 +372,14 @@ class DepositRequest(BaseModel):
 @router.post("/deposit")
 async def deposit_funds(
     deposit: DepositRequest,
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Depositar fondos virtuales en modo práctica.
     Útil para testear operaciones de venta.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
@@ -409,15 +403,14 @@ async def deposit_funds(
 
 @router.post("/deposit-all-cryptos")
 async def deposit_all_cryptos(
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Depositar $50 equivalentes en las principales criptomonedas.
     Ideal para configurar un ambiente de prueba completo.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
@@ -472,14 +465,13 @@ class OrderRequest(BaseModel):
 @router.post("/order")
 async def execute_virtual_order(
     order: OrderRequest,
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Ejecutar una orden virtual (compra/venta) en modo práctica.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     balances = json.loads(wallet.balances) if wallet.balances else {"USDT": 100.0}
@@ -621,7 +613,7 @@ async def execute_virtual_order(
 
 @router.get("/orders")
 async def get_virtual_orders(
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     limit: int = 50,
     symbol: Optional[str] = None
@@ -629,8 +621,7 @@ async def get_virtual_orders(
     """
     Obtener historial de órdenes virtuales.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     
@@ -686,14 +677,13 @@ async def get_virtual_orders(
 
 @router.post("/reset")
 async def reset_virtual_wallet(
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Resetear wallet virtual a $100 USDT iniciales.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     
@@ -716,14 +706,13 @@ async def reset_virtual_wallet(
 @router.get("/position/{symbol}")
 async def get_position(
     symbol: str, 
-    token: str = Depends(oauth2_scheme),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     Obtener posición actual de un símbolo.
     """
-    payload = require_valid_token(token)
-    user_id = payload.get("user_id", 1)
+    user_id = current_user.id
     
     wallet = get_or_create_wallet(db, user_id)
     balances = json.loads(wallet.balances)
@@ -753,3 +742,34 @@ async def get_position(
         "unrealized_pnl": round(unrealized_pnl, 2),
         "unrealized_pnl_percent": round(unrealized_pnl_percent, 2)
     }
+
+
+@router.get("/sentinel-logs")
+async def get_sentinel_logs(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    limit: int = 20
+):
+    """
+    Obtener los últimos logs/justificaciones del Centinela CIO.
+    """
+    user_id = current_user.id
+    wallet = get_or_create_wallet(db, user_id)
+    
+    logs = db.query(VirtualTradeModel).filter(
+        VirtualTradeModel.wallet_id == wallet.id,
+        VirtualTradeModel.strategy == "SENTINEL_CIO"
+    ).order_by(VirtualTradeModel.created_at.desc()).limit(limit).all()
+    
+    return [
+        {
+            "id": log.id,
+            "symbol": log.symbol,
+            "side": log.side,
+            "price": log.price,
+            "quantity": log.quantity,
+            "reason": log.reason,
+            "timestamp": log.created_at.isoformat()
+        } for log in logs
+    ]
+

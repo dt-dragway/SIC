@@ -90,13 +90,13 @@ export default function AIEvolutionWidget() {
     const progressPercent = (stats.xp / stats.next_level_xp) * 100;
 
     return (
-        <div className="relative group overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0f] shadow-2xl transition-all hover:border-violet-500/30">
-            {/* Background Gradients */}
-            <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-violet-600/10 blur-3xl pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-blue-600/10 blur-3xl pointer-events-none"></div>
+        <div className="relative group overflow-hidden mate-card shadow-2xl transition-all hover:border-violet-500/30">
+            {/* Background Gradients (Low Opacity) */}
+            <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-violet-600/5 blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-blue-600/5 blur-3xl pointer-events-none"></div>
 
             {/* Header */}
-            <div className="border-b border-white/5 bg-white/[0.02] p-4 flex items-center justify-between backdrop-blur-md">
+            <div className="border-b border-white/5 bg-slate-900/40 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="relative flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20">
                         <Trophy className="h-5 w-5 text-white" />
@@ -200,7 +200,7 @@ export default function AIEvolutionWidget() {
 
             {/* Reset Confirmation Modal Overlay */}
             {showResetConfirm && (
-                <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
+                <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-6">
                     <div className="bg-[#0a0a0f] border border-rose-500/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl shadow-rose-900/20 space-y-4">
                         <div className="flex items-center gap-3 text-rose-500">
                             <AlertTriangle size={24} />

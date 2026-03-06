@@ -386,7 +386,7 @@ class AutoExecutionService:
             
     def _validate_settings(self, settings: Dict) -> bool:
         """Valida configuración de automatización."""
-        required_fields = ['max_daily_trades', 'max_position_size', 'min_confidence']
+        required_fields = ['max_daily_trades', 'max_position_size', 'min_signal_confidence']
         
         for field in required_fields:
             if field not in settings:
@@ -397,7 +397,7 @@ class AutoExecutionService:
         if settings['max_daily_trades'] < 1 or settings['max_daily_trades'] > 50:
             return False
             
-        if settings['min_confidence'] < 50 or settings['min_confidence'] > 100:
+        if settings['min_signal_confidence'] < 50 or settings['min_signal_confidence'] > 100:
             return False
             
         return True

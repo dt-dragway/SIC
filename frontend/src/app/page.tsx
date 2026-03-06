@@ -12,6 +12,7 @@ import { useWallet } from '../context/WalletContext' // Import Context
 import InstitutionalAssistant from '../components/ai/InstitutionalAssistant'
 import AINeuroEngine from '../components/ai/AINeuroEngine'
 import SignalExecutionModal from '../components/trading/SignalExecutionModal' // Import Modal
+import SentinelTerminal from '../components/dashboard/SentinelTerminal'
 import { AVAILABLE_SYMBOLS, DEFAULT_SYMBOL } from '../lib/constants'
 import { X } from 'lucide-react'
 
@@ -28,37 +29,87 @@ interface Balance {
 
 interface Signal {
     symbol: string
-    type: string
-    confidence: number
+    type: 'LONG' | 'SHORT'
     entry_price: number
     stop_loss: number
     take_profit: number
-    strength: string
+    confidence: number
+    reasoning?: string[]
 }
 
 export default function Home() {
     const router = useRouter()
-    const { isAuthenticated, loading: authLoading, token } = useAuth()
-    const { mode, setMode, totalUsd, balances, isLoading: walletLoading, refreshWallet } = useWallet() // Added refreshWallet
+    const { isAuthenticated, token } = useAuth()
+    const { mode, setMode, totalUsd, isLoading: walletLoading, balances, refreshBalances } = useWallet() // Use Context
 
+    const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_SYMBOL)
     const [signals, setSignals] = useState<Signal[]>([])
-    const [dataLoading, setDataLoading] = useState(true)
-
-    // Estadísticas de Trading
     const [stats, setStats] = useState({
         total_trades: 0,
         winning_trades: 0,
         losing_trades: 0,
         win_rate: 0,
         total_pnl: 0,
-        roi_percent: 0,
-        current_value: 0,
-        initial_capital: 100
+        roi_percent: 0
     })
+    const [loading, setLoading] = useState(true)
 
-    // Ejecución de Señales
-    const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null)
+    // Modal signal execution state
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
+    const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null)
+
+    useEffect(() => {
+        if (!isAuthenticated) return
+
+        fetchInitialData()
+    }, [isAuthenticated, mode])
+
+    const fetchInitialData = async () => {
+        setLoading(true)
+        try {
+            const authHeaders = { 'Authorization': `Bearer ${token}` }
+
+            const [signalsRes, statsRes] = await Promise.all([
+                fetch('/api/v1/trading/signals/dashboard', { headers: authHeaders }),
+                fetch(mode === 'practice' ? '/api/v1/practice/stats' : '/api/v1/trading/stats', { headers: authHeaders })
+            ])
+
+            if (signalsRes.ok) {
+                const signalsData = await signalsRes.json()
+                setSignals(signalsData)
+                // Opcionalmente guardar el primer símbolo con señal si el default no tiene
+                if (signalsData.length > 0 && !signalsData.find(s => s.symbol === selectedSymbol)) {
+                    // setSelectedSymbol(signalsData[0].symbol)
+                }
+            }
+
+            if (statsRes.ok) {
+                const statsData = await statsRes.json()
+                setStats({
+                    total_trades: statsData.total_trades || 0,
+                    winning_trades: statsData.winning_trades || 0,
+                    losing_trades: statsData.losing_trades || 0,
+                    win_rate: statsData.win_rate || 0,
+                    total_pnl: statsData.total_pnl || 0,
+                    roi_percent: statsData.roi_percent || 0
+                })
+            }
+
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleRefresh = async () => {
+        setLoading(true)
+        await Promise.all([
+            fetchInitialData(),
+            refreshBalances()
+        ])
+        setLoading(false)
+    }
 
     const handleExecuteSignal = (signal: Signal) => {
         setSelectedSignal(signal)
@@ -66,132 +117,28 @@ export default function Home() {
     }
 
     const handleDismissSignal = (index: number) => {
-        setSignals(prev => prev.filter((_, i) => i !== index))
-    }
-
-    // Estado para el símbolo seleccionado
-    const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_SYMBOL)
-
-
-
-    const currentSymbolData = AVAILABLE_SYMBOLS.find(s => s.symbol === selectedSymbol) || AVAILABLE_SYMBOLS[0]
-
-
-
-    // Auth Guard
-    useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push('/login')
-        }
-    }, [authLoading, isAuthenticated, router])
-
-    // Reusable Data Fetching
-    const fetchDashboardData = async () => {
-        if (!token) return;
-
-        try {
-            // No set dataLoading(true) here to avoid flashing UI on silent refresh
-
-            // Stats endpoint depends on mode
-            const statsEndpoint = mode === 'practice'
-                ? '/api/v1/practice/stats'
-                : '/api/v1/trading/stats';
-
-            const [signalsRes, statsRes] = await Promise.all([
-                fetch('/api/v1/signals/scan', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }).catch(() => null),
-                fetch(statsEndpoint, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }).catch(() => null)
-            ]);
-
-            // Process Signals
-            if (signalsRes?.ok) {
-                const data = await signalsRes.json();
-                const topSignals = data.signals ? data.signals.slice(0, 5) : [];
-
-                setSignals(topSignals);
-                localStorage.setItem(`sic_dashboard_signals_${mode}`, JSON.stringify(topSignals));
-            }
-
-            // Process Stats
-            if (statsRes?.ok) {
-                const statsData = await statsRes.json();
-                setStats(statsData);
-                localStorage.setItem(`sic_dashboard_stats_${mode}`, JSON.stringify(statsData));
-            }
-        } catch (error) {
-            console.error("Error fetching dashboard data", error);
-        } finally {
-            setDataLoading(false);
-        }
-    };
-
-    // Load Cache on Mount
-    useEffect(() => {
-        const cachedSignals = localStorage.getItem(`sic_dashboard_signals_${mode}`);
-        const cachedStats = localStorage.getItem(`sic_dashboard_stats_${mode}`);
-
-        if (cachedSignals) {
-            try { setSignals(JSON.parse(cachedSignals)); } catch (e) { }
-        }
-        if (cachedStats) {
-            try { setStats(JSON.parse(cachedStats)); } catch (e) { }
-        }
-    }, [mode]);
-
-    // Initial Load & Polling
-    useEffect(() => {
-        if (authLoading || !isAuthenticated || !token) return;
-
-        // Only show loader if we have NO data (first visit)
-        const hasCache = localStorage.getItem(`sic_dashboard_stats_${mode}`);
-        if (!hasCache) setDataLoading(true);
-
-        Promise.all([
-            fetchDashboardData(),
-            refreshWallet()
-        ]);
-
-        const interval = setInterval(fetchDashboardData, 10000);
-        return () => clearInterval(interval);
-    }, [authLoading, isAuthenticated, token, mode]);
-
-    // Manual refresh handler
-    const handleRefresh = async () => {
-        setDataLoading(true);
-        await Promise.all([
-            refreshWallet(),
-            fetchDashboardData()
-        ]);
-        setDataLoading(false);
-    };
-
-    // Solo mostrar pantalla de carga durante autenticación inicial
-    // El wallet se recarga en background sin bloquear la UI
-    if (authLoading) {
-        return <LoadingSpinner />
+        const newSignals = [...signals]
+        newSignals.splice(index, 1)
+        setSignals(newSignals)
     }
 
     if (!isAuthenticated) {
-        return null;
+        return <LoadingSpinner fullScreen />
     }
+
+    const currentSymbolData = AVAILABLE_SYMBOLS.find(s => s.symbol === selectedSymbol) || AVAILABLE_SYMBOLS[0]
 
     return (
         <DashboardLayout>
-            <div className="max-w-7xl mx-auto px-6 py-6 pb-6">
-                {/* Header with Mode Switcher */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="max-w-[1600px] mx-auto">
+                {/* Dashboard Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                            Dashboard
-                        </h1>
-                        <p className="text-slate-400 text-sm mt-1">Visión general de tu portafolio y señales de trading</p>
+                        <h1 className="text-3xl font-bold text-white tracking-tight">Institutional Dashboard</h1>
+                        <p className="text-slate-500 mt-1 font-medium">Bienvenido, {mode === 'practice' ? 'Modo Simulación Activo' : 'Entorno Real (Mainnet)'}</p>
                     </div>
 
-                    {/* Mode Switcher */}
-                    <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
+                    <div className="flex bg-white/5 p-1 rounded-lg border border-white/10 backdrop-blur-sm">
                         <button
                             onClick={() => setMode('practice')}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'practice'
@@ -334,7 +281,7 @@ export default function Home() {
                     </div>
 
                     {/* Signals Panel */}
-                    <div className="glass-card p-6 border border-white/5 bg-white/[0.02]">
+                    <div className="mate-card p-6 border border-white/5 bg-white/[0.02]">
                         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <span>🎯</span> Señales IA
                         </h2>
@@ -407,8 +354,10 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* Quick Actions */}
-                {/* Quick Actions Removed */}
+                {/* Sentinel CIO Activity Log */}
+                <div className="mt-8 min-h-[400px]">
+                    <SentinelTerminal />
+                </div>
             </div>
 
             {/* Modal de Ejecución de Señales */}
@@ -420,13 +369,8 @@ export default function Home() {
                     accountBalance={mode === 'practice' ? totalUsd : (balances.find(b => b.asset === 'USDT')?.total || 0)}
                     availableBalance={(() => {
                         if (selectedSignal.type === 'LONG') {
-                            // Buying, show USDT
-                            return mode === 'practice'
-                                ? (balances.find(b => b.asset === 'USDT')?.total || 0)
-                                : (balances.find(b => b.asset === 'USDT')?.total || 0)
+                            return (balances.find(b => b.asset === 'USDT')?.total || 0)
                         } else {
-                            // Selling (Shorting), show Crypto Balance
-                            // Assuming symbol like 'BTCUSDT' -> 'BTC'
                             const baseAsset = selectedSignal.symbol.replace('USDT', '')
                             return balances.find(b => b.asset === baseAsset)?.total || 0
                         }
@@ -437,12 +381,10 @@ export default function Home() {
                     })()}
                     mode={mode === 'practice' ? 'practice' : 'real'}
                     onOrderSubmit={async () => {
-                        // Remover la señal ejecutada de la lista visualmente
                         if (selectedSignal) {
                             setSignals(prev => prev.filter(s => s.symbol !== selectedSignal.symbol))
                         }
                         setIsOrderModalOpen(false)
-                        // Trigger de recarga inmediata de fondos y stats SIN recargar página
                         await handleRefresh()
                     }}
                 />

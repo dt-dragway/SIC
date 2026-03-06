@@ -34,8 +34,9 @@ class AutomationStatus(BaseModel):
     emergency_stop: bool
     queue_status: Dict
     check_interval: int
-    uptime: Optional[str]
-    settings: Optional[AutomationSettings]
+    uptime: Optional[str] = None
+    settings: Optional[AutomationSettings] = None
+    emergency_conditions: Optional[Dict[str, bool]] = None
 
 
 class SymbolAutomationConfig(BaseModel):

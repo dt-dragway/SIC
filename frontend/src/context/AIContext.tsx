@@ -1,7 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { DEFAULT_SYMBOL } from '../lib/constants';
+import { toast } from 'sonner';
+import { Zap, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface AIAnalysis {
     symbol: string;  // Símbolo de la cripto analizada (BTC, ETH, etc.)
@@ -37,6 +39,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
     const [status, setStatus] = useState<OllamaStatus | null>(null);
     const [symbol, setSymbol] = useState(DEFAULT_SYMBOL); // Global Symbol Focus
     const [mounted, setMounted] = useState(false);
+    const lastTradeIdRef = useRef<number | null>(null);
 
     // Track mount state for client-side only operations
     useEffect(() => {
@@ -184,6 +187,73 @@ export function AIProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    // Polling del Centinela CIO para Notificaciones Globales
+    const pollSentinelTrades = async () => {
+        if (!mounted) return;
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const res = await fetch('/api/v1/practice/sentinel-logs?limit=5', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const logs = await res.json();
+                if (logs && logs.length > 0) {
+                    const latestTrade = logs[0];
+
+                    // Si es la primera vez que cargamos, guardamos el ID sin mostrar toast
+                    if (lastTradeIdRef.current === null) {
+                        lastTradeIdRef.current = latestTrade.id;
+                        return;
+                    }
+
+                    // Si el ID es mayor al último visto, hay nuevos trades
+                    if (latestTrade.id > lastTradeIdRef.current) {
+                        // Procesar todos los trades nuevos
+                        const newTrades = logs.filter((l: any) => l.id > (lastTradeIdRef.current || 0)).reverse();
+
+                        newTrades.forEach((trade: any) => {
+                            toast.custom((t) => (
+                                <div className="bg-[#0B0E14]/95 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex items-start gap-4 min-w-[320px] animate-in slide-in-from-right-5">
+                                    <div className={`p-2 rounded-xl bg-gradient-to-br ${trade.side === 'BUY' ? 'from-emerald-500 to-teal-600' : 'from-rose-500 to-pink-600'} shadow-lg`}>
+                                        {trade.side === 'BUY' ? <TrendingUp size={18} className="text-white" /> : <TrendingDown size={18} className="text-white" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-white font-bold text-sm tracking-tight">{trade.side === 'BUY' ? 'Compra' : 'Venta'} Táctica IA</h4>
+                                                <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-[8px] text-blue-400 font-bold uppercase tracking-tighter">Sentinel</span>
+                                            </div>
+                                            <span className="text-[9px] text-slate-500 font-mono italic">Justified</span>
+                                        </div>
+                                        <p className="text-cyan-400 font-bold text-xs mb-1 font-mono">
+                                            {trade.symbol} @ ${trade.price.toLocaleString()}
+                                        </p>
+                                        <p className="text-slate-300 text-[10px] leading-relaxed line-clamp-2">
+                                            {trade.reason}
+                                        </p>
+                                    </div>
+                                    <button onClick={() => toast.dismiss(t)} className="text-slate-600 hover:text-white transition-colors">
+                                        <Zap size={12} />
+                                    </button>
+                                </div>
+                            ), {
+                                duration: 10000,
+                            });
+                        });
+
+                        lastTradeIdRef.current = latestTrade.id;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Error polling sentinel trades", e);
+        }
+    };
+
+
     // Initial Mount Logic (The "Brain" wakes up)
     useEffect(() => {
         // Only run on client after mount
@@ -199,7 +269,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
         // Esto garantiza que Sidebar y Dashboard estén 100% sincronizados
         analyzeMarket(symbol);
 
-        // Heartbeat pulse every 30s
+        // Heartbeat pulse every 30s for analysis, but 10s for Sentinel
         const interval = setInterval(() => {
             const currentToken = localStorage.getItem('token');
             if (!currentToken) return;
@@ -207,7 +277,14 @@ export function AIProvider({ children }: { children: ReactNode }) {
             analyzeMarket(symbol);
         }, 30000);
 
-        return () => clearInterval(interval);
+        const sentinelInterval = setInterval(() => {
+            pollSentinelTrades();
+        }, 12000); // Cada 12 segundos para no saturar
+
+        return () => {
+            clearInterval(interval);
+            clearInterval(sentinelInterval);
+        };
     }, [symbol, mounted]);
 
     // Also reload memory if symbol changes (future proofing)

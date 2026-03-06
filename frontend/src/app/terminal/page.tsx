@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import SentinelTerminal from '@/components/dashboard/SentinelTerminal';
 import WhaleAlertWidget from '@/components/onchain/WhaleAlertWidget';
 import {
     Monitor,
@@ -43,6 +44,7 @@ export default function TerminalPage() {
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
+                if (!token) return;
                 const headers = { 'Authorization': `Bearer ${token}` };
 
                 const [depthRes, fundingRes] = await Promise.all([
@@ -151,7 +153,7 @@ export default function TerminalPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     {/* Order Book Column */}
-                    <div className="glass-card rounded-3xl border border-white/5 bg-black/40 p-4 h-[600px] flex flex-col">
+                    <div className="glass-card rounded-3xl border border-white/5 bg-black/40 p-4 h-full min-h-[600px] flex flex-col">
                         <h3 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
                             <BarChart3 size={16} /> Order Book (Profundidad)
                         </h3>
@@ -167,7 +169,7 @@ export default function TerminalPage() {
                         <div className="flex-1 overflow-hidden flex flex-col-reverse justify-end space-y-reverse space-y-[1px]">
                             {depth?.asks.slice(0, 15).reverse().map(([price, amount], i) => {
                                 const total = parseFloat(price) * parseFloat(amount);
-                                const width = Math.min((parseFloat(amount) / 5) * 100, 100); // Mock width calc
+                                const width = Math.min((parseFloat(amount) / 5) * 100, 100);
                                 return (
                                     <div key={i} className="grid grid-cols-3 text-[11px] font-mono py-0.5 px-2 relative hover:bg-white/5">
                                         <div className="absolute top-0 right-0 bottom-0 bg-rose-500/10 z-0" style={{ width: `${width}%` }} />
@@ -203,27 +205,13 @@ export default function TerminalPage() {
                         </div>
                     </div>
 
-                    {/* Chart / Analysis Column (Placeholder for real charts/whale tracking) */}
-                    <div className="lg:col-span-2 space-y-6">
-
-                        {/* Microstructure Explained */}
-                        <div className="glass-card p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-indigo-500/10 to-purple-500/5">
-                            <h3 className="text-lg font-bold text-indigo-300 mb-2">Microestructura de Mercado</h3>
-                            <p className="text-slate-400 text-sm leading-relaxed">
-                                El <strong>Order Book</strong> revela las intenciones reales de los participantes.
-                                <br />
-                                <span className="text-emerald-400">Muros de Compra (Bids)</span> soportan el precio, mientras que <span className="text-rose-400">Muros de Venta (Asks)</span> actúan como resistencia.
-                                <br /><br />
-                                <strong>Funding Rate:</strong> {funding?.fundingRate && funding.fundingRate > 0.01
-                                    ? <span className="text-amber-400">Alto ({funding.fundingRate.toFixed(4)}%). Los Longs pagan a los Shorts. Posible corrección bajista (Long Squeeze).</span>
-                                    : funding?.fundingRate && funding.fundingRate < 0
-                                        ? <span className="text-emerald-400">Negativo ({funding.fundingRate.toFixed(4)}%). Los Shorts pagan a los Longs. Posible rebote alcista (Short Squeeze).</span>
-                                        : <span className="text-slate-300">Neutral. Mercado equilibrado.</span>
-                                }
-                            </p>
+                    {/* Sentinel CIO & Whale Alert Column */}
+                    <div className="lg:col-span-2 space-y-6 flex flex-col h-full">
+                        <div className="flex-1 min-h-[400px]">
+                            <SentinelTerminal />
                         </div>
 
-                        <div className="glass-card p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-indigo-500/5 to-purple-500/5">
+                        <div className="glass-card p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 shadow-xl">
                             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                 <Activity size={20} className="text-cyan-400" />
                                 Rastreo de Ballenas (Live Whale Alert)

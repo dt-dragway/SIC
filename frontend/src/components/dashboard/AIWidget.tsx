@@ -53,13 +53,13 @@ export default function AIWidget({ symbol = 'BTCUSDT' }: { symbol?: string }) {
     const styles = analysis ? getSignalColor(analysis.signal) : getSignalColor('HOLD');
 
     return (
-        <div className="relative group overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0f] p-0 shadow-2xl transition-all hover:border-violet-500/30">
-            {/* Background Effects */}
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-violet-600/10 blur-3xl pointer-events-none group-hover:bg-violet-600/20 transition-all"></div>
-            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-fuchsia-600/10 blur-3xl pointer-events-none group-hover:bg-fuchsia-600/20 transition-all"></div>
+        <div className="relative group overflow-hidden mate-card p-0 shadow-2xl transition-all hover:border-violet-500/30">
+            {/* Background Effects (Low Opacity) */}
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-violet-600/5 blur-3xl pointer-events-none group-hover:bg-violet-600/10 transition-all"></div>
+            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-fuchsia-600/5 blur-3xl pointer-events-none group-hover:bg-fuchsia-600/10 transition-all"></div>
 
             {/* Header / Status Bar */}
-            <div className="border-b border-white/5 bg-white/[0.02] p-4 flex items-center justify-between backdrop-blur-md">
+            <div className="border-b border-white/5 bg-slate-900/40 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="relative flex items-center justify-center h-8 w-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/20">
                         <Brain className="h-4 w-4 text-white" />

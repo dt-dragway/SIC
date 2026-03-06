@@ -62,12 +62,22 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Glassmorphism Card */
-.glass-card {
-  background: rgba(18, 18, 26, 0.8);
-  backdrop-filter: blur(10px);
+/* Matte Card (Optimized for High Performance) */
+.mate-card {
+  background-color: var(--sic-card);
   border: 1px solid var(--sic-border);
-  border-radius: 16px;
+  border-radius: 12px;
+  transform: translateZ(0); /* Hardware Acceleration */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Legacy Support (Simplified) */
+.glass-card {
+  background-color: var(--sic-card);
+  border: 1px solid var(--sic-border);
+  border-radius: 12px;
+  transform: translateZ(0);
 }
 
 /* Price Colors */

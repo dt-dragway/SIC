@@ -308,13 +308,7 @@ async def get_current_user(token: str = Depends(get_token), db: Session = Depend
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
-    return {
-        "id": user.id,
-        "email": user.email,
-        "name": user.name,
-        "has_2fa": user.has_2fa,
-        "created_at": user.created_at
-    }
+    return user
 
 
 @router.post("/2fa/enable")

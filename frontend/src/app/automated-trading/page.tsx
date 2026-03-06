@@ -1,7 +1,9 @@
 "use client";
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AutoTradingTerminal from '@/components/dashboard/AutoTradingTerminal';
 import { useState, useEffect } from 'react';
+
 import {
   Card,
   CardContent,
@@ -421,8 +423,8 @@ export default function AutomatedTradingPage() {
                       <Badge
                         key={tier}
                         className={`cursor-pointer ${settings.allowed_tiers.includes(tier)
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-600 text-gray-300'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-600 text-gray-300'
                           }`}
                         onClick={() => {
                           const newTiers = settings.allowed_tiers.includes(tier)
@@ -462,6 +464,9 @@ export default function AutomatedTradingPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Auto Execution Engine Terminal Logs */}
+        <AutoTradingTerminal isRunning={status?.running || false} />
       </div>
     </DashboardLayout>
   );
