@@ -67,6 +67,23 @@ services:
       - /app/node_modules
     command: npm run dev
 
+  # Sentinel Worker (24/7 Autonomous Watchdog)
+  worker_sentinel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sic_sentinel
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: python /app/app/workers/sentinel.py
+
 volumes:
   postgres_data:
   redis_data:
