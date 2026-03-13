@@ -16,8 +16,8 @@ model agent_trades {
   entry_price       Float
   exit_price        Float
   pnl               Float
-  signals_used      String?
-  patterns_detected String?
+  signals_used      Json?
+  patterns_detected Json?
   created_at        DateTime? @db.Timestamp(6)
 
   @@index([id], map: "ix_agent_trades_id")
@@ -60,8 +60,8 @@ model signals {
   take_profit  Float
   stop_loss    Float
   risk_reward  Float
-  reasoning    String?
-  ml_data      String?
+  reasoning    Json?
+  ml_data      Json?
   raw_response String?
   result       String?   @db.VarChar(20)
   actual_pnl   Float?
@@ -139,7 +139,7 @@ model virtual_wallets {
   id              Int              @id @default(autoincrement())
   user_id         Int              @unique
   initial_capital Float?
-  balances        String?
+  balances        Json?
   created_at      DateTime?        @db.Timestamp(6)
   reset_at        DateTime?        @db.Timestamp(6)
   virtual_trades  virtual_trades[]
@@ -166,8 +166,8 @@ model order_book_snapshots {
   best_bid      Float
   best_ask      Float
   spread        Float
-  bids_json     String?
-  asks_json     String?
+  bids_json     Json?
+  asks_json     Json?
   bid_volume_10 Float?
   ask_volume_10 Float?
   timestamp     DateTime? @db.Timestamp(6)

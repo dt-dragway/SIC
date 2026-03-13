@@ -4,7 +4,7 @@ SIC Ultra - Modelos SQLAlchemy
 Modelos de base de datos para PostgreSQL.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey, Text, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -82,7 +82,7 @@ class VirtualWallet(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     
     initial_capital = Column(Float, default=100.0)
-    balances = Column(Text, default='{"USDT": 100.0}')  # JSON string
+    balances = Column(JSON, default=lambda: {"USDT": 100.0})  # Native JS0N
     
     created_at = Column(DateTime, default=datetime.utcnow)
     reset_at = Column(DateTime, nullable=True)
@@ -131,8 +131,8 @@ class Signal(Base):
     stop_loss = Column(Float, nullable=False)
     risk_reward = Column(Float, nullable=False)
     
-    reasoning = Column(Text) # JSON list of reasons
-    ml_data = Column(Text) # JSON storage for LSTM/XGBoost metrics
+    reasoning = Column(JSON) # JSON list of reasons
+    ml_data = Column(JSON) # JSON storage for LSTM/XGBoost metrics
     raw_response = Column(Text) # Store full LLM response for future training
     
     # Resultado
@@ -198,8 +198,8 @@ class AgentTrade(Base):
     pnl = Column(Float, nullable=False)
     
     # Datos del análisis (JSON)
-    signals_used = Column(Text, nullable=True)  # JSON array de signals usados
-    patterns_detected = Column(Text, nullable=True)  # JSON array de patrones
+    signals_used = Column(JSON, nullable=True)  # JSON array de signals usados
+    patterns_detected = Column(JSON, nullable=True)  # JSON array de patrones
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -254,7 +254,7 @@ class AlgorithmicOrder(Base):
     status = Column(String(20), default="RUNNING") # RUNNING, COMPLETED, CANCELLED, FAILED
     
     # Datos de control técnico (JSON)
-    config_json = Column(Text, nullable=True) # Intervalos, etc.
+    config_json = Column(JSON, nullable=True) # Intervalos, etc.
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

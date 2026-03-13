@@ -4,7 +4,7 @@ SIC Ultra - Modelos SQLAlchemy INSTITUCIONALES
 Modelos adicionales para análisis institucional.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, JSON
 from datetime import datetime
 from app.infrastructure.database.models import Base
 
@@ -20,8 +20,8 @@ class OrderBookSnapshot(Base):
     best_ask = Column(Float, nullable=False)
     spread = Column(Float, nullable=False)
     
-    bids_json = Column(Text)
-    asks_json = Column(Text)
+    bids_json = Column(JSON)
+    asks_json = Column(JSON)
     
     bid_volume_10 = Column(Float)
     ask_volume_10 = Column(Float)
