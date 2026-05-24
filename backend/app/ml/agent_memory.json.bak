@@ -1,0 +1,2794 @@
+{
+  "created_at": "2026-02-01T16:00:00.000000",
+  "version": "1.0",
+  "total_trades": 109,
+  "winning_trades": 56,
+  "losing_trades": 53,
+  "total_pnl": 9653.285639999998,
+  "best_trade": 1000,
+  "worst_trade": -210.0,
+  "patterns_learned": {
+    "BULLISH_ENGULFING": {
+      "total": 4,
+      "wins": 4,
+      "losses": 0
+    },
+    "bullish_engulfing": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "EMA_GOLDEN_CROSS": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "BULLISH_MARUBOZU": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "SUPPORT_BOUNCE": {
+      "total": 3,
+      "wins": 3,
+      "losses": 0
+    },
+    "BREAKOUT_CONFIRMED": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "FALSE_BREAKOUT": {
+      "total": 4,
+      "wins": 0,
+      "losses": 4
+    },
+    "RSI_OVERSOLD": {
+      "total": 2,
+      "wins": 2,
+      "losses": 0
+    },
+    "RSI_OVERBOUGHT": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "BAND_REJECTION": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "TREND_REVERSAL_FAIL": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "BULL_TRAP_PATTERN": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "DOUBLE_BOTTOM": {
+      "total": 4,
+      "wins": 4,
+      "losses": 0
+    },
+    "EMA_CROSS_DOWN": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "BEARISH_MARUBOZU": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "KNIFE_FALL_ATTEMPT": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "PULLBACK_REJECTION": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "BEARISH_ENGULFING": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "INSTITUTIONAL_BUY_SPON": {
+      "total": 3,
+      "wins": 3,
+      "losses": 0
+    },
+    "VOLUME_SURGE_BOUNCE": {
+      "total": 3,
+      "wins": 3,
+      "losses": 0
+    },
+    "LIQUIDITY_HUNT_WIN": {
+      "total": 2,
+      "wins": 2,
+      "losses": 0
+    },
+    "FALSE_BREAKOUT_VOL": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "ORDER_IMBALANCE_WIN": {
+      "total": 2,
+      "wins": 2,
+      "losses": 0
+    },
+    "EMA_50_REBOUND": {
+      "total": 5,
+      "wins": 5,
+      "losses": 0
+    },
+    "FIBONACCI_618_BOUNCE": {
+      "total": 2,
+      "wins": 2,
+      "losses": 0
+    },
+    "CHANNEL_BREAKOUT_DOWN": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "BOLLINGER_SQUEEZE_OUT": {
+      "total": 7,
+      "wins": 7,
+      "losses": 0
+    },
+    "SQUEEZE_FALSE_START": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "HIGH_VOLATILITY_LOSS": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "FALSE_REVERSAL_BOUNCE": {
+      "total": 2,
+      "wins": 0,
+      "losses": 2
+    },
+    "SUPPORT_BROKEN_LOSS": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "BTC_CORRELATION_ALIGNED": {
+      "total": 6,
+      "wins": 6,
+      "losses": 0
+    },
+    "CORRELATION_LAG_LOSS": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "TREND_CONTINUATION_STEADY": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "SUPPORT_BOUNCE_STEADY": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "RESISTANCE_TOUCH": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "VOLUME_SUPPORT_STEADY": {
+      "total": 1,
+      "wins": 1,
+      "losses": 0
+    },
+    "FALSE_BREAKOUT_STEADY": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "[4h] \ud83d\udcca Bullish Engulfing": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "[4h] \ud83d\udcca BEARISH Marubozu": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    },
+    "[4h] \ud83d\udcca Bearish Engulfing": {
+      "total": 1,
+      "wins": 0,
+      "losses": 1
+    }
+  },
+  "strategy_performance": {},
+  "market_insights": [],
+  "evolution_history": [
+    {
+      "timestamp": "2026-03-05T23:09:30.883654",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 50.0,
+      "strategy_weights": {
+        "rsi": 0.8550000000000001,
+        "macd": 1.1,
+        "bollinger": 0.774,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:09:30.917839",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 40.0,
+      "strategy_weights": {
+        "rsi": 0.7335,
+        "macd": 1.1,
+        "bollinger": 0.6606,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:10:59.427900",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 33.33333333333333,
+      "strategy_weights": {
+        "rsi": 0.62415,
+        "macd": 1.1,
+        "bollinger": 0.5585399999999999,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:10:59.437655",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 28.57142857142857,
+      "strategy_weights": {
+        "rsi": 0.525735,
+        "macd": 1.1,
+        "bollinger": 0.46668599999999993,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:10:59.476969",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 25.0,
+      "strategy_weights": {
+        "rsi": 0.4371615,
+        "macd": 1.1,
+        "bollinger": 0.38401739999999995,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:11:15.584991",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 22.22222222222222,
+      "strategy_weights": {
+        "rsi": 0.35744535,
+        "macd": 1.1,
+        "bollinger": 0.30961565999999996,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:11:15.596431",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 20.0,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:11:15.623970",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 18.181818181818183,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:12:07.768934",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 16.666666666666664,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:12:07.785422",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 15.384615384615385,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:12:07.805938",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 14.285714285714285,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:12:29.257853",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 13.333333333333334,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:12:29.274450",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 12.5,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:12:29.301607",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 11.76470588235294,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:15:56.954958",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 11.11111111111111,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:15:56.991376",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 10.526315789473683,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:15:57.015876",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 10.0,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:16:48.445966",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 9.523809523809524,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:16:48.487405",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 9.090909090909092,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-03-05T23:16:48.509449",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 8.695652173913043,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T14:32:57.978948",
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "win_rate": 8.333333333333332,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T14:32:58.007620",
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "win_rate": 8.0,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T14:32:58.036591",
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "win_rate": 7.6923076923076925,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T17:48:57.436850",
+      "trade_id": "auto_SOLUSDT_1779572937",
+      "pnl": 0.0,
+      "win_rate": 7.4074074074074066,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T19:22:53.795142",
+      "trade_id": "auto_SOLUSDT_1779578573",
+      "pnl": 0.0,
+      "win_rate": 7.142857142857142,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T19:50:09.845636",
+      "trade_id": "auto_SOLUSDT_1779580209",
+      "pnl": 0.0,
+      "win_rate": 6.896551724137931,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T20:02:51.129703",
+      "trade_id": "auto_SOLUSDT_1779580971",
+      "pnl": 0.0,
+      "win_rate": 6.666666666666667,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T20:23:58.926788",
+      "trade_id": "auto_SOLUSDT_1779582238",
+      "pnl": 0.0,
+      "win_rate": 6.451612903225806,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-23T21:04:49.898379",
+      "mutation_applied": true,
+      "risk_regime": "HIGH_RISK",
+      "reason": "Racha perdedora consecutiva detectada (3 p\u00e9rdidas)",
+      "metrics": {
+        "consecutive_losses": 3,
+        "win_rate_recent": 0.0
+      },
+      "parameter_changes": {
+        "confidence": "75% -> 80%",
+        "position_size": "$11.0 -> $11.0",
+        "risk_level": "moderate -> conservative"
+      },
+      "message": "\ud83d\udee1\ufe0f MUTACI\u00d3N DEFENSIVA: Umbral de confianza incrementado a 80% (antes 75%) y tama\u00f1o de posici\u00f3n reducido a $11.0 USD debido a una racha de 3 p\u00e9rdidas consecutivas."
+    },
+    {
+      "timestamp": "2026-05-23T21:06:50.342434",
+      "mutation_applied": true,
+      "risk_regime": "NORMAL",
+      "reason": "Condiciones normales y estables de rentabilidad",
+      "metrics": {
+        "consecutive_losses": 0,
+        "win_rate_recent": 0.0
+      },
+      "parameter_changes": {
+        "confidence": "75% -> 70%",
+        "position_size": "$11.0 -> $50.0",
+        "risk_level": "moderate -> moderate"
+      },
+      "message": "\ud83d\ude80 MUTACI\u00d3N DE CRECIMIENTO: Par\u00e1metros optimizados restablecidos a niveles normales (Confianza: 70%, Posici\u00f3n: $50.0 USD) al normalizarse el win rate."
+    },
+    {
+      "timestamp": "2026-05-23T22:07:35.465035",
+      "mutation_applied": true,
+      "risk_regime": "HIGH_RISK",
+      "reason": "Racha perdedora consecutiva detectada (3 p\u00e9rdidas)",
+      "metrics": {
+        "consecutive_losses": 3,
+        "win_rate_recent": 0.0
+      },
+      "parameter_changes": {
+        "confidence": "70% -> 80%",
+        "position_size": "$21.0 -> $21.0",
+        "risk_level": "moderate -> conservative"
+      },
+      "message": "\ud83d\udee1\ufe0f MUTACI\u00d3N DEFENSIVA: Umbral de confianza incrementado a 80% (antes 70%) y tama\u00f1o de posici\u00f3n reducido a $21.0 USD debido a una racha de 3 p\u00e9rdidas consecutivas."
+    },
+    {
+      "timestamp": "2026-05-24T01:14:43.163705",
+      "trade_id": "auto_SOLUSDT_1779599683",
+      "pnl": 0.0,
+      "win_rate": 6.25,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:32:13.810680",
+      "trade_id": "auto_BTCUSDT_1779600733",
+      "pnl": 0.0,
+      "win_rate": 6.0606060606060606,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:32:14.892791",
+      "trade_id": "auto_ETHUSDT_1779600734",
+      "pnl": 0.0,
+      "win_rate": 5.88235294117647,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:32:15.929759",
+      "trade_id": "auto_BNBUSDT_1779600735",
+      "pnl": 0.0,
+      "win_rate": 5.714285714285714,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:32:17.048557",
+      "trade_id": "auto_SOLUSDT_1779600737",
+      "pnl": 0.0,
+      "win_rate": 5.555555555555555,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:32:24.741869",
+      "trade_id": "auto_LINKUSDT_1779600744",
+      "pnl": 0.0,
+      "win_rate": 5.405405405405405,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.1,
+        "bollinger": 0.3,
+        "trend": 1.0,
+        "volume": 1.0,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.492852",
+      "trade_id": "DEEP-SIM-C1-BTCUSDT",
+      "pnl": 850.0,
+      "win_rate": 7.894736842105263,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.2100000000000002,
+        "bollinger": 0.3,
+        "trend": 1.1,
+        "volume": 1.1,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.519480",
+      "trade_id": "DEEP-SIM-C1-ETHUSDT",
+      "pnl": 240.0,
+      "win_rate": 10.256410256410255,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.3530000000000004,
+        "bollinger": 0.3,
+        "trend": 1.2320000000000002,
+        "volume": 1.12,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.540086",
+      "trade_id": "DEEP-SIM-C1-SOLUSDT",
+      "pnl": 180.0,
+      "win_rate": 12.5,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.3730000000000004,
+        "bollinger": 0.3,
+        "trend": 1.3772000000000004,
+        "volume": 1.2320000000000002,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.557255",
+      "trade_id": "DEEP-SIM-C1-LINKUSDT",
+      "pnl": 90.0,
+      "win_rate": 14.634146341463413,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.3730000000000004,
+        "bollinger": 0.3,
+        "trend": 1.5369200000000005,
+        "volume": 1.2520000000000002,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.577130",
+      "trade_id": "DEEP-SIM-C1-BNBUSDT",
+      "pnl": -45.0,
+      "win_rate": 14.285714285714285,
+      "strategy_weights": {
+        "rsi": 0.3,
+        "macd": 1.3730000000000004,
+        "bollinger": 0.3,
+        "trend": 1.4012280000000006,
+        "volume": 1.2520000000000002,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.587011",
+      "cycle": 1,
+      "regime": "Tendencia Alcista Macro (Bull Run)",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 1: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Tendencia Alcista Macro (Bull Run).",
+      "parameter_changes": {
+        "trend": "Ajustado a 1.52x",
+        "macd": "Ajustado a 1.44x",
+        "volume": "Ajustado a 1.31x",
+        "bollinger": "Ajustado a 0.28x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.800658",
+      "trade_id": "DEEP-SIM-C2-SOLUSDT",
+      "pnl": 120.0,
+      "win_rate": 16.27906976744186,
+      "strategy_weights": {
+        "rsi": 0.33,
+        "macd": 1.44,
+        "bollinger": 0.30800000000000005,
+        "trend": 1.52,
+        "volume": 1.31,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.813508",
+      "trade_id": "DEEP-SIM-C2-BNBUSDT",
+      "pnl": 95.0,
+      "win_rate": 18.181818181818183,
+      "strategy_weights": {
+        "rsi": 0.38500000000000006,
+        "macd": 1.44,
+        "bollinger": 0.3608000000000001,
+        "trend": 1.52,
+        "volume": 1.31,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.830709",
+      "trade_id": "DEEP-SIM-C2-LINKUSDT",
+      "pnl": 45.0,
+      "win_rate": 20.0,
+      "strategy_weights": {
+        "rsi": 0.4455000000000001,
+        "macd": 1.44,
+        "bollinger": 0.38080000000000014,
+        "trend": 1.52,
+        "volume": 1.31,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.839570",
+      "trade_id": "DEEP-SIM-C2-ETHUSDT",
+      "pnl": 70.0,
+      "win_rate": 21.73913043478261,
+      "strategy_weights": {
+        "rsi": 0.46550000000000014,
+        "macd": 1.44,
+        "bollinger": 0.4188800000000002,
+        "trend": 1.52,
+        "volume": 1.31,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.850501",
+      "trade_id": "DEEP-SIM-C2-BTCUSDT",
+      "pnl": -80.0,
+      "win_rate": 21.27659574468085,
+      "strategy_weights": {
+        "rsi": 0.41895000000000016,
+        "macd": 1.44,
+        "bollinger": 0.4388800000000002,
+        "trend": 1.368,
+        "volume": 1.31,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:40.855688",
+      "cycle": 2,
+      "regime": "Mercado Lateral de Rango Estrecho (Ranging)",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 2: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Mercado Lateral de Rango Estrecho (Ranging).",
+      "parameter_changes": {
+        "rsi": "Ajustado a 0.46x",
+        "bollinger": "Ajustado a 0.48x",
+        "trend": "Ajustado a 1.21x",
+        "macd": "Ajustado a 1.37x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.066281",
+      "trade_id": "DEEP-SIM-C3-BTCUSDT",
+      "pnl": -150.0,
+      "win_rate": 20.833333333333336,
+      "strategy_weights": {
+        "rsi": 0.46,
+        "macd": 1.37,
+        "bollinger": 0.48,
+        "trend": 1.089,
+        "volume": 1.179,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.078793",
+      "trade_id": "DEEP-SIM-C3-ETHUSDT",
+      "pnl": -90.0,
+      "win_rate": 20.408163265306122,
+      "strategy_weights": {
+        "rsi": 0.46,
+        "macd": 1.233,
+        "bollinger": 0.48,
+        "trend": 1.069,
+        "volume": 1.0431000000000001,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.092923",
+      "trade_id": "DEEP-SIM-C3-SOLUSDT",
+      "pnl": -60.0,
+      "win_rate": 20.0,
+      "strategy_weights": {
+        "rsi": 0.41400000000000003,
+        "macd": 1.213,
+        "bollinger": 0.48,
+        "trend": 1.069,
+        "volume": 0.9207900000000001,
+        "support_resistance": 1.0,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.100647",
+      "trade_id": "DEEP-SIM-C3-LINKUSDT",
+      "pnl": 35.0,
+      "win_rate": 21.568627450980394,
+      "strategy_weights": {
+        "rsi": 0.394,
+        "macd": 1.213,
+        "bollinger": 0.48,
+        "trend": 1.069,
+        "volume": 0.9007900000000001,
+        "support_resistance": 1.1,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.109605",
+      "trade_id": "DEEP-SIM-C3-BNBUSDT",
+      "pnl": -40.0,
+      "win_rate": 21.153846153846153,
+      "strategy_weights": {
+        "rsi": 0.394,
+        "macd": 1.213,
+        "bollinger": 0.48,
+        "trend": 0.9621,
+        "volume": 0.9007900000000001,
+        "support_resistance": 1.12,
+        "top_trader_signals": 1.5
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.115247",
+      "cycle": 3,
+      "regime": "Falso Rompimiento Alcista (Bull Trap)",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 3: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Falso Rompimiento Alcista (Bull Trap).",
+      "parameter_changes": {
+        "support_resistance": "Ajustado a 1.23x",
+        "volume": "Ajustado a 0.81x",
+        "trend": "Ajustado a 0.89x",
+        "rsi": "Ajustado a 0.41x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.329107",
+      "trade_id": "DEEP-SIM-C4-BTCUSDT",
+      "pnl": 980.0,
+      "win_rate": 22.641509433962266,
+      "strategy_weights": {
+        "rsi": 0.41,
+        "macd": 1.3343000000000003,
+        "bollinger": 0.48,
+        "trend": 0.9790000000000001,
+        "volume": 0.81,
+        "support_resistance": 1.23,
+        "top_trader_signals": 1.6500000000000001
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.346233",
+      "trade_id": "DEEP-SIM-C4-ETHUSDT",
+      "pnl": 310.0,
+      "win_rate": 24.074074074074073,
+      "strategy_weights": {
+        "rsi": 0.41,
+        "macd": 1.4897300000000004,
+        "bollinger": 0.48,
+        "trend": 1.0989000000000002,
+        "volume": 0.81,
+        "support_resistance": 1.23,
+        "top_trader_signals": 1.6700000000000002
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.362696",
+      "trade_id": "DEEP-SIM-C4-SOLUSDT",
+      "pnl": -210.0,
+      "win_rate": 23.636363636363637,
+      "strategy_weights": {
+        "rsi": 0.369,
+        "macd": 1.5097300000000005,
+        "bollinger": 0.48,
+        "trend": 1.1189000000000002,
+        "volume": 0.81,
+        "support_resistance": 1.107,
+        "top_trader_signals": 1.6700000000000002
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.382837",
+      "trade_id": "DEEP-SIM-C4-BNBUSDT",
+      "pnl": 190.0,
+      "win_rate": 25.0,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 1.5097300000000005,
+        "bollinger": 0.48,
+        "trend": 1.2307900000000003,
+        "volume": 0.81,
+        "support_resistance": 1.087,
+        "top_trader_signals": 1.8370000000000004
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.408990",
+      "trade_id": "DEEP-SIM-C4-LINKUSDT",
+      "pnl": 80.0,
+      "win_rate": 26.31578947368421,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 1.5097300000000005,
+        "bollinger": 0.48,
+        "trend": 1.3758690000000005,
+        "volume": 0.81,
+        "support_resistance": 1.087,
+        "top_trader_signals": 1.8570000000000004
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.418436",
+      "cycle": 4,
+      "regime": "Capitulaci\u00f3n Bajista (Crash del Mercado)",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 4: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Capitulaci\u00f3n Bajista (Crash del Mercado).",
+      "parameter_changes": {
+        "top_trader_signals": "Ajustado a 2.14x",
+        "trend": "Ajustado a 1.54x",
+        "macd": "Ajustado a 1.59x",
+        "rsi": "Ajustado a 0.31x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.639245",
+      "trade_id": "DEEP-SIM-C5-SOLUSDT",
+      "pnl": 280.0,
+      "win_rate": 27.586206896551722,
+      "strategy_weights": {
+        "rsi": 0.31,
+        "macd": 1.59,
+        "bollinger": 0.48,
+        "trend": 1.54,
+        "volume": 0.8910000000000001,
+        "support_resistance": 1.1957,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.654809",
+      "trade_id": "DEEP-SIM-C5-BNBUSDT",
+      "pnl": 195.0,
+      "win_rate": 28.8135593220339,
+      "strategy_weights": {
+        "rsi": 0.31,
+        "macd": 1.7490000000000003,
+        "bollinger": 0.48,
+        "trend": 1.54,
+        "volume": 1.0021000000000002,
+        "support_resistance": 1.2157,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.686140",
+      "trade_id": "DEEP-SIM-C5-LINKUSDT",
+      "pnl": 110.0,
+      "win_rate": 30.0,
+      "strategy_weights": {
+        "rsi": 0.341,
+        "macd": 1.7690000000000003,
+        "bollinger": 0.48,
+        "trend": 1.54,
+        "volume": 1.1243100000000004,
+        "support_resistance": 1.2157,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.715102",
+      "trade_id": "DEEP-SIM-C5-ETHUSDT",
+      "pnl": -120.0,
+      "win_rate": 29.508196721311474,
+      "strategy_weights": {
+        "rsi": 0.36100000000000004,
+        "macd": 1.7690000000000003,
+        "bollinger": 0.432,
+        "trend": 1.54,
+        "volume": 1.0298790000000004,
+        "support_resistance": 1.2157,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.734020",
+      "trade_id": "DEEP-SIM-C5-BTCUSDT",
+      "pnl": 450.0,
+      "win_rate": 30.64516129032258,
+      "strategy_weights": {
+        "rsi": 0.36100000000000004,
+        "macd": 1.7690000000000003,
+        "bollinger": 0.412,
+        "trend": 1.6940000000000002,
+        "volume": 1.1108669000000007,
+        "support_resistance": 1.2157,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.742579",
+      "cycle": 5,
+      "regime": "Pico de Volumen HFT (Flujo Institucional)",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 5: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Pico de Volumen HFT (Flujo Institucional).",
+      "parameter_changes": {
+        "volume": "Ajustado a 1.3x",
+        "support_resistance": "Ajustado a 1.28x",
+        "macd": "Ajustado a 1.86x",
+        "bollinger": "Ajustado a 0.39x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.956878",
+      "trade_id": "DEEP-SIM-C6-ETHUSDT",
+      "pnl": 340.0,
+      "win_rate": 31.746031746031743,
+      "strategy_weights": {
+        "rsi": 0.39710000000000006,
+        "macd": 1.86,
+        "bollinger": 0.39,
+        "trend": 1.8854000000000004,
+        "volume": 1.3,
+        "support_resistance": 1.4080000000000001,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.971853",
+      "trade_id": "DEEP-SIM-C6-BTCUSDT",
+      "pnl": 890.0,
+      "win_rate": 32.8125,
+      "strategy_weights": {
+        "rsi": 0.4171000000000001,
+        "macd": 2.0460000000000003,
+        "bollinger": 0.39,
+        "trend": 2.0959400000000006,
+        "volume": 1.3,
+        "support_resistance": 1.5708000000000002,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:41.986781",
+      "trade_id": "DEEP-SIM-C6-BNBUSDT",
+      "pnl": 150.0,
+      "win_rate": 33.84615384615385,
+      "strategy_weights": {
+        "rsi": 0.4588100000000001,
+        "macd": 2.0660000000000003,
+        "bollinger": 0.39,
+        "trend": 2.327534000000001,
+        "volume": 1.3,
+        "support_resistance": 1.5908000000000002,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.002573",
+      "trade_id": "DEEP-SIM-C6-SOLUSDT",
+      "pnl": 120.0,
+      "win_rate": 34.84848484848485,
+      "strategy_weights": {
+        "rsi": 0.4788100000000001,
+        "macd": 2.0660000000000003,
+        "bollinger": 0.39,
+        "trend": 2.582287400000001,
+        "volume": 1.4300000000000002,
+        "support_resistance": 1.5908000000000002,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.018194",
+      "trade_id": "DEEP-SIM-C6-LINKUSDT",
+      "pnl": -75.0,
+      "win_rate": 34.32835820895522,
+      "strategy_weights": {
+        "rsi": 0.4788100000000001,
+        "macd": 2.0660000000000003,
+        "bollinger": 0.35100000000000003,
+        "trend": 2.342058660000001,
+        "volume": 1.4500000000000002,
+        "support_resistance": 1.5908000000000002,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.024582",
+      "cycle": 6,
+      "regime": "Correcci\u00f3n Saludable en Canal Alcista",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 6: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Correcci\u00f3n Saludable en Canal Alcista.",
+      "parameter_changes": {
+        "trend": "Ajustado a 2.55x",
+        "support_resistance": "Ajustado a 1.75x",
+        "rsi": "Ajustado a 0.5x",
+        "bollinger": "Ajustado a 0.3x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.237322",
+      "trade_id": "DEEP-SIM-C7-LINKUSDT",
+      "pnl": 190.0,
+      "win_rate": 35.294117647058826,
+      "strategy_weights": {
+        "rsi": 0.5,
+        "macd": 2.0660000000000003,
+        "bollinger": 0.33,
+        "trend": 2.55,
+        "volume": 1.5950000000000004,
+        "support_resistance": 1.75,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.262809",
+      "trade_id": "DEEP-SIM-C7-SOLUSDT",
+      "pnl": 240.0,
+      "win_rate": 36.231884057971016,
+      "strategy_weights": {
+        "rsi": 0.5,
+        "macd": 2.2726000000000006,
+        "bollinger": 0.38500000000000006,
+        "trend": 2.55,
+        "volume": 1.6150000000000004,
+        "support_resistance": 1.75,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.278446",
+      "trade_id": "DEEP-SIM-C7-ETHUSDT",
+      "pnl": 410.0,
+      "win_rate": 37.142857142857146,
+      "strategy_weights": {
+        "rsi": 0.5,
+        "macd": 2.2926000000000006,
+        "bollinger": 0.4455000000000001,
+        "trend": 2.805,
+        "volume": 1.6150000000000004,
+        "support_resistance": 1.75,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.291424",
+      "trade_id": "DEEP-SIM-C7-BNBUSDT",
+      "pnl": -95.0,
+      "win_rate": 36.61971830985916,
+      "strategy_weights": {
+        "rsi": 0.45,
+        "macd": 2.2926000000000006,
+        "bollinger": 0.41895000000000016,
+        "trend": 2.825,
+        "volume": 1.6150000000000004,
+        "support_resistance": 1.75,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.309828",
+      "trade_id": "DEEP-SIM-C7-BTCUSDT",
+      "pnl": 950.0,
+      "win_rate": 37.5,
+      "strategy_weights": {
+        "rsi": 0.43,
+        "macd": 2.2926000000000006,
+        "bollinger": 0.4388450000000002,
+        "trend": 3.0,
+        "volume": 1.7765000000000006,
+        "support_resistance": 1.75,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.318903",
+      "cycle": 7,
+      "regime": "Compresi\u00f3n de Volatilidad Extrema (Squeeze)",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 7: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Compresi\u00f3n de Volatilidad Extrema (Squeeze).",
+      "parameter_changes": {
+        "bollinger": "Ajustado a 0.55x",
+        "volume": "Ajustado a 1.89x",
+        "trend": "Ajustado a 3.15x",
+        "rsi": "Ajustado a 0.41x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.535585",
+      "trade_id": "DEEP-SIM-C8-BTCUSDT",
+      "pnl": -120.0,
+      "win_rate": 36.986301369863014,
+      "strategy_weights": {
+        "rsi": 0.41,
+        "macd": 2.2926000000000006,
+        "bollinger": 0.55,
+        "trend": 2.835,
+        "volume": 1.7009999999999998,
+        "support_resistance": 1.75,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.571764",
+      "trade_id": "DEEP-SIM-C8-ETHUSDT",
+      "pnl": -85.0,
+      "win_rate": 36.486486486486484,
+      "strategy_weights": {
+        "rsi": 0.369,
+        "macd": 2.2926000000000006,
+        "bollinger": 0.55,
+        "trend": 2.815,
+        "volume": 1.6809999999999998,
+        "support_resistance": 1.575,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.587839",
+      "trade_id": "DEEP-SIM-C8-SOLUSDT",
+      "pnl": -55.0,
+      "win_rate": 36.0,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.0633400000000006,
+        "bollinger": 0.49500000000000005,
+        "trend": 2.815,
+        "volume": 1.6809999999999998,
+        "support_resistance": 1.555,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.603036",
+      "trade_id": "DEEP-SIM-C8-LINKUSDT",
+      "pnl": -40.0,
+      "win_rate": 35.526315789473685,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.0433400000000006,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.5335,
+        "volume": 1.6809999999999998,
+        "support_resistance": 1.555,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.641735",
+      "trade_id": "DEEP-SIM-C8-BNBUSDT",
+      "pnl": 30.0,
+      "win_rate": 36.36363636363637,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.0433400000000006,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.5135,
+        "volume": 1.6809999999999998,
+        "support_resistance": 1.7105000000000001,
+        "top_trader_signals": 2.14
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.675073",
+      "cycle": 8,
+      "regime": "Racha de P\u00e9rdidas de Pr\u00e1ctica (Auto-Mutaci\u00f3n)",
+      "win_rate_sim": 20.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 8: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Racha de P\u00e9rdidas de Pr\u00e1ctica (Auto-Mutaci\u00f3n).",
+      "parameter_changes": {
+        "top_trader_signals": "Ajustado a 2.46x",
+        "support_resistance": "Ajustado a 1.82x",
+        "volume": "Ajustado a 1.51x",
+        "trend": "Ajustado a 2.39x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.889394",
+      "trade_id": "DEEP-SIM-C9-BNBUSDT",
+      "pnl": 185.0,
+      "win_rate": 37.17948717948718,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.0433400000000006,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.6290000000000004,
+        "volume": 1.51,
+        "support_resistance": 1.82,
+        "top_trader_signals": 2.706
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.903361",
+      "trade_id": "DEEP-SIM-C9-SOLUSDT",
+      "pnl": 290.0,
+      "win_rate": 37.9746835443038,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.247674000000001,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.6490000000000005,
+        "volume": 1.51,
+        "support_resistance": 1.82,
+        "top_trader_signals": 2.9986
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.919604",
+      "trade_id": "DEEP-SIM-C9-ETHUSDT",
+      "pnl": 395.0,
+      "win_rate": 38.75,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.267674000000001,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.6490000000000005,
+        "volume": 1.6610000000000003,
+        "support_resistance": 1.82,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.934321",
+      "trade_id": "DEEP-SIM-C9-LINKUSDT",
+      "pnl": 80.0,
+      "win_rate": 39.50617283950617,
+      "strategy_weights": {
+        "rsi": 0.349,
+        "macd": 2.267674000000001,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.6490000000000005,
+        "volume": 1.6810000000000003,
+        "support_resistance": 1.82,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.961327",
+      "trade_id": "DEEP-SIM-C9-BTCUSDT",
+      "pnl": -110.0,
+      "win_rate": 39.02439024390244,
+      "strategy_weights": {
+        "rsi": 0.3141,
+        "macd": 2.267674000000001,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.3841000000000006,
+        "volume": 1.6810000000000003,
+        "support_resistance": 1.82,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:42.969955",
+      "cycle": 9,
+      "regime": "Arbitraje de Tasas y Correlaciones Macro",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 9: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen Arbitraje de Tasas y Correlaciones Macro.",
+      "parameter_changes": {
+        "top_trader_signals": "Ajustado a 3.6x",
+        "trend": "Ajustado a 2.48x",
+        "rsi": "Ajustado a 0.28x",
+        "support_resistance": "Ajustado a 1.82x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:43.191445",
+      "trade_id": "DEEP-SIM-C10-BTCUSDT",
+      "pnl": 590.0,
+      "win_rate": 39.75903614457831,
+      "strategy_weights": {
+        "rsi": 0.30800000000000005,
+        "macd": 2.4944414000000013,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.728,
+        "volume": 1.6810000000000003,
+        "support_resistance": 1.82,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:43.233893",
+      "trade_id": "DEEP-SIM-C10-ETHUSDT",
+      "pnl": 280.0,
+      "win_rate": 40.476190476190474,
+      "strategy_weights": {
+        "rsi": 0.3608000000000001,
+        "macd": 2.5144414000000013,
+        "bollinger": 0.47500000000000003,
+        "trend": 2.748,
+        "volume": 1.6810000000000003,
+        "support_resistance": 2.0020000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:43.257944",
+      "trade_id": "DEEP-SIM-C10-BNBUSDT",
+      "pnl": 110.0,
+      "win_rate": 41.17647058823529,
+      "strategy_weights": {
+        "rsi": 0.4188800000000002,
+        "macd": 2.5144414000000013,
+        "bollinger": 0.5225000000000001,
+        "trend": 2.748,
+        "volume": 1.6810000000000003,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:43.277886",
+      "trade_id": "DEEP-SIM-C10-SOLUSDT",
+      "pnl": 140.0,
+      "win_rate": 41.86046511627907,
+      "strategy_weights": {
+        "rsi": 0.4388800000000002,
+        "macd": 2.7658855400000015,
+        "bollinger": 0.5425000000000001,
+        "trend": 2.748,
+        "volume": 1.8491000000000004,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:43.303159",
+      "trade_id": "DEEP-SIM-C10-LINKUSDT",
+      "pnl": -30.0,
+      "win_rate": 41.37931034482759,
+      "strategy_weights": {
+        "rsi": 0.4388800000000002,
+        "macd": 2.7858855400000015,
+        "bollinger": 0.4882500000000001,
+        "trend": 2.748,
+        "volume": 1.8691000000000004,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T01:47:43.313722",
+      "cycle": 10,
+      "regime": "R\u00e9gimen de Equilibrio y Consistencia Macro",
+      "win_rate_sim": 80.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 10: Optimizaci\u00f3n del cerebro completada bajo el r\u00e9gimen R\u00e9gimen de Equilibrio y Consistencia Macro.",
+      "parameter_changes": {
+        "rsi": "Ajustado a 0.48x",
+        "macd": "Ajustado a 2.93x",
+        "trend": "Ajustado a 2.89x",
+        "bollinger": "Ajustado a 0.47x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T10:27:22.484972",
+      "trade_id": "auto_BNBUSDT_1779632842",
+      "pnl": 0.0,
+      "win_rate": 40.909090909090914,
+      "strategy_weights": {
+        "rsi": 0.48,
+        "macd": 2.93,
+        "bollinger": 0.47,
+        "trend": 2.89,
+        "volume": 1.8691000000000004,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T12:29:00.635873",
+      "trade_id": "auto_ETHUSDT_1779640140",
+      "pnl": 0.0,
+      "win_rate": 40.44943820224719,
+      "strategy_weights": {
+        "rsi": 0.48,
+        "macd": 2.93,
+        "bollinger": 0.47,
+        "trend": 2.89,
+        "volume": 1.8691000000000004,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T13:56:27.489085",
+      "mutation_applied": true,
+      "risk_regime": "NORMAL",
+      "reason": "Condiciones normales y estables de rentabilidad",
+      "metrics": {
+        "consecutive_losses": 0,
+        "win_rate_recent": 100.0
+      },
+      "parameter_changes": {
+        "confidence": "70% -> 70%",
+        "position_size": "$11.0 -> $50.0",
+        "risk_level": "moderate -> moderate"
+      },
+      "message": "\ud83d\ude80 MUTACI\u00d3N DE CRECIMIENTO: Par\u00e1metros optimizados restablecidos a niveles normales (Confianza: 70%, Posici\u00f3n: $50.0 USD) al normalizarse el win rate."
+    },
+    {
+      "timestamp": "2026-05-24T22:32:34.918955",
+      "trade_id": "AUTO-EVOLUTION-C1-BTCUSDT",
+      "pnl": 10.799999999999999,
+      "win_rate": 41.11111111111111,
+      "strategy_weights": {
+        "rsi": 0.48,
+        "macd": 2.93,
+        "bollinger": 0.517,
+        "trend": 3.0,
+        "volume": 2.0560100000000006,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:34.940472",
+      "cycle": 1,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BOLLINGER_SQUEEZE_OUT",
+      "trade_id": "AUTO-EVOLUTION-C1-BTCUSDT",
+      "pnl": 10.8,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 1: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en BTCUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "bollinger": "Incrementado a 0.56x",
+        "volume": "Incrementado a 2.18x",
+        "trend": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:35.622800",
+      "trade_id": "AUTO-EVOLUTION-C2-ETHUSDT",
+      "pnl": 9.648000000000001,
+      "win_rate": 41.75824175824176,
+      "strategy_weights": {
+        "rsi": 0.528,
+        "macd": 2.93,
+        "bollinger": 0.56,
+        "trend": 3.0,
+        "volume": 2.18,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.6
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:35.631385",
+      "cycle": 2,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BULLISH_ENGULFING",
+      "trade_id": "AUTO-EVOLUTION-C2-ETHUSDT",
+      "pnl": 9.65,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 2: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en ETHUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "rsi": "Incrementado a 0.58x",
+        "trend": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:36.253747",
+      "trade_id": "AUTO-EVOLUTION-C3-SOLUSDT",
+      "pnl": 15.340499999999999,
+      "win_rate": 42.391304347826086,
+      "strategy_weights": {
+        "rsi": 0.58,
+        "macd": 2.93,
+        "bollinger": 0.56,
+        "trend": 3.0,
+        "volume": 2.18,
+        "support_resistance": 2.0220000000000002,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:36.394170",
+      "cycle": 3,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BTC_CORRELATION_ALIGNED",
+      "trade_id": "AUTO-EVOLUTION-C3-SOLUSDT",
+      "pnl": 15.34,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 3: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en SOLUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "top_trader_signals": "Incrementado a 3.0x",
+        "trend": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:37.019192",
+      "trade_id": "AUTO-EVOLUTION-C4-BNBUSDT",
+      "pnl": 8.917919999999999,
+      "win_rate": 43.01075268817204,
+      "strategy_weights": {
+        "rsi": 0.58,
+        "macd": 2.93,
+        "bollinger": 0.56,
+        "trend": 3.0,
+        "volume": 2.18,
+        "support_resistance": 2.2242000000000006,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:37.031214",
+      "cycle": 4,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: EMA_50_REBOUND",
+      "trade_id": "AUTO-EVOLUTION-C4-BNBUSDT",
+      "pnl": 8.92,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 4: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en BNBUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "trend": "Incrementado a 3.0x",
+        "support_resistance": "Incrementado a 2.36x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:37.655047",
+      "trade_id": "AUTO-EVOLUTION-C5-DOTUSDT",
+      "pnl": 12.850859999999999,
+      "win_rate": 43.61702127659575,
+      "strategy_weights": {
+        "rsi": 0.638,
+        "macd": 2.93,
+        "bollinger": 0.56,
+        "trend": 3.0,
+        "volume": 2.18,
+        "support_resistance": 2.596,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:37.676063",
+      "cycle": 5,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: DOUBLE_BOTTOM",
+      "trade_id": "AUTO-EVOLUTION-C5-DOTUSDT",
+      "pnl": 12.85,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 5: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en DOTUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "support_resistance": "Incrementado a 2.75x",
+        "rsi": "Incrementado a 0.69x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:38.295591",
+      "trade_id": "AUTO-EVOLUTION-C6-LINKUSDT",
+      "pnl": 11.20824,
+      "win_rate": 44.21052631578947,
+      "strategy_weights": {
+        "rsi": 0.69,
+        "macd": 2.93,
+        "bollinger": 0.56,
+        "trend": 3.0,
+        "volume": 2.3980000000000006,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:38.307426",
+      "cycle": 6,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: SUPPORT_BOUNCE",
+      "trade_id": "AUTO-EVOLUTION-C6-LINKUSDT",
+      "pnl": 11.21,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 6: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en LINKUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "support_resistance": "Incrementado a 3.0x",
+        "volume": "Incrementado a 2.54x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:38.868529",
+      "trade_id": "AUTO-EVOLUTION-C7-ADAUSDT",
+      "pnl": 9.18834,
+      "win_rate": 44.79166666666667,
+      "strategy_weights": {
+        "rsi": 0.759,
+        "macd": 2.93,
+        "bollinger": 0.6160000000000001,
+        "trend": 3.0,
+        "volume": 2.54,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:38.879733",
+      "cycle": 7,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: RSI_OVERSOLD",
+      "trade_id": "AUTO-EVOLUTION-C7-ADAUSDT",
+      "pnl": 9.19,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 7: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en ADAUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "rsi": "Incrementado a 0.82x",
+        "bollinger": "Incrementado a 0.67x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:39.493010",
+      "trade_id": "AUTO-EVOLUTION-C8-BTCUSDT",
+      "pnl": 19.148640000000004,
+      "win_rate": 45.36082474226804,
+      "strategy_weights": {
+        "rsi": 0.82,
+        "macd": 2.93,
+        "bollinger": 0.67,
+        "trend": 3.0,
+        "volume": 2.7940000000000005,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:39.503349",
+      "cycle": 8,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: INSTITUTIONAL_BUY_SPON",
+      "trade_id": "AUTO-EVOLUTION-C8-BTCUSDT",
+      "pnl": 19.15,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 8: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en BTCUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "volume": "Incrementado a 2.95x",
+        "top_trader_signals": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:40.342762",
+      "trade_id": "AUTO-EVOLUTION-C9-SOLUSDT",
+      "pnl": 19.27458,
+      "win_rate": 45.91836734693878,
+      "strategy_weights": {
+        "rsi": 0.82,
+        "macd": 3.0,
+        "bollinger": 0.67,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:40.361259",
+      "cycle": 9,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: VOLUME_SURGE_BOUNCE",
+      "trade_id": "AUTO-EVOLUTION-C9-SOLUSDT",
+      "pnl": 19.27,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 9: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en SOLUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "volume": "Incrementado a 3.0x",
+        "macd": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:41.028514",
+      "trade_id": "AUTO-EVOLUTION-C10-ETHUSDT",
+      "pnl": 15.982800000000001,
+      "win_rate": 46.464646464646464,
+      "strategy_weights": {
+        "rsi": 0.902,
+        "macd": 3.0,
+        "bollinger": 0.67,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:41.045013",
+      "cycle": 10,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: LIQUIDITY_HUNT_WIN",
+      "trade_id": "AUTO-EVOLUTION-C10-ETHUSDT",
+      "pnl": 15.98,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 10: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en ETHUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "rsi": "Incrementado a 0.97x",
+        "volume": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:41.616081",
+      "trade_id": "AUTO-EVOLUTION-C11-BNBUSDT",
+      "pnl": 18.63576,
+      "win_rate": 47.0,
+      "strategy_weights": {
+        "rsi": 1.067,
+        "macd": 3.0,
+        "bollinger": 0.67,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:41.630017",
+      "cycle": 11,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: FIBONACCI_618_BOUNCE",
+      "trade_id": "AUTO-EVOLUTION-C11-BNBUSDT",
+      "pnl": 18.64,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 11: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en BNBUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "trend": "Incrementado a 3.0x",
+        "rsi": "Incrementado a 1.14x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:42.221617",
+      "trade_id": "AUTO-EVOLUTION-C12-ADAUSDT",
+      "pnl": 14.448,
+      "win_rate": 47.524752475247524,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.67,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:42.240276",
+      "cycle": 12,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: ORDER_IMBALANCE_WIN",
+      "trade_id": "AUTO-EVOLUTION-C12-ADAUSDT",
+      "pnl": 14.45,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 12: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en ADAUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "volume": "Incrementado a 3.0x",
+        "support_resistance": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:42.918719",
+      "trade_id": "AUTO-EVOLUTION-C13-DOTUSDT",
+      "pnl": 24.6051,
+      "win_rate": 48.03921568627451,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.7370000000000001,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:42.938455",
+      "cycle": 13,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BOLLINGER_SQUEEZE_OUT",
+      "trade_id": "AUTO-EVOLUTION-C13-DOTUSDT",
+      "pnl": 24.61,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 13: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en DOTUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "bollinger": "Incrementado a 0.79x",
+        "volume": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:43.579610",
+      "trade_id": "AUTO-EVOLUTION-C14-LINKUSDT",
+      "pnl": 18.36324,
+      "win_rate": 48.54368932038835,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.79,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:43.590884",
+      "cycle": 14,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BTC_CORRELATION_ALIGNED",
+      "trade_id": "AUTO-EVOLUTION-C14-LINKUSDT",
+      "pnl": 18.36,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 14: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en LINKUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "top_trader_signals": "Incrementado a 3.0x",
+        "trend": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:44.175105",
+      "trade_id": "AUTO-EVOLUTION-C15-SOLUSDT",
+      "pnl": 25.80624,
+      "win_rate": 49.03846153846153,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.79,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:44.187002",
+      "cycle": 15,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: EMA_50_REBOUND",
+      "trade_id": "AUTO-EVOLUTION-C15-SOLUSDT",
+      "pnl": 25.81,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 15: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en SOLUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "trend": "Incrementado a 3.0x",
+        "support_resistance": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:44.742399",
+      "trade_id": "AUTO-EVOLUTION-C16-BTCUSDT",
+      "pnl": 34.5807,
+      "win_rate": 49.523809523809526,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.79,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:44.753040",
+      "cycle": 16,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: DOUBLE_BOTTOM",
+      "trade_id": "AUTO-EVOLUTION-C16-BTCUSDT",
+      "pnl": 34.58,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 16: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en BTCUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "support_resistance": "Incrementado a 3.0x",
+        "macd": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:45.330196",
+      "trade_id": "AUTO-EVOLUTION-C17-ETHUSDT",
+      "pnl": 25.128600000000002,
+      "win_rate": 50.0,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.79,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:45.344771",
+      "cycle": 17,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: VOLUME_SURGE_BOUNCE",
+      "trade_id": "AUTO-EVOLUTION-C17-ETHUSDT",
+      "pnl": 25.13,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 17: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en ETHUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "volume": "Incrementado a 3.0x",
+        "trend": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:46.126058",
+      "trade_id": "AUTO-EVOLUTION-C18-SOLUSDT",
+      "pnl": 42.61824,
+      "win_rate": 50.467289719626166,
+      "strategy_weights": {
+        "rsi": 1.14,
+        "macd": 3.0,
+        "bollinger": 0.79,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:46.153436",
+      "cycle": 18,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: INSTITUTIONAL_BUY_SPON",
+      "trade_id": "AUTO-EVOLUTION-C18-SOLUSDT",
+      "pnl": 42.62,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 18: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en SOLUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "volume": "Incrementado a 3.0x",
+        "top_trader_signals": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:46.796781",
+      "trade_id": "AUTO-EVOLUTION-C19-LINKUSDT",
+      "pnl": 26.274239999999995,
+      "win_rate": 50.92592592592593,
+      "strategy_weights": {
+        "rsi": 1.254,
+        "macd": 3.0,
+        "bollinger": 0.79,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:46.809511",
+      "cycle": 19,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BULLISH_ENGULFING",
+      "trade_id": "AUTO-EVOLUTION-C19-LINKUSDT",
+      "pnl": 26.27,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 19: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en LINKUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "rsi": "Incrementado a 1.34x",
+        "macd": "Incrementado a 3.0x"
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:47.439887",
+      "trade_id": "AUTO-EVOLUTION-C20-BTCUSDT",
+      "pnl": 55.38564,
+      "win_rate": 51.37614678899083,
+      "strategy_weights": {
+        "rsi": 1.34,
+        "macd": 3.0,
+        "bollinger": 0.8690000000000001,
+        "trend": 3.0,
+        "volume": 3.0,
+        "support_resistance": 3.0,
+        "top_trader_signals": 3.0
+      }
+    },
+    {
+      "timestamp": "2026-05-24T22:32:47.452834",
+      "cycle": 20,
+      "regime": "Hiper-Optimizaci\u00f3n del P&L: BOLLINGER_SQUEEZE_OUT",
+      "trade_id": "AUTO-EVOLUTION-C20-BTCUSDT",
+      "pnl": 55.39,
+      "win_rate_sim": 100.0,
+      "message": "\ud83e\udd16 \u00c9POCA DE APRENDIZAJE 20: Optimizaci\u00f3n y auto-mutaci\u00f3n neuronal completada en BTCUSDT. Peso de estrategias recalibrado.",
+      "parameter_changes": {
+        "bollinger": "Incrementado a 0.93x",
+        "volume": "Incrementado a 3.0x",
+        "trend": "Incrementado a 3.0x"
+      }
+    }
+  ],
+  "current_strategy_weights": {
+    "rsi": 1.34,
+    "macd": 3.0,
+    "bollinger": 0.93,
+    "trend": 3.0,
+    "volume": 3.0,
+    "support_resistance": 3.0,
+    "top_trader_signals": 3.0
+  },
+  "trade_results": [
+    {
+      "trade_id": "whipsaw_00",
+      "pnl": -3.33,
+      "side": "LONG",
+      "timestamp": "2026-05-23T14:32:57.978993"
+    },
+    {
+      "trade_id": "whipsaw_01",
+      "pnl": -3.33,
+      "side": "LONG",
+      "timestamp": "2026-05-23T14:32:58.007665"
+    },
+    {
+      "trade_id": "whipsaw_02",
+      "pnl": -3.33,
+      "side": "LONG",
+      "timestamp": "2026-05-23T14:32:58.036655"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779572937",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-23T17:48:57.436874"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779578573",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-23T19:22:53.795209"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779580209",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-23T19:50:09.845720"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779580971",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-23T20:02:51.129800"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779582238",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-23T20:23:58.926817"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779599683",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:14:43.163728"
+    },
+    {
+      "trade_id": "auto_BTCUSDT_1779600733",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:32:13.810766"
+    },
+    {
+      "trade_id": "auto_ETHUSDT_1779600734",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:32:14.895924"
+    },
+    {
+      "trade_id": "auto_BNBUSDT_1779600735",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:32:15.929781"
+    },
+    {
+      "trade_id": "auto_SOLUSDT_1779600737",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:32:17.048598"
+    },
+    {
+      "trade_id": "auto_LINKUSDT_1779600744",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:32:24.741896"
+    },
+    {
+      "trade_id": "DEEP-SIM-C1-BTCUSDT",
+      "pnl": 850.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.492929"
+    },
+    {
+      "trade_id": "DEEP-SIM-C1-ETHUSDT",
+      "pnl": 240.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.519513"
+    },
+    {
+      "trade_id": "DEEP-SIM-C1-SOLUSDT",
+      "pnl": 180.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.540177"
+    },
+    {
+      "trade_id": "DEEP-SIM-C1-LINKUSDT",
+      "pnl": 90.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.557343"
+    },
+    {
+      "trade_id": "DEEP-SIM-C1-BNBUSDT",
+      "pnl": -45.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.577206"
+    },
+    {
+      "trade_id": "DEEP-SIM-C2-SOLUSDT",
+      "pnl": 120.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.800681"
+    },
+    {
+      "trade_id": "DEEP-SIM-C2-BNBUSDT",
+      "pnl": 95.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:40.813528"
+    },
+    {
+      "trade_id": "DEEP-SIM-C2-LINKUSDT",
+      "pnl": 45.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.830751"
+    },
+    {
+      "trade_id": "DEEP-SIM-C2-ETHUSDT",
+      "pnl": 70.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:40.839601"
+    },
+    {
+      "trade_id": "DEEP-SIM-C2-BTCUSDT",
+      "pnl": -80.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:40.850527"
+    },
+    {
+      "trade_id": "DEEP-SIM-C3-BTCUSDT",
+      "pnl": -150.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.066341"
+    },
+    {
+      "trade_id": "DEEP-SIM-C3-ETHUSDT",
+      "pnl": -90.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.078854"
+    },
+    {
+      "trade_id": "DEEP-SIM-C3-SOLUSDT",
+      "pnl": -60.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.092983"
+    },
+    {
+      "trade_id": "DEEP-SIM-C3-LINKUSDT",
+      "pnl": 35.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.100673"
+    },
+    {
+      "trade_id": "DEEP-SIM-C3-BNBUSDT",
+      "pnl": -40.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.109626"
+    },
+    {
+      "trade_id": "DEEP-SIM-C4-BTCUSDT",
+      "pnl": 980.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:41.329128"
+    },
+    {
+      "trade_id": "DEEP-SIM-C4-ETHUSDT",
+      "pnl": 310.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:41.346263"
+    },
+    {
+      "trade_id": "DEEP-SIM-C4-SOLUSDT",
+      "pnl": -210.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.362774"
+    },
+    {
+      "trade_id": "DEEP-SIM-C4-BNBUSDT",
+      "pnl": 190.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:41.382922"
+    },
+    {
+      "trade_id": "DEEP-SIM-C4-LINKUSDT",
+      "pnl": 80.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:41.409017"
+    },
+    {
+      "trade_id": "DEEP-SIM-C5-SOLUSDT",
+      "pnl": 280.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.639328"
+    },
+    {
+      "trade_id": "DEEP-SIM-C5-BNBUSDT",
+      "pnl": 195.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.654831"
+    },
+    {
+      "trade_id": "DEEP-SIM-C5-LINKUSDT",
+      "pnl": 110.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.686165"
+    },
+    {
+      "trade_id": "DEEP-SIM-C5-ETHUSDT",
+      "pnl": -120.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.715124"
+    },
+    {
+      "trade_id": "DEEP-SIM-C5-BTCUSDT",
+      "pnl": 450.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.734041"
+    },
+    {
+      "trade_id": "DEEP-SIM-C6-ETHUSDT",
+      "pnl": 340.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.956966"
+    },
+    {
+      "trade_id": "DEEP-SIM-C6-BTCUSDT",
+      "pnl": 890.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.971892"
+    },
+    {
+      "trade_id": "DEEP-SIM-C6-BNBUSDT",
+      "pnl": 150.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:41.986803"
+    },
+    {
+      "trade_id": "DEEP-SIM-C6-SOLUSDT",
+      "pnl": 120.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.002638"
+    },
+    {
+      "trade_id": "DEEP-SIM-C6-LINKUSDT",
+      "pnl": -75.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.018223"
+    },
+    {
+      "trade_id": "DEEP-SIM-C7-LINKUSDT",
+      "pnl": 190.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.237360"
+    },
+    {
+      "trade_id": "DEEP-SIM-C7-SOLUSDT",
+      "pnl": 240.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.262856"
+    },
+    {
+      "trade_id": "DEEP-SIM-C7-ETHUSDT",
+      "pnl": 410.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.278472"
+    },
+    {
+      "trade_id": "DEEP-SIM-C7-BNBUSDT",
+      "pnl": -95.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.291458"
+    },
+    {
+      "trade_id": "DEEP-SIM-C7-BTCUSDT",
+      "pnl": 950.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.309860"
+    },
+    {
+      "trade_id": "DEEP-SIM-C8-BTCUSDT",
+      "pnl": -120.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.535612"
+    },
+    {
+      "trade_id": "DEEP-SIM-C8-ETHUSDT",
+      "pnl": -85.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.571811"
+    },
+    {
+      "trade_id": "DEEP-SIM-C8-SOLUSDT",
+      "pnl": -55.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.587891"
+    },
+    {
+      "trade_id": "DEEP-SIM-C8-LINKUSDT",
+      "pnl": -40.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.603065"
+    },
+    {
+      "trade_id": "DEEP-SIM-C8-BNBUSDT",
+      "pnl": 30.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.641774"
+    },
+    {
+      "trade_id": "DEEP-SIM-C9-BNBUSDT",
+      "pnl": 185.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.889419"
+    },
+    {
+      "trade_id": "DEEP-SIM-C9-SOLUSDT",
+      "pnl": 290.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.903386"
+    },
+    {
+      "trade_id": "DEEP-SIM-C9-ETHUSDT",
+      "pnl": 395.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.919625"
+    },
+    {
+      "trade_id": "DEEP-SIM-C9-LINKUSDT",
+      "pnl": 80.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.934413"
+    },
+    {
+      "trade_id": "DEEP-SIM-C9-BTCUSDT",
+      "pnl": -110.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:42.961380"
+    },
+    {
+      "trade_id": "DEEP-SIM-C10-BTCUSDT",
+      "pnl": 590.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:43.191533"
+    },
+    {
+      "trade_id": "DEEP-SIM-C10-ETHUSDT",
+      "pnl": 280.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:43.233953"
+    },
+    {
+      "trade_id": "DEEP-SIM-C10-BNBUSDT",
+      "pnl": 110.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T01:47:43.257971"
+    },
+    {
+      "trade_id": "DEEP-SIM-C10-SOLUSDT",
+      "pnl": 140.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:43.279107"
+    },
+    {
+      "trade_id": "DEEP-SIM-C10-LINKUSDT",
+      "pnl": -30.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T01:47:43.303212"
+    },
+    {
+      "trade_id": "auto_BNBUSDT_1779632842",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-24T10:27:22.484993"
+    },
+    {
+      "trade_id": "auto_ETHUSDT_1779640140",
+      "pnl": 0.0,
+      "side": "SELL",
+      "timestamp": "2026-05-24T12:29:00.635894"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C1-BTCUSDT",
+      "pnl": 10.799999999999999,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:34.919229"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C2-ETHUSDT",
+      "pnl": 9.648000000000001,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:35.622825"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C3-SOLUSDT",
+      "pnl": 15.340499999999999,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:36.253797"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C4-BNBUSDT",
+      "pnl": 8.917919999999999,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:37.019261"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C5-DOTUSDT",
+      "pnl": 12.850859999999999,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:37.655075"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C6-LINKUSDT",
+      "pnl": 11.20824,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:38.295670"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C7-ADAUSDT",
+      "pnl": 9.18834,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:38.868570"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C8-BTCUSDT",
+      "pnl": 19.148640000000004,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:39.493032"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C9-SOLUSDT",
+      "pnl": 19.27458,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:40.342815"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C10-ETHUSDT",
+      "pnl": 15.982800000000001,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:41.028545"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C11-BNBUSDT",
+      "pnl": 18.63576,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:41.616118"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C12-ADAUSDT",
+      "pnl": 14.448,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:42.221785"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C13-DOTUSDT",
+      "pnl": 24.6051,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:42.918784"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C14-LINKUSDT",
+      "pnl": 18.36324,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:43.579637"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C15-SOLUSDT",
+      "pnl": 25.80624,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:44.175152"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C16-BTCUSDT",
+      "pnl": 34.5807,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:44.742429"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C17-ETHUSDT",
+      "pnl": 25.128600000000002,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:45.330252"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C18-SOLUSDT",
+      "pnl": 42.61824,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:46.126140"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C19-LINKUSDT",
+      "pnl": 26.274239999999995,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:46.796805"
+    },
+    {
+      "trade_id": "AUTO-EVOLUTION-C20-BTCUSDT",
+      "pnl": 55.38564,
+      "side": "LONG",
+      "timestamp": "2026-05-24T22:32:47.440007"
+    }
+  ]
+}

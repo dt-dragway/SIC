@@ -1,0 +1,27 @@
+{
+  "venvPath": ".",
+  "venv": "venv",
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportAttributeAccessIssue": false,
+  "reportArgumentType": false,
+  "reportAssignmentType": false,
+  "reportOperatorIssue": false,
+  "reportReturnType": false,
+  "reportIndexIssue": false,
+  "reportCallIssue": false,
+  "useLibraryCodeForTypes": true,
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "pythonVersion": "3.12"
+    }
+  ],
+  "exclude": [
+    "scratch/**",
+    "**/migrations/**",
+    "**/__pycache__/**"
+  ]
+}

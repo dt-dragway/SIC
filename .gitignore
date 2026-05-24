@@ -1,0 +1,73 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite3
+
+# Models (large files)
+models/*.model
+models/*.pkl
+models/*.h5
+
+# Node
+node_modules/
+.next/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.pem
+*.key
+
+# Docker
+.docker/
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+
+# MLflow
+mlruns/
+
+# AI/ML Memory and backups
+backend/app/ml/agent_memory.json
+backend/app/ml/backups/
+backend/app/ml/knowledge_base/chroma_db/
+backend/app/ml/knowledge_base/books/
+
+# Secrets and Sensitive Data
+CREDENCIALES.md
+MEMORIA_PERSISTENCIA.md
+BACKUP_CRITICAL/
+database/
+.env
+*.pem
+*.key
+
+# Temp / Local Files
+login_response.json
+backend.log
+*.json_backup

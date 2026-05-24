@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-02-08T03:27:23.816756",
+  "version": "1.0",
+  "total_trades": 100,
+  "winning_trades": 65,
+  "losing_trades": 0,
+  "total_pnl": 0.0,
+  "best_trade": null,
+  "worst_trade": null,
+  "patterns_learned": {},
+  "strategy_performance": {},
+  "market_insights": [],
+  "evolution_history": [],
+  "current_strategy_weights": {
+    "rsi": 1.0,
+    "macd": 1.0,
+    "bollinger": 1.0,
+    "trend": 1.0,
+    "volume": 1.0,
+    "support_resistance": 1.0,
+    "top_trader_signals": 1.5
+  }
+}
