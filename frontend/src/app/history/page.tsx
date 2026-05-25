@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useWallet } from '@/context/WalletContext';
+import { useAuth } from '@/hooks/useAuth';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import {
     History,
     TrendingUp,
@@ -44,27 +46,28 @@ interface Stats {
 
 
 export default function HistoryPage() {
+    const { isAuthenticated, loading: authLoading } = useAuth();
     const { mode } = useWallet();
     const [activeTab, setActiveTab] = useState<'TRADING' | 'P2P'>('TRADING');
     const [trades, setTrades] = useState<Trade[]>([]);
     const [stats, setStats] = useState<Stats>({ total_trades: 0, win_rate: 0, total_pnl: 0, volume: 0 });
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('ALL');
-    const [selectedDay, setSelectedDay] = useState<string>('ALL');
-    const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
-    const [selectedYear, setSelectedYear] = useState<string>('ALL');
+    const [timeRange, setTimeRange] = useState('ALL'); // Nuevo sistema de rango: ALL, 24H, 7D, 30D
 
     // Estado de Paginación Premium
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 15; // 15 operaciones por página
+    const itemsPerPage = 15;
 
     useEffect(() => {
-        fetchHistory();
-    }, [mode, activeTab]);
+        if (isAuthenticated) {
+            fetchHistory();
+        }
+    }, [mode, activeTab, isAuthenticated]);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filter, activeTab, selectedDay, selectedMonth, selectedYear]);
+    }, [filter, activeTab, timeRange]);
 
     const fetchHistory = async () => {
         setLoading(true);
@@ -75,30 +78,17 @@ export default function HistoryPage() {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             if (activeTab === 'TRADING') {
-                if (mode === 'practice') {
-                    // Practice Data
-                    const [tradesRes, statsRes] = await Promise.all([
-                        fetch('/api/v1/practice/trades', { headers }),
-                        fetch('/api/v1/practice/stats', { headers })
-                    ]);
-
-                    if (tradesRes.ok && statsRes.ok) {
-                        const tradesData = await tradesRes.json();
-                        const statsData = await statsRes.json();
-                        setTrades(tradesData);
-                        setStats({
-                            total_trades: statsData.total_trades,
-                            win_rate: statsData.win_rate,
-                            total_pnl: statsData.total_pnl,
-                            volume: tradesData.reduce((acc: number, t: any) => acc + (t.total || 0), 0)
-                        });
-                    }
-                } else {
-                    // Real Spot Data
-                    const res = await fetch('/api/v1/trading/orders?limit=50', { headers });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const adaptedTrades = data.orders.map((o: any) => ({
+                const endpoint = mode === 'practice' ? '/api/v1/practice/trades' : '/api/v1/trading/orders?limit=100';
+                const res = await fetch(endpoint, { headers });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    let adaptedTrades = [];
+                    
+                    if (mode === 'practice') {
+                        adaptedTrades = data;
+                    } else {
+                        adaptedTrades = (data.orders || []).map((o: any) => ({
                             id: o.orderId,
                             symbol: o.symbol,
                             side: o.side,
@@ -110,7 +100,23 @@ export default function HistoryPage() {
                             type: o.type,
                             strategy: o.strategy || 'MANUAL'
                         }));
-                        setTrades(adaptedTrades);
+                    }
+                    
+                    setTrades(adaptedTrades);
+                    
+                    // Fetch Stats for practice
+                    if (mode === 'practice') {
+                        const statsRes = await fetch('/api/v1/practice/stats', { headers });
+                        if (statsRes.ok) {
+                            const statsData = await statsRes.json();
+                            setStats({
+                                total_trades: statsData.total_trades,
+                                win_rate: statsData.win_rate,
+                                total_pnl: statsData.total_pnl,
+                                volume: adaptedTrades.reduce((acc: number, t: any) => acc + (t.total || 0), 0)
+                            });
+                        }
+                    } else {
                         setStats({
                             total_trades: adaptedTrades.length,
                             win_rate: 0,
@@ -120,13 +126,13 @@ export default function HistoryPage() {
                     }
                 }
             } else {
-                // P2P Data (Always Real)
+                // P2P Data
                 const res = await fetch('/api/v1/p2p/history', { headers });
                 if (res.ok) {
                     const data = await res.json();
-                    const adaptedTrades = data.trades.map((t: any) => ({
+                    const adaptedTrades = (data.trades || []).map((t: any) => ({
                         id: t.orderNumber,
-                        symbol: t.asset, // Use asset as symbol
+                        symbol: t.asset,
                         side: t.type,
                         quantity: t.amount,
                         price: t.price,
@@ -153,26 +159,34 @@ export default function HistoryPage() {
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString('es-ES', {
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
+        try {
+            return new Date(dateString).toLocaleString('es-ES', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        } catch (e) {
+            return 'Fecha inválida';
+        }
     };
 
-    // Filtro unificado de tipo de operación y fecha (Día, Mes, Año)
+    // Lógica de filtrado mejorada
     const filteredTrades = trades.filter(t => {
-        const tradeDate = new Date(t.timestamp);
+        const tradeDate = new Date(t.timestamp).getTime();
+        const now = new Date().getTime();
+        
+        // Filtro de tipo (BUY/SELL)
         const matchSide = filter === 'ALL' || t.side === filter;
         
-        // Filtro de Año
-        const matchYear = selectedYear === 'ALL' || tradeDate.getFullYear().toString() === selectedYear;
+        // Filtro de rango de tiempo
+        let matchTime = true;
+        if (timeRange === '24H') {
+            matchTime = (now - tradeDate) <= (24 * 60 * 60 * 1000);
+        } else if (timeRange === '7D') {
+            matchTime = (now - tradeDate) <= (7 * 24 * 60 * 60 * 1000);
+        } else if (timeRange === '30D') {
+            matchTime = (now - tradeDate) <= (30 * 24 * 60 * 60 * 1000);
+        }
         
-        // Filtro de Mes
-        const matchMonth = selectedMonth === 'ALL' || (tradeDate.getMonth() + 1).toString() === selectedMonth;
-        
-        // Filtro de Día
-        const matchDay = selectedDay === 'ALL' || tradeDate.getDate().toString() === selectedDay;
-        
-        return matchSide && matchYear && matchMonth && matchDay;
+        return matchSide && matchTime;
     });
 
     // Calcular elementos paginados
@@ -193,6 +207,8 @@ export default function HistoryPage() {
 
     // Calcular PNL acumulado dinámicamente si aplica
     const displayPnL = filteredTrades.reduce((acc: number, t: any) => acc + (t.pnl || 0), 0);
+
+    if (authLoading || !isAuthenticated) return <LoadingSpinner />;
 
     return (
         <DashboardLayout>
@@ -237,66 +253,24 @@ export default function HistoryPage() {
                             ))}
                         </div>
 
-                        {/* Selectores de Fecha (Día, Mes, Año) */}
-                        <div className="flex items-center gap-2.5 bg-white/[0.02] border border-white/5 px-3 py-1 rounded-xl glass-card">
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">Día:</span>
-                                <select
-                                    value={selectedDay}
-                                    onChange={(e) => setSelectedDay(e.target.value)}
-                                    className="bg-black/40 border border-white/10 rounded-lg text-xs font-semibold px-2 py-1 text-slate-300 focus:outline-none focus:border-amber-500/50 cursor-pointer min-w-[60px]"
+                        {/* Selector de Rango de Tiempo (Nuevo Sistema) */}
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-1 rounded-xl">
+                            {[
+                                { val: 'ALL', label: 'Todo' },
+                                { val: '24H', label: 'Últimas 24h' },
+                                { val: '7D', label: '7 Días' },
+                                { val: '30D', label: '30 Días' }
+                            ].map(r => (
+                                <button
+                                    key={r.val}
+                                    onClick={() => setTimeRange(r.val)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${timeRange === r.val
+                                        ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                                        : 'bg-transparent text-slate-500 border-transparent hover:bg-white/5'}`}
                                 >
-                                    <option value="ALL">Todos</option>
-                                    {Array.from({ length: 31 }, (_, i) => (
-                                        <option key={i + 1} value={(i + 1).toString()}>{i + 1}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="h-4 w-px bg-white/10"></div>
-
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">Mes:</span>
-                                <select
-                                    value={selectedMonth}
-                                    onChange={(e) => setSelectedMonth(e.target.value)}
-                                    className="bg-black/40 border border-white/10 rounded-lg text-xs font-semibold px-2 py-1 text-slate-300 focus:outline-none focus:border-amber-500/50 cursor-pointer min-w-[85px]"
-                                >
-                                    <option value="ALL">Todos</option>
-                                    {[
-                                        { val: '1', name: 'Ene' },
-                                        { val: '2', name: 'Feb' },
-                                        { val: '3', name: 'Mar' },
-                                        { val: '4', name: 'Abr' },
-                                        { val: '5', name: 'May' },
-                                        { val: '6', name: 'Jun' },
-                                        { val: '7', name: 'Jul' },
-                                        { val: '8', name: 'Ago' },
-                                        { val: '9', name: 'Sep' },
-                                        { val: '10', name: 'Oct' },
-                                        { val: '11', name: 'Nov' },
-                                        { val: '12', name: 'Dic' }
-                                    ].map(m => (
-                                        <option key={m.val} value={m.val}>{m.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="h-4 w-px bg-white/10"></div>
-
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">Año:</span>
-                                <select
-                                    value={selectedYear}
-                                    onChange={(e) => setSelectedYear(e.target.value)}
-                                    className="bg-black/40 border border-white/10 rounded-lg text-xs font-semibold px-2 py-1 text-slate-300 focus:outline-none focus:border-amber-500/50 cursor-pointer min-w-[70px]"
-                                >
-                                    <option value="ALL">Todos</option>
-                                    {['2026', '2025', '2024', '2023'].map(y => (
-                                        <option key={y} value={y}>{y}</option>
-                                    ))}
-                                </select>
-                            </div>
+                                    {r.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>

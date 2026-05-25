@@ -66,10 +66,11 @@ class AgentMemory:
     
     def _load(self) -> dict:
         """Cargar memoria desde archivo"""
+        data = None
         if os.path.exists(self.memory_file):
             try:
                 with open(self.memory_file, 'r') as f:
-                    return json.load(f)
+                    data = json.load(f)
             except Exception as e:
                 logger.error(f"❌ Error cargando memoria del agente: {e}")
                 # Intentar cargar backup si existe
@@ -78,33 +79,54 @@ class AgentMemory:
                     try:
                         with open(backup_path, 'r') as f:
                             logger.info("⚠️ Restaurando memoria desde backup...")
-                            return json.load(f)
+                            data = json.load(f)
                     except:
                         pass
         
-        return {
-            "created_at": datetime.utcnow().isoformat(),
-            "version": "1.0",
-            "total_trades": 0,
-            "winning_trades": 0,
-            "losing_trades": 0,
-            "total_pnl": 0.0,
-            "best_trade": None,
-            "worst_trade": None,
-            "patterns_learned": {},
-            "strategy_performance": {},
-            "market_insights": [],
-            "evolution_history": [],
-            "current_strategy_weights": {
-                "rsi": 1.0,
-                "macd": 1.0,
-                "bollinger": 1.0,
-                "trend": 1.0,
-                "volume": 1.0,
-                "support_resistance": 1.0,
-                "top_trader_signals": 1.5  # Mayor peso a señales de top traders
+        if data is None:
+            data = {
+                "created_at": datetime.utcnow().isoformat(),
+                "version": "2.0",
+                "total_trades": 0,
+                "winning_trades": 0,
+                "losing_trades": 0,
+                "total_pnl": 0.0,
+                "best_trade": None,
+                "worst_trade": None,
+                "patterns_learned": {},
+                "strategy_performance": {},
+                "market_insights": [],
+                "evolution_history": [],
+                "post_mortem_logs": [],
+                "regime_strategy_weights": {
+                    "BULLISH": {"rsi": 1.0, "macd": 1.2, "bollinger": 1.0, "trend": 1.5, "volume": 1.0, "support_resistance": 1.0, "top_trader_signals": 1.5},
+                    "BEARISH": {"rsi": 1.0, "macd": 1.2, "bollinger": 1.0, "trend": 1.5, "volume": 1.0, "support_resistance": 1.0, "top_trader_signals": 1.5},
+                    "RANGING": {"rsi": 1.5, "macd": 0.8, "bollinger": 1.5, "trend": 0.5, "volume": 1.0, "support_resistance": 1.5, "top_trader_signals": 1.0},
+                    "VOLATILE": {"rsi": 0.5, "macd": 0.5, "bollinger": 1.5, "trend": 1.0, "volume": 1.5, "support_resistance": 1.0, "top_trader_signals": 1.0},
+                    "NORMAL": {"rsi": 1.0, "macd": 1.0, "bollinger": 1.0, "trend": 1.0, "volume": 1.0, "support_resistance": 1.0, "top_trader_signals": 1.5}
+                }
             }
-        }
+            
+        # Migración de v1.0 a v2.0
+        if data.get("version", "1.0") == "1.0" or "regime_strategy_weights" not in data:
+            logger.info("🔄 Migrando memoria a v2.0 (Regime-Aware)")
+            old_weights = data.get("current_strategy_weights", {
+                "rsi": 1.0, "macd": 1.0, "bollinger": 1.0, "trend": 1.0, "volume": 1.0, "support_resistance": 1.0, "top_trader_signals": 1.5
+            })
+            data["regime_strategy_weights"] = {
+                "BULLISH": dict(old_weights),
+                "BEARISH": dict(old_weights),
+                "RANGING": {"rsi": 1.5, "macd": 0.8, "bollinger": 1.5, "trend": 0.5, "volume": 1.0, "support_resistance": 1.5, "top_trader_signals": 1.0},
+                "VOLATILE": {"rsi": 0.5, "macd": 0.5, "bollinger": 1.5, "trend": 1.0, "volume": 1.5, "support_resistance": 1.0, "top_trader_signals": 1.0},
+                "NORMAL": dict(old_weights)
+            }
+            if "current_strategy_weights" in data:
+                del data["current_strategy_weights"]
+            if "post_mortem_logs" not in data:
+                data["post_mortem_logs"] = []
+            data["version"] = "2.0"
+            
+        return data
     
     def save(self):
         """Guardar memoria a archivo con backup atómico"""
@@ -179,17 +201,32 @@ class AgentMemory:
             return 0.0
         return (self.data["winning_trades"] / total) * 100
     
-    def update_strategy_weight(self, strategy: str, success: bool):
+    def update_strategy_weight(self, strategy: str, success: bool, regime: str = "NORMAL"):
         """
-        Ajustar peso de estrategia basado en resultado.
-        Las estrategias exitosas ganan más peso.
+        Ajustar peso de estrategia basado en resultado y régimen actual.
+        Implementa Olvido Inteligente (Decay).
         """
-        weights = self.data["current_strategy_weights"]
+        if "regime_strategy_weights" not in self.data:
+            return
+            
+        if regime not in self.data["regime_strategy_weights"]:
+            regime = "NORMAL"
+            
+        weights = self.data["regime_strategy_weights"][regime]
+        
         if strategy in weights:
             if success:
-                weights[strategy] = min(weights[strategy] * 1.1, 3.0)  # Max 3x
+                # Incremento moderado
+                weights[strategy] = min(weights[strategy] * 1.05, 3.0)
             else:
-                weights[strategy] = max(weights[strategy] * 0.9, 0.3)  # Min 0.3x
+                # Castigo más severo para adaptación rápida
+                weights[strategy] = max(weights[strategy] * 0.90, 0.3)
+                
+        # Decaimiento (Mean Reversion) del resto de pesos hacia 1.0
+        for s in weights:
+            if s != strategy:
+                weights[s] = weights[s] * 0.99 + 1.0 * 0.01
+                
         self.save()
 
 
@@ -424,13 +461,17 @@ class LearningEngine:
         pnl: float,
         signals_used: List[str],
         patterns_detected: List[str],
-        db_session=None
+        db_session=None,
+        regime: str = "NORMAL",
+        timeframe: str = "1h"
     ):
         """
-        Registrar resultado de un trade para aprendizaje.
+        Registrar resultado de un trade para aprendizaje multidimensional.
         
         Args:
             db_session: (Opcional) Sesión de BD para sincronización
+            regime: Régimen de mercado detectado durante el trade
+            timeframe: Temporalidad principal usada
         """
         success = pnl > 0
         
@@ -451,28 +492,36 @@ class LearningEngine:
         
         # Aprender de las señales usadas
         for signal in signals_used:
-            self.memory.update_strategy_weight(signal, success)
+            self.memory.update_strategy_weight(signal, success, regime)
         
-        # Aprender de patrones
+        # Aprender de patrones (Multidimensional: Patrón -> Temporalidad -> Régimen)
         for pattern in patterns_detected:
             if pattern not in self.memory.data["patterns_learned"]:
-                self.memory.data["patterns_learned"][pattern] = {
+                self.memory.data["patterns_learned"][pattern] = {}
+                
+            if timeframe not in self.memory.data["patterns_learned"][pattern]:
+                self.memory.data["patterns_learned"][pattern][timeframe] = {}
+                
+            if regime not in self.memory.data["patterns_learned"][pattern][timeframe]:
+                self.memory.data["patterns_learned"][pattern][timeframe][regime] = {
                     "total": 0, "wins": 0, "losses": 0
                 }
             
-            self.memory.data["patterns_learned"][pattern]["total"] += 1
+            p_data = self.memory.data["patterns_learned"][pattern][timeframe][regime]
+            p_data["total"] += 1
             if success:
-                self.memory.data["patterns_learned"][pattern]["wins"] += 1
+                p_data["wins"] += 1
             else:
-                self.memory.data["patterns_learned"][pattern]["losses"] += 1
+                p_data["losses"] += 1
         
         # Registrar en historial de evolución
         self.memory.data["evolution_history"].append({
             "timestamp": datetime.utcnow().isoformat(),
             "trade_id": trade_id,
             "pnl": pnl,
+            "regime": regime,
             "win_rate": self.memory.get_win_rate(),
-            "strategy_weights": dict(self.memory.data["current_strategy_weights"])
+            "strategy_weights": dict(self.memory.data.get("regime_strategy_weights", {}).get(regime, {}))
         })
         
         # Registrar en historial de trades (RLMF usa esto)
@@ -508,19 +557,24 @@ class LearningEngine:
         
         logger.info(f"📚 Aprendizaje registrado: Trade {trade_id}, PnL: ${pnl:.2f}, Win Rate: {self.memory.get_win_rate():.1f}%")
     
-    def get_strategy_confidence(self, strategy: str) -> float:
-        """Obtener confianza actual en una estrategia"""
-        weights = self.memory.data["current_strategy_weights"]
+    def get_strategy_confidence(self, strategy: str, regime: str = "NORMAL") -> float:
+        """Obtener confianza actual en una estrategia para un régimen específico"""
+        if "regime_strategy_weights" not in self.memory.data:
+            return 1.0
+        weights = self.memory.data["regime_strategy_weights"].get(regime, {})
         return weights.get(strategy, 1.0)
     
-    def get_pattern_accuracy(self, pattern: str) -> float:
-        """Obtener precisión histórica de un patrón"""
+    def get_pattern_accuracy(self, pattern: str, timeframe: str = "1h", regime: str = "NORMAL") -> float:
+        """Obtener precisión histórica de un patrón multidimensional"""
         patterns = self.memory.data["patterns_learned"]
-        if pattern not in patterns or patterns[pattern]["total"] == 0:
-            return 0.5  # Sin datos, asumir 50%
         
-        p = patterns[pattern]
-        return p["wins"] / p["total"]
+        try:
+            p = patterns[pattern][timeframe][regime]
+            if p["total"] == 0:
+                return 0.5
+            return p["wins"] / p["total"]
+        except KeyError:
+            return 0.5  # Sin datos, asumir 50%
 
 
 # === Main Trading Agent ===
@@ -621,6 +675,11 @@ class TradingAgentAI:
         closes = [c["close"] for c in candles]
         current_price = closes[-1]
         
+        # === 0. Detectar Régimen de Mercado (RLMF) ===
+        regime_report = self.regime_detector.detect(candles, indicators)
+        current_regime = regime_report.regime.value
+        regime_params = regime_report.params
+        
         # === 1. Análisis de Indicadores ===
         signals = []
         reasoning = []
@@ -630,7 +689,7 @@ class TradingAgentAI:
         rsi = indicators.get("rsi", [])
         if rsi:
             current_rsi = rsi[-1]
-            rsi_weight = self.learning.get_strategy_confidence("rsi")
+            rsi_weight = self.learning.get_strategy_confidence("rsi", current_regime)
             
             if current_rsi < 30:
                 signals.append(("LONG", 2 * rsi_weight, "RSI sobreventa"))
@@ -649,7 +708,7 @@ class TradingAgentAI:
         macd = indicators.get("macd", {})
         if macd.get("histogram"):
             hist = macd["histogram"]
-            macd_weight = self.learning.get_strategy_confidence("macd")
+            macd_weight = self.learning.get_strategy_confidence("macd", current_regime)
             
             if len(hist) >= 2:
                 if hist[-1] > 0 and hist[-2] <= 0:
@@ -662,7 +721,7 @@ class TradingAgentAI:
         # Bollinger
         bollinger = indicators.get("bollinger", {})
         if bollinger.get("lower") and bollinger.get("upper"):
-            bb_weight = self.learning.get_strategy_confidence("bollinger")
+            bb_weight = self.learning.get_strategy_confidence("bollinger", current_regime)
             lower = bollinger["lower"][-1]
             upper = bollinger["upper"][-1]
             
@@ -675,7 +734,7 @@ class TradingAgentAI:
         
         # Trend
         trend = indicators.get("trend", "NEUTRAL")
-        trend_weight = self.learning.get_strategy_confidence("trend")
+        trend_weight = self.learning.get_strategy_confidence("trend", current_regime)
         if trend == "BULLISH":
             signals.append(("LONG", 1.5 * trend_weight, "Tendencia alcista confirmada"))
             indicators_used.append("trend")
@@ -690,8 +749,8 @@ class TradingAgentAI:
         patterns_detected = []
         
         for pattern in patterns:
-            # Aplicar precisión histórica aprendida
-            learned_accuracy = self.learning.get_pattern_accuracy(pattern.name)
+            # Aplicar precisión histórica aprendida (Multidimensional)
+            learned_accuracy = self.learning.get_pattern_accuracy(pattern.name, "1h", current_regime)
             adjusted_confidence = pattern.confidence * learned_accuracy
             
             if adjusted_confidence > 0.5:
@@ -704,7 +763,7 @@ class TradingAgentAI:
                 patterns_detected.append(pattern.name)
         
         # === 3. Consenso de Top Traders ===
-        top_trader_weight = self.learning.get_strategy_confidence("top_trader_signals")
+        top_trader_weight = self.learning.get_strategy_confidence("top_trader_signals", current_regime)
         consensus = self.top_trader_analyzer.get_consensus(symbol)
         
         if consensus:
@@ -741,9 +800,7 @@ class TradingAgentAI:
         if isinstance(atr, list) and atr:
             atr = atr[-1]
         
-        # RLMF: Detectar régimen y ajustar multiplicadores
-        regime_report = self.regime_detector.detect(candles, indicators)
-        regime_params = regime_report.params
+        # Usar los multiplicadores del régimen previamente detectado
         sl_multiplier = regime_params.get("sl_atr_multiplier", 1.5)
         tp_multiplier = regime_params.get("tp_atr_multiplier", 3.0)
         

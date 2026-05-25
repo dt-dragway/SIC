@@ -34,10 +34,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token: null
     });
 
+    const autoLoginAdmin = async () => {
+        try {
+            console.log("🔑 Ejecutando Auto-Login Administrativo Persistente...");
+            const formData = new URLSearchParams();
+            formData.append('username', 'admin@sic.com');
+            formData.append('password', 'Admin24252026**');
+
+            const res = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const token = data.access_token;
+                localStorage.setItem('token', token);
+                
+                const userRes = await fetch('/api/v1/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (userRes.ok) {
+                    const user = await userRes.json();
+                    setState({
+                        user,
+                        loading: false,
+                        isAuthenticated: true,
+                        token
+                    });
+                    console.log("🟢 Auto-Login administrativo completado con éxito.");
+                    return true;
+                }
+            }
+        } catch (error) {
+            console.error("❌ Falló el Auto-Login en background:", error);
+        }
+        setState(prev => ({ ...prev, loading: false }));
+        return false;
+    };
+
     const logout = async () => {
-        localStorage.removeItem('token');
-        setState({ user: null, loading: false, isAuthenticated: false, token: null });
-        router.push('/login');
+        console.log("🔐 Logout solicitado en entorno personal - Renovando sesión en background...");
+        await autoLoginAdmin();
     };
 
     const checkSession = async (token: string) => {
@@ -57,13 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     token
                 });
             } else {
-                console.log("Sesión inválida, limpiando...");
-                localStorage.removeItem('token');
-                setState({ user: null, loading: false, isAuthenticated: false, token: null });
+                console.log("🔄 Sesión inválida o expirada en Binance/DB. Reintentando auto-login...");
+                await autoLoginAdmin();
             }
         } catch (error) {
-            console.error("Error checking session:", error);
-            setState(prev => ({ ...prev, loading: false }));
+            console.error("⚠️ Error conectando con el backend de sesión. Reintentando auto-login...", error);
+            await autoLoginAdmin();
         }
     };
 
@@ -84,9 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedToken && storedToken !== 'undefined' && storedToken !== 'null') {
             checkSession(storedToken).finally(() => clearTimeout(safetyTimeout));
         } else {
-            if (storedToken) localStorage.removeItem('token');
-            setState(prev => ({ ...prev, loading: false }));
-            clearTimeout(safetyTimeout);
+            autoLoginAdmin().finally(() => clearTimeout(safetyTimeout));
         }
 
         return () => clearTimeout(safetyTimeout);

@@ -201,10 +201,16 @@ class PostTradeAnalyzer:
                 current_weight = learning_engine.get_strategy_confidence(strategy)
                 new_weight = max(0.3, min(3.0, current_weight + adjustment))
                 
-                # Actualizar en memory
-                if strategy in learning_engine.memory.data["current_strategy_weights"]:
-                    learning_engine.memory.data["current_strategy_weights"][strategy] = new_weight
-                    applied += 1
+                # Actualizar en memory para todos los regímenes
+                if "regime_strategy_weights" in learning_engine.memory.data:
+                    for r_name, r_weights in learning_engine.memory.data["regime_strategy_weights"].items():
+                        if strategy in r_weights:
+                            r_weights[strategy] = round(new_weight, 4)
+                            applied += 1
+                elif "current_strategy_weights" in learning_engine.memory.data:
+                    if strategy in learning_engine.memory.data["current_strategy_weights"]:
+                        learning_engine.memory.data["current_strategy_weights"][strategy] = round(new_weight, 4)
+                        applied += 1
         
         if applied > 0:
             learning_engine.memory.save()
@@ -428,7 +434,7 @@ class PostTradeAnalyzer:
         mae: float, mfe: float, efficiency: float,
         pnl: float, entry_quality: str, exit_quality: str
     ) -> str:
-        """Genera una lección en lenguaje natural."""
+        """Genera una lección usando IA Post-Mortem (OpenRouter)."""
         parts = []
         
         result = "GANADOR" if pnl > 0 else "PERDEDOR"
@@ -436,29 +442,59 @@ class PostTradeAnalyzer:
         
         if slippage > 0.003:
             parts.append(f"Entry con alto slippage ({slippage:.3%}) → considerar limit orders")
+            
+        # === 🧠 Post-Mortem IA (Para trades perdedores o con pésima eficiencia) ===
+        if pnl <= 0 or efficiency < 0.3:
+            try:
+                from app.config import settings
+                import requests
+                api_key = getattr(settings, 'openrouter_api_key', None)
+                model = getattr(settings, 'openrouter_model', "nvidia/nemotron-3-super-120b-a12b:free")
+                
+                if api_key:
+                    prompt = (
+                        f"Como analista quant, dame una lección técnica hiper-corta (máx 15 palabras) "
+                        f"de por qué falló este trade o cómo mejorar:\n"
+                        f"Símbolo: {symbol}, Dirección: {direction}, PnL: {pnl}\n"
+                        f"MAE (Adverso): {mae:.3%}, MFE (A Favor): {mfe:.3%}\n"
+                        f"Eficiencia: {efficiency:.0%}, Calidad Entrada: {entry_quality}, Salida: {exit_quality}"
+                    )
+                    
+                    response = requests.post(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "HTTP-Referer": "https://github.com/dt-dragway/SIC",
+                            "X-Title": "SIC Ultra Agent"
+                        },
+                        json={
+                            "model": model,
+                            "messages": [{"role": "user", "content": prompt}],
+                            "temperature": 0.2,
+                            "max_tokens": 50
+                        },
+                        timeout=10
+                    )
+                    if response.status_code == 200:
+                        ia_lesson = response.json()["choices"][0]["message"]["content"].strip()
+                        parts.append(f"🧠 IA Post-Mortem: {ia_lesson}")
+                    else:
+                        logger.warning(f"IA Post-Mortem falló: HTTP {response.status_code}")
+            except Exception as e:
+                logger.error(f"Error conectando a IA Post-Mortem: {e}")
         
-        if mae > 0.02 and pnl > 0:
-            parts.append(
-                f"Sufrió {mae:.3%} de drawdown antes de ganar → "
-                f"SL casi activado, mejorar timing de entrada"
-            )
-        
-        if mae > 0.02 and pnl < 0:
-            parts.append(
-                f"MAE de {mae:.3%} muestra que la entrada fue contra el flujo del mercado"
-            )
-        
-        if mfe > 0.03 and efficiency < 0.3:
-            parts.append(
-                f"El precio fue {mfe:.3%} a favor pero solo capturamos {efficiency:.0%} → "
-                f"considerar trailing stop"
-            )
-        
-        if efficiency > 0.7 and pnl > 0:
-            parts.append("Excelente captura de movimiento → mantener estrategia actual")
-        
-        if not parts[1:]:
-            parts.append("Trade normal sin desviaciones significativas")
+        # Fallback si la IA no agregó nada
+        if len(parts) == 1:
+            if mae > 0.02 and pnl > 0:
+                parts.append(f"Sufrió {mae:.3%} de drawdown antes de ganar → mejorar timing")
+            elif mae > 0.02 and pnl <= 0:
+                parts.append(f"MAE de {mae:.3%} muestra entrada contra el flujo del mercado")
+            elif mfe > 0.03 and efficiency < 0.3:
+                parts.append(f"MFE fue {mfe:.3%} pero efficiency {efficiency:.0%} → ajustar trailing stop")
+            elif efficiency > 0.7 and pnl > 0:
+                parts.append("Excelente captura de movimiento")
+            else:
+                parts.append("Trade normal sin desviaciones significativas")
         
         return " | ".join(parts)
 

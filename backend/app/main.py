@@ -11,6 +11,10 @@ from contextlib import asynccontextmanager
 from loguru import logger
 import sys
 import asyncio
+import socket
+
+# Configurar timeout global de sockets (10s) para evitar que peticiones síncronas bloqueen Uvicorn
+socket.setdefaulttimeout(10.0)
 
 from app.config import settings
 from app.api.v1 import router as api_v1_router

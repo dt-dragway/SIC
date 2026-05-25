@@ -71,3 +71,8 @@ database/
 login_response.json
 backend.log
 *.json_backup
+scratch/
+backend/scratch/
+*.bak
+*.tmp
+.aider*

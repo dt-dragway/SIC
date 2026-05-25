@@ -30,7 +30,7 @@ class BinanceClient:
     def _connect(self):
         """Conectar a Binance API"""
         try:
-            requests_params = {}
+            requests_params = {"timeout": 10}
             if settings.binance_proxy:
                 requests_params = {
                     "proxies": {
@@ -51,7 +51,7 @@ class BinanceClient:
                     api_key=api_key,
                     api_secret=api_secret,
                     testnet=True,
-                    requests_params=requests_params if requests_params else None
+                    requests_params=requests_params
                 )
                 logger.info("🔗 Conectado a Binance TESTNET")
             else:
@@ -59,7 +59,7 @@ class BinanceClient:
                 self.client = Client(
                     api_key=api_key,
                     api_secret=api_secret,
-                    requests_params=requests_params if requests_params else None
+                    requests_params=requests_params
                 )
                 logger.info("🔗 Conectado a Binance REAL")
                 

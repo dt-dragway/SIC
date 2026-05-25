@@ -152,20 +152,12 @@ class KnowledgeBase:
         self._initialize()
     
     def _initialize(self):
-        """Inicializar modelos y base de datos"""
+        """Inicializar base de datos vectorial"""
         if not CHROMADB_AVAILABLE:
             logger.error("ChromaDB no disponible")
             return
         
-        if not EMBEDDINGS_AVAILABLE:
-            logger.error("Sentence Transformers no disponible")
-            return
-        
         try:
-            # Modelo de embeddings (multilingüe, soporta español)
-            logger.info("📚 Cargando modelo de embeddings...")
-            self.embedding_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-            
             # Cliente ChromaDB persistente
             self.client = chromadb.PersistentClient(path=CHROMA_DIR)
             
@@ -175,10 +167,21 @@ class KnowledgeBase:
                 metadata={"description": "Base de conocimientos de trading y finanzas"}
             )
             
-            logger.success(f"✅ Base de conocimientos inicializada. Documentos: {self.collection.count()}")
+            logger.success(f"✅ Base de conocimientos inicializada (ChromaDB conectada). Documentos: {self.collection.count()}")
             
         except Exception as e:
-            logger.error(f"Error inicializando knowledge base: {e}")
+            logger.error(f"Error inicializando ChromaDB: {e}")
+            
+    def _load_embedding_model(self):
+        """Carga el modelo de embeddings SentenceTransformer bajo demanda para no congelar el loop principal."""
+        if self.embedding_model is None:
+            if not EMBEDDINGS_AVAILABLE:
+                logger.error("Sentence Transformers no disponible")
+                raise ImportError("Sentence Transformers no disponible para generar embeddings")
+            
+            logger.info("📚 Cargando modelo de embeddings bajo demanda (SentenceTransformer)...")
+            self.embedding_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+            logger.success("✅ Modelo de embeddings cargado exitosamente bajo demanda.")
     
     @property
     def is_ready(self) -> bool:
@@ -216,7 +219,8 @@ class KnowledgeBase:
         chunks = DocumentProcessor.chunk_text(text, chunk_size=500, overlap=100)
         logger.info(f"📝 Chunks creados: {len(chunks)}")
         
-        # Crear embeddings
+        # Asegurar que el modelo esté cargado y crear embeddings
+        self._load_embedding_model()
         embeddings = self.embedding_model.encode(chunks).tolist()
         
         # Generar IDs únicos
@@ -272,7 +276,8 @@ class KnowledgeBase:
         if not self.is_ready:
             return []
         
-        # Generar embedding de la query
+        # Asegurar que el modelo esté cargado y generar embedding de la query
+        self._load_embedding_model()
         query_embedding = self.embedding_model.encode([query]).tolist()
         
         # Filtro por categoría
@@ -427,7 +432,8 @@ Responde en español, sé conciso pero preciso.
                     json={
                         "model": self.model,
                         "prompt": prompt,
-                        "stream": False
+                        "stream": False,
+                        "keep_alive": -1
                     }
                 )
                 

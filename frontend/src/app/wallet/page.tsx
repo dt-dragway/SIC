@@ -16,6 +16,10 @@ export default function WalletPage() {
     const { balances, totalUsd, mode, setMode, isLoading: walletLoading, refreshWallet } = useWallet();
     const [hideBalance, setHideBalance] = useState(false);
 
+    useEffect(() => {
+        console.log("WalletPage Debug:", { authLoading, isAuthenticated, walletLoading });
+    }, [authLoading, isAuthenticated, walletLoading]);
+
     const handleResetWallet = async () => {
         if (!confirm('¿Estás seguro de resetear tu balance de práctica? Esto configurará tu saldo en $50 USDT y $10 en cada una de las 10 criptomonedas principales ($150 USD total).')) {
             return;

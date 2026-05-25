@@ -252,7 +252,8 @@ class OllamaProvider(LLMProvider):
                         {prompt}
                         
                         Responde con: SIGNAL: BUY/SELL/HOLD, CONFIDENCE: %, REASON: ...""",
-                        "stream": False
+                        "stream": False,
+                        "keep_alive": -1
                     }
                 )
                 

@@ -272,7 +272,8 @@ class AutoExecutionService:
             # 1. Obtener pre-señal base del generador técnico
             from app.ml.signal_generator import get_signal_generator
             generator = get_signal_generator()
-            base_signal = generator.analyze(symbol)
+            # Ejecutar análisis pesado en hilo de fondo para no bloquear el bucle principal de Uvicorn
+            base_signal = await asyncio.to_thread(generator.analyze, symbol)
             
             if not base_signal:
                 self.add_scan_log(symbol, "Análisis técnico: Señal neutral (confianza insuficiente)")
@@ -455,7 +456,7 @@ class AutoExecutionService:
             # Obtener precio real del mercado
             from app.infrastructure.binance.client import get_binance_client
             client = get_binance_client()
-            real_price = client.get_price(symbol)
+            real_price = await asyncio.to_thread(client.get_price, symbol)
             
             if not real_price:
                 logger.error(f"❌ No se pudo obtener precio real para {symbol}")
