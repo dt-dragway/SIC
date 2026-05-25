@@ -111,7 +111,7 @@ class MarketScanner:
 
     def _simulate_whale_alert(self, db: Session):
         """Simula una alerta de ballena detectada en la blockchain"""
-        blockchains = ["BTC", "ETH", "SOL", "BNB"]
+        blockchains = ["BTC", "ETH", "SOL", "BNB", "NEAR", "SAGA", "NIL", "RIF", "LINK", "DOGE"]
         flow_types = ["exchange_inflow", "exchange_outflow", "whale_to_whale"]
         blockchain = random.choice(blockchains)
         flow = random.choice(flow_types)
@@ -142,5 +142,8 @@ class MarketScanner:
 market_scanner = MarketScanner()
 
 def get_market_scanner() -> MarketScanner:
+    """Obtener instancia del escáner"""
+    return market_scanner
+> MarketScanner:
     """Obtener instancia del escáner"""
     return market_scanner

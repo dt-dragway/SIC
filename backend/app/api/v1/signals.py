@@ -260,25 +260,13 @@ async def scan_market(token: str = Depends(oauth2_scheme)):
         return _scan_cache["data"]
 
     symbols = [
-        # Top Market Cap
-        "BTCUSDT",    # Bitcoin
-        "ETHUSDT",    # Ethereum
-        "BNBUSDT",    # Binance Coin
-        "SOLUSDT",    # Solana
-        "XRPUSDT",    # Ripple
-        "ADAUSDT",    # Cardano
+        # Top Market Cap & High Liquidity
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT",
+        "XRPUSDT", "LINKUSDT", "DOGEUSDT", "NEARUSDT",
         
-        # DeFi & Layer 1
-        "DOTUSDT",    # Polkadot
-        "MATICUSDT",  # Polygon
-        "AVAXUSDT",   # Avalanche
-        "LINKUSDT",   # Chainlink
-        
-        # Popular Coins
-        "DOGEUSDT",   # Dogecoin
-        "LTCUSDT",    # Litecoin
-        "ATOMUSDT",   # Cosmos
-        "UNIUSDT",    # Uniswap
+        # High-Potential "Movers" (New additions)
+        "SAGAUSDT", "NILUSDT", "RIFUSDT", "DEXEUSDT",
+        "RENDERUSDT", "INJUSDT", "FTMUSDT", "PEPEUSDT"
     ]
     signals = []
     

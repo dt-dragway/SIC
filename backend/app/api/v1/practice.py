@@ -770,7 +770,11 @@ async def reset_virtual_wallet(
     binance = get_binance_client()
     
     initial_balances = {"USDT": 50.0}
-    symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOTUSDT", "MATICUSDT", "DOGEUSDT", "LINKUSDT"]
+    symbols = [
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", 
+        "NEARUSDT", "SAGAUSDT", "NILUSDT", "RIFUSDT", "DEXEUSDT", 
+        "DOGEUSDT", "LINKUSDT"
+    ]
     
     for sym in symbols:
         coin = sym.replace("USDT", "")
@@ -781,15 +785,15 @@ async def reset_virtual_wallet(
             else:
                 fallback_prices = {
                     "BTC": 70000.0, "ETH": 3500.0, "BNB": 580.0, "SOL": 170.0,
-                    "XRP": 0.50, "ADA": 0.45, "DOT": 6.5, "MATIC": 0.70,
-                    "DOGE": 0.15, "LINK": 15.0
+                    "XRP": 0.50, "NEAR": 6.5, "SAGA": 0.02, "NIL": 0.08,
+                    "RIF": 0.05, "DEXE": 17.0, "DOGE": 0.15, "LINK": 15.0
                 }
                 initial_balances[coin] = round(10.0 / fallback_prices.get(coin, 1.0), 6)
         except Exception:
             fallback_prices = {
                 "BTC": 70000.0, "ETH": 3500.0, "BNB": 580.0, "SOL": 170.0,
-                "XRP": 0.50, "ADA": 0.45, "DOT": 6.5, "MATIC": 0.70,
-                "DOGE": 0.15, "LINK": 15.0
+                "XRP": 0.50, "NEAR": 6.5, "SAGA": 0.02, "NIL": 0.08,
+                "RIF": 0.05, "DEXE": 17.0, "DOGE": 0.15, "LINK": 15.0
             }
             initial_balances[coin] = round(10.0 / fallback_prices.get(coin, 1.0), 6)
             

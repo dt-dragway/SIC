@@ -89,12 +89,14 @@ async def lifespan(app: FastAPI):
                     "USDT": 1000.0,
                     "BTC": 0.01,
                     "ETH": 0.5,
-                    "BNB": 0.1,      # Añadido: usado en señales
+                    "BNB": 0.1,
                     "SOL": 10.0,
                     "XRP": 500.0,
-                    "ADA": 1000.0,
-                    "DOT": 100.0,
-                    "MATIC": 100.0,  # Añadido: usado en señales
+                    "NEAR": 50.0,
+                    "SAGA": 200.0,
+                    "NIL": 1000.0,
+                    "RIF": 1000.0,
+                    "DEXE": 10.0,
                     "DOGE": 5000.0,
                     "LINK": 50.0
                 }

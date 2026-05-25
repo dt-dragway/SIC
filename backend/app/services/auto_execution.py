@@ -720,12 +720,15 @@ class AutoExecutionService:
             'BTCUSDT', 
             'ETHUSDT', 
             'SOLUSDT', 
+            'BNBUSDT',
+            'XRPUSDT',
+            'NEARUSDT',
             'LINKUSDT', 
-            'BNBUSDT', 
-            'ADAUSDT', 
-            'XRPUSDT', 
-            'MATICUSDT', 
-            'DOGEUSDT'
+            'DOGEUSDT',
+            'SAGAUSDT',
+            'NILUSDT',
+            'RIFUSDT',
+            'DEXEUSDT'
         ]
         
     async def _get_symbol_settings(self, symbol: str) -> Dict:

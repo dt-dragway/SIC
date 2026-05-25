@@ -32,8 +32,12 @@ async def run_sentinel_cio():
     agent = get_trading_agent()
     db = SessionLocal()
     
-    # Elite 10
-    symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOTUSDT", "MATICUSDT", "DOGEUSDT", "LINKUSDT"]
+    # Elite 12 - Optimizado para alta volatilidad y volumen
+    symbols = [
+        "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", 
+        "LINKUSDT", "DOGEUSDT", "NEARUSDT", "SAGAUSDT", 
+        "NILUSDT", "RIFUSDT", "DEXEUSDT"
+    ]
     
     # 1. Fetch Practice Wallets
     wallets = db.query(VirtualWallet).all()
