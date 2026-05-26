@@ -132,8 +132,8 @@ async def run_sentinel_cio():
                         direction = "BUY" if radar_data["rsi"] < 25 else "SELL"
                         entry_price = radar_data["price"]
                         
-                        # Risk Mgmt: 20% of USDT balance or 10 USDT minimum
-                        strike_amount = max(10.0, balances.get("USDT", 0) * 0.20)
+                        # Risk Mgmt: 20% of USDT balance or 11 USDT minimum
+                        strike_amount = max(11.0, balances.get("USDT", 0) * 0.20)
                         qty = strike_amount / entry_price
                         
                         # Execute in DB
@@ -176,7 +176,7 @@ async def run_sentinel_cio():
                                 if direction == "BUY":
                                     real_usdt_info = client.get_balance("USDT")
                                     real_usdt = real_usdt_info["free"] if real_usdt_info else 0.0
-                                    real_strike = max(10.0, real_usdt * 0.20)
+                                    real_strike = max(11.0, real_usdt * 0.20)
                                     
                                     if real_usdt >= real_strike:
                                         real_qty = real_strike / entry_price

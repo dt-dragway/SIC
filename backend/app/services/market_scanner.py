@@ -144,6 +144,4 @@ market_scanner = MarketScanner()
 def get_market_scanner() -> MarketScanner:
     """Obtener instancia del escáner"""
     return market_scanner
-> MarketScanner:
-    """Obtener instancia del escáner"""
-    return market_scanner
+

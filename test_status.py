@@ -1,18 +1,29 @@
-import requests
-import json
-import jwt
-from datetime import datetime, timedelta
+import asyncio
+import httpx
+from app.infrastructure.database.session import SessionLocal
+from app.infrastructure.database.models import User, AutomationConfig
+from app.api.v1.auth import create_access_token
 
-# Create a valid token
-token = jwt.encode(
-    {"sub": "1", "exp": datetime.utcnow() + timedelta(days=1)}, 
-    "b8c3d7e2f1a59046a297b4d3e5f68a12c49b8e7df0a91c3b5d7e6f8a02419c8d", 
-    algorithm="HS256"
-)
+db = SessionLocal()
+user = db.query(User).filter(User.email == "admin@sic.com").first()
+if not user:
+    user = db.query(User).first()
 
-res = requests.get('http://localhost:8001/api/v1/automated-trading/status', headers={'Authorization': f'Bearer {token}'})
-print("STATUS API:", res.json())
+token = create_access_token(data={"sub": str(user.id)})
 
-res2 = requests.get('http://localhost:8001/api/v1/automated-trading/settings', headers={'Authorization': f'Bearer {token}'})
-print("SETTINGS API:", res2.json())
+# Imprimir estado real en la BD
+config = db.query(AutomationConfig).filter(AutomationConfig.user_id == user.id).first()
+if config:
+    print(f"DATABASE ENABLED STATUS: {config.enabled}")
+else:
+    print("NO CONFIG IN DB!")
 
+db.close()
+
+async def fetch():
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        res = await client.get('http://localhost:8001/api/v1/automated-trading/status', headers={'Authorization': f'Bearer {token}'})
+        print("API STATUS RESPONSE:")
+        print(res.json())
+
+asyncio.run(fetch())

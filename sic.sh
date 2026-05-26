@@ -117,7 +117,7 @@ function start_services() {
     fi
 
     # Script rápido para sincronizar DB usando SQLAlchemy
-    python3 << EOF
+    venv/bin/python3 << EOF
 import sys
 try:
     from app.infrastructure.database.models import Base
@@ -134,8 +134,9 @@ EOF
     cd backend
     source venv/bin/activate
     # Iniciamos en background y redirigimos output a log
-    nohup uvicorn app.main:app --reload --host 0.0.0.0 --port 8001 > ../logs/backend.log 2>&1 < /dev/null &
+    nohup venv/bin/python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001 > ../logs/backend.log 2>&1 < /dev/null &
     BACKEND_PID=$!
+    disown $BACKEND_PID
     echo -e "   ✅ Backend (Uvicorn) en ejecución (PID: $BACKEND_PID, Puerto: 8001)"
     cd ..
 
@@ -144,8 +145,9 @@ EOF
     cd backend
     source venv/bin/activate
     export PYTHONPATH="$(pwd)"
-    nohup python -m app.workers.sentinel > ../logs/sentinel.log 2>&1 < /dev/null &
+    nohup venv/bin/python -m app.workers.sentinel > ../logs/sentinel.log 2>&1 < /dev/null &
     SENTINEL_PID=$!
+    disown $SENTINEL_PID
     echo -e "   ✅ Sentinel Worker en ejecución (PID: $SENTINEL_PID)"
     cd ..
 
@@ -159,6 +161,7 @@ EOF
     # El package.json ya define: "dev": "next dev -p 3001"
     nohup npm run dev > ../logs/frontend.log 2>&1 < /dev/null &
     FRONTEND_PID=$!
+    disown $FRONTEND_PID
     echo -e "   ✅ Frontend (Next.js) en ejecución (PID: $FRONTEND_PID, Puerto: 3001)"
     cd ..
 

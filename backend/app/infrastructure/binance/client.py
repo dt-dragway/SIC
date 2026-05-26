@@ -187,7 +187,7 @@ class BinanceClient:
         try:
             ticker = self.client.get_symbol_ticker(symbol=symbol.upper())
             return float(ticker['price'])
-        except BinanceAPIException as e:
+        except Exception as e:
             logger.error(f"Error obteniendo precio de {symbol}: {e}")
             return None
     
@@ -199,8 +199,8 @@ class BinanceClient:
         try:
             tickers = self.client.get_all_tickers()
             return {t['symbol']: float(t['price']) for t in tickers}
-        except BinanceAPIException as e:
-            logger.error(f"Error obteniendo precios: {e}")
+        except Exception as e:
+            logger.error(f"Error obteniendo precios en get_all_prices: {e}")
             return {}
     
     def get_24h_ticker(self, symbol: str) -> Optional[Dict]:

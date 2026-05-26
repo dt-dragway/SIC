@@ -84,7 +84,11 @@ async def start_automation(
             raise HTTPException(status_code=400, detail="Error al iniciar automatización")
         
         # Guardar configuración en base de datos
-        # TODO: Implementar guardado de configuración
+        from app.infrastructure.database.models import AutomationConfig
+        config = db.query(AutomationConfig).filter(AutomationConfig.user_id == current_user.id).first()
+        if config:
+            config.enabled = True
+            db.commit()
         
         logger.info(f"🚀 Automatización iniciada por usuario {current_user.id}")
         
@@ -119,6 +123,13 @@ async def stop_automation(
         if not success:
             raise HTTPException(status_code=400, detail="Error al detener automatización")
         
+        # Guardar estado en base de datos
+        from app.infrastructure.database.models import AutomationConfig
+        config = db.query(AutomationConfig).filter(AutomationConfig.user_id == current_user.id).first()
+        if config:
+            config.enabled = False
+            db.commit()
+            
         logger.info(f"🛑 Automatización detenida por usuario {current_user.id}")
         
         return {
