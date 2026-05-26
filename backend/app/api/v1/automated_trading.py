@@ -145,8 +145,11 @@ async def get_automation_status(
         auto_service = get_auto_execution_service()
         status = auto_service.get_automation_status()
         
-        # Cargar configuración guardada
-        # TODO: Cargar configuración desde BD
+        # Sincronizar estado en vivo con la Base de Datos para evitar el "efecto espejismo" de memoria RAM
+        from app.infrastructure.database.models import AutomationConfig
+        config = db.query(AutomationConfig).filter(AutomationConfig.user_id == current_user.id).first()
+        if config:
+            status['running'] = config.enabled
         
         return AutomationStatus(**status)
         

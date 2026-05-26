@@ -1,9 +1,9 @@
 {
   "created_at": "2026-02-01T16:00:00.000000",
   "version": "2.0",
-  "total_trades": 172,
+  "total_trades": 173,
   "winning_trades": 90,
-  "losing_trades": 82,
+  "losing_trades": 83,
   "total_pnl": 17766.413459999996,
   "best_trade": 1000,
   "worst_trade": -210.0,
@@ -460,7 +460,14 @@
     "[4h] \ud83d\udcca Bullish Engulfing": {
       "total": 1,
       "wins": 0,
-      "losses": 1
+      "losses": 1,
+      "1h": {
+        "NORMAL": {
+          "total": 1,
+          "wins": 0,
+          "losses": 1
+        }
+      }
     },
     "[4h] \ud83d\udcca BEARISH Marubozu": {
       "total": 1,
@@ -572,6 +579,15 @@
       }
     },
     "[1h] \ud83d\udcca Bearish Engulfing": {
+      "1h": {
+        "NORMAL": {
+          "total": 1,
+          "wins": 0,
+          "losses": 1
+        }
+      }
+    },
+    "[4h] \ud83d\udcca BULLISH Marubozu": {
       "1h": {
         "NORMAL": {
           "total": 1,
@@ -3703,6 +3719,22 @@
         "support_resistance": 1.4088970681267967,
         "top_trader_signals": 2.2029523269412015
       }
+    },
+    {
+      "timestamp": "2026-05-25T13:31:13.379833",
+      "trade_id": "auto_RIFUSDT_1779730273",
+      "pnl": 0.0,
+      "regime": "NORMAL",
+      "win_rate": 52.02312138728323,
+      "strategy_weights": {
+        "rsi": 0.837727422929393,
+        "macd": 1.59864823641205,
+        "bollinger": 0.7634052027370001,
+        "trend": 1.3785490139005856,
+        "volume": 1.5999796224819098,
+        "support_resistance": 1.4007600164710736,
+        "top_trader_signals": 2.179013575635071
+      }
     }
   ],
   "trade_results": [
@@ -4599,6 +4631,12 @@
       "pnl": 0.0,
       "side": "SELL",
       "timestamp": "2026-05-25T03:17:19.263038"
+    },
+    {
+      "trade_id": "auto_RIFUSDT_1779730273",
+      "pnl": 0.0,
+      "side": "BUY",
+      "timestamp": "2026-05-25T13:31:13.379863"
     }
   ],
   "regime_strategy_weights": {
@@ -4639,13 +4677,13 @@
       "top_trader_signals": 2.3847
     },
     "NORMAL": {
-      "rsi": 0.8344326323124099,
-      "macd": 1.6108032205,
-      "bollinger": 0.75860137,
-      "trend": 1.3862350922360835,
-      "volume": 1.6121616391,
-      "support_resistance": 1.4088970681267967,
-      "top_trader_signals": 2.2029523269412015
+      "rsi": 0.837727422929393,
+      "macd": 1.59864823641205,
+      "bollinger": 0.7634052027370001,
+      "trend": 1.3785490139005856,
+      "volume": 1.5999796224819098,
+      "support_resistance": 1.4007600164710736,
+      "top_trader_signals": 2.179013575635071
     }
   },
   "post_mortem_logs": [],
