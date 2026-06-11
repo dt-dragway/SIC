@@ -1,0 +1,11 @@
+[tool.pyrefly]
+python_version = "3.12"
+search_path = ["."]
+python_platform = "Linux"
+
+# Suprimir falsos positivos de SQLAlchemy Column types
+# que no son resolubles sin el runtime del ORM
+check_untyped_defs = false
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+ignore_missing_imports = true

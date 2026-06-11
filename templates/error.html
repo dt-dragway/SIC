@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error - SIC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-theme.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Error en el sistema</h1>
+        <div class="alerta critico">
+            {{ error }}
+        </div>
+        <a href="/" class="boton">Volver al inicio</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+# app.py - Corrección de Rutas y Templates
+
+# ... (Importaciones y configuraciones anteriores se mantienen igual)
+
+# --------------------------------------------------
+# Corrección de Rutas
+# --------------------------------------------------
+@app.route('/arbitraje')  # Ruta en español
+def arbitrage_p2p():
+    analyzer = P2PAnalyzer(alert_manager)
+    oportunidades = analyzer.analyze_opportunities()
+    return render_template('arbitraje.html', oportunidades=oportunidades)  # Nombre de template en español
+
+# --------------------------------------------------
+# Actualización de Templates
+# --------------------------------------------------
+# templates/index.html (Corrección de enlaces)
+'''
+<div class="modulos">
+    <a href="/arbitraje" class="boton">💹 Arbitraje P2P</a>
+    <!-- Resto de enlaces -->
+</div>
+'''
+
+# templates/arbitraje.html (Archivo nuevo)
+'''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SIC - Arbitraje P2P</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-theme.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Arbitraje P2P USDT/VES</h1>
+        <a href="/" class="boton">🏠 Inicio</a>
+        
+        <div class="grafico-container">
+            <canvas id="precioChart"></canvas>
+        </div>
+        
+        <!-- Contenido de tablas anterior -->
+        
+        <script>
+            // Script para gráfico
+            const ctx = document.getElementById('precioChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Compra Mín', 'Compra Prom', 'Venta Máx', 'Venta Prom'],
+                    datasets: [{
+                        label: 'Precios VES/USDT',
+                        data: [
+                            {{ oportunidades.compras|min(attribute='precio')|float }},
+                            {{ (oportunidades.compras|map(attribute='precio')|sum)/oportunidades.compras|length }},
+                            {{ oportunidades.ventas|max(attribute='precio')|float }},
+                            {{ (oportunidades.ventas|map(attribute='precio')|sum)/oportunidades.ventas|length }}
+                        ],
+                        borderColor: '#00ff9d',
+                        tension: 0.1
+                    }]
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
+'''
+
+# --------------------------------------------------
+# Actualización del Analizador P2P
+# --------------------------------------------------
+class P2PAnalyzer:
+    def analyze_opportunities(self):
+        try:
+            df = self.fetch_p2p_data()
+            if df.empty:
+                return {'compras': [], 'ventas': []}  # Estructura de datos segura
+            
+            # ... (procesamiento anterior)
+            
+            return {
+                'compras': mejores_compras.to_dict('records'),
+                'ventas': mejores_ventas.to_dict('records'),
+                'estadisticas': {
+                    'compra_min': df[df['type'] == 'COMPRA']['precio'].min(),
+                    'compra_max': df[df['type'] == 'COMPRA']['precio'].max(),
+                    'venta_min': df[df['type'] == 'VENTA']['precio'].min(),
+                    'venta_max': df[df['type'] == 'VENTA']['precio'].max(),
+                    'diferencia_promedio': df[df['type'] == 'VENTA']['precio'].mean() - 
+                                         df[df['type'] == 'COMPRA']['precio'].mean()
+                }
+            }
+        except Exception as e:
+            logging.error(f"Error en análisis: {str(e)}")
+            return {'compras': [], 'ventas': [], 'estadisticas': {}}
+
+# --------------------------------------------------
+# Actualización de Estilos
+# --------------------------------------------------
+# static/css/dark-theme.css (Adiciones)
+'''
+.grafico-container {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 1px solid #2d2d2d;
+}
+
+canvas {
+    width: 100% !important;
+    height: 400px !important;
+}
+'''
+
+# --------------------------------------------------
+# Inicialización Corregida
+# --------------------------------------------------
+def initialize():
+    try:
+        alert_manager = AlertManager()
+        ai_manager = AIModelManager()
+        trading_bot = TradingBot(alert_manager)
+        p2p_analyzer = P2PAnalyzer(alert_manager)
+        
+        # Iniciar servicios
+        trading_bot.start()
+        
+        # Hilo para actualizar datos P2P
+        threading.Thread(target=self._update_p2p_data, daemon=True).start()
+        
+        logging.info("Sistema inicializado correctamente")
+        
+    except Exception as e:
+        logging.critical(f"Error durante inicialización: {str(e)}")
+        raise SystemExit(1)
+
+def _update_p2p_data(self):
+    while True:
+        try:
+            self.p2p_analyzer.analyze_opportunities()
+            time.sleep(300)
+        except Exception as e:
+            logging.error(f"Error actualizando P2P: {str(e)}")
+        time.sleep(300)
